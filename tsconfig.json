@@ -116,8 +116,5 @@
         "resources/js/**/*.tsx",
         "resources/js/**/*.vue"
     ],
-    "exclude": [
-        "node_modules",
-        "resources/js/actions/Illuminate/**"
-    ]
+    "exclude": ["node_modules", "resources/js/actions/Illuminate/**"]
 }
