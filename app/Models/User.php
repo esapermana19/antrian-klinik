@@ -35,11 +35,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    public function getForeignKey(): string
+    {
+        return 'user_id';
+    }
+
     protected $primaryKey = 'user_id';
 
     public function patients(): HasMany
@@ -54,5 +54,35 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->user_code)) {
+                $user->user_code = static::generateUserCode();
+            }
+        });
+    }
+
+    public static function generateUserCode(): string
+    {
+        $prefix = now()->format('Ymd'); // Hasil: 20261015 (8 digit)
+
+        // Cari user_code terakhir di tanggal yang sama
+        $latestUser = static::where('user_code', 'like', "{$prefix}%")
+            ->orderByDesc('user_code')
+            ->first();
+
+        $nextNumber = 1;
+
+        if ($latestUser && $latestUser->user_code) {
+            // Ambil 3 digit terakhir dan tambah 1
+            $lastSequence = (int) substr($latestUser->user_code, 8);
+            $nextNumber = $lastSequence + 1;
+        }
+
+        // Format jadi 3 digit dengan padding nol (001, 002, dst.)
+        return sprintf('%s%03d', $prefix, $nextNumber);
     }
 }

@@ -18,9 +18,10 @@ test('security page is displayed', function () {
 
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $response = $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
-        ->get(route('security.edit'))
+        ->get(route('security.edit'));
+    $response->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('settings/Security')
             ->where('canManagePasskeys', true)
