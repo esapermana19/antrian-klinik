@@ -42,9 +42,9 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     protected $primaryKey = 'user_id';
 
-    public function patients():HasMany
+    public function patients(): HasMany
     {
-        return $this->hasMany(Patient::class, 'user_id','user_id');
+        return $this->hasMany(Patient::class, 'user_id', 'user_id');
     }
 
     protected function casts(): array
