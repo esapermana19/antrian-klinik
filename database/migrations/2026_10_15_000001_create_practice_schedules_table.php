@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('practice_schedules', function (Blueprint $table) {
             $table->id('schedule_id');
-            $table->string('schedule_code', 16)->unique();
+            $table->string('schedule_code', 9)->unique();
             $table->date('date');
             $table->enum('session', ['morning', 'afternoon']);
             $table->time('opening_hours');

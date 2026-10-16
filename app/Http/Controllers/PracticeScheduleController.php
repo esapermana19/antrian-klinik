@@ -2,17 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePracticeScheduleRequest;
+use App\Http\Requests\UpdatePracticeScheduleRequest;
 use App\Models\PracticeSchedule;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PracticeScheduleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $schedules = PracticeSchedule::query()
+            ->orderByRaw("FIELD(day, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')")
+            ->orderBy('session')
+            ->paginate(10);
+        return Inertia::render('PracticeSchedules/Index', [
+            'schedules' => $schedules,
+        ]);
     }
 
     /**
@@ -26,9 +37,30 @@ class PracticeScheduleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePracticeScheduleRequest $request): RedirectResponse
     {
-        //
+        $data = $request->validated();
+        //ambil 3 huruf day
+        $dayCode = strtoupper(substr($data['day'], 0, 3));
+        // kode sesi
+        $sessionNumber = $data['session'] === 'morning' ? '1' : '2';
+        //prefix dasar schedule_code
+        $prefix = "{$dayCode}-{sessionNumber}-S";
+        //cari no urut terakhir didatabase
+        $lastSchedule = PracticeSchedule::where('schedule_code', 'LIKE', "{$prefix}%")
+            ->orderBy('schedule_code', 'desc')
+            ->first();
+        //no urut selanjutnya
+        $nextNumber = 1;
+        if ($lastSchedule) {
+            $lastNumber = (int) substr($lastSchedule->schedule_code, -2);
+            $nextNumber = $lastNumber + 1;
+        }
+        //gabungan
+        $data['schedule_code'] = $prefix . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
+
+        PracticeSchedule::create($data);
+        return back()->with('success', 'Jadwal praktik berhasil ditambahkan.');
     }
 
     /**
@@ -50,16 +82,22 @@ class PracticeScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PracticeSchedule $practiceSchedule)
+    public function update(UpdatePracticeScheduleRequest $request, PracticeSchedule $practiceSchedules):RedirectResponse
     {
-        //
+        $practiceSchedules->update($request->validated());
+        return back()->with('success', 'Jadwal praktik berhasil diperbarui');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PracticeSchedule $practiceSchedule)
+    public function destroy(PracticeSchedule $practiceSchedules):RedirectResponse
     {
-        //
+        //proteksi cek jadwal sudah digunakan atau tidak
+        if(method_exists($practiceSchedules, 'queues') && $practiceSchedules->queues()->exists()) {
+            return back()->with('error', 'Jadwal tidak dapat dihapus karena sudah memiliki data antrian.');
+        }
+        $practiceSchedules->delete();
+        return back()->with('success', 'Jadwal praktik berhasil dihapus.');
     }
 }

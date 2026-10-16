@@ -8,6 +8,41 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $medrec_id
+ * @property int $queue_id
+ * @property int $patient_id
+ * @property string $medrec_code
+ * @property string $main_complaint
+ * @property string $blood_pressure
+ * @property string $temperature
+ * @property int $weight
+ * @property string $diagnosis
+ * @property string $notes_on_treatment
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property-read \App\Models\Invoice|null $invoice
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MedicationPrescription> $medicationPrescriptions
+ * @property-read int|null $medication_prescriptions_count
+ * @property-read \App\Models\Patient $patient
+ * @property-read \App\Models\Queue $queue
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereBloodPressure($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereDiagnosis($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereMainComplaint($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereMedrecCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereMedrecId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereNotesOnTreatment($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord wherePatientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereQueueId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereTemperature($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereWeight($value)
+ * @mixin \Eloquent
+ */
 #[Fillable(['queue_id', 'patient_id', 'medrec_code', 'main_complaint', 'blood_pressure', 'temperature', 'weight', 'diagnosis', 'notes_on_treatment'])]
 class MedicalRecord extends Model
 {

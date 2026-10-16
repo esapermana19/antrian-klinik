@@ -18,6 +18,7 @@ class PracticeSchedule extends Model
         ];
     }
 
+    protected $table = 'practice_schedules';
     protected $primaryKey = 'schedule_id';
 
     // relasi ke queue
