@@ -45,7 +45,7 @@ class PracticeScheduleController extends Controller
         // kode sesi
         $sessionNumber = $data['session'] === 'morning' ? '1' : '2';
         //prefix dasar schedule_code
-        $prefix = "{$dayCode}-{sessionNumber}-S";
+        $prefix = "{$dayCode}-{$sessionNumber}-S";
         //cari no urut terakhir didatabase
         $lastSchedule = PracticeSchedule::where('schedule_code', 'LIKE', "{$prefix}%")
             ->orderBy('schedule_code', 'desc')
@@ -82,22 +82,22 @@ class PracticeScheduleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePracticeScheduleRequest $request, PracticeSchedule $practiceSchedules):RedirectResponse
+    public function update(UpdatePracticeScheduleRequest $request, PracticeSchedule $practiceSchedule):RedirectResponse
     {
-        $practiceSchedules->update($request->validated());
+        $practiceSchedule->update($request->validated());
         return back()->with('success', 'Jadwal praktik berhasil diperbarui');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PracticeSchedule $practiceSchedules):RedirectResponse
+    public function destroy(PracticeSchedule $practiceSchedule):RedirectResponse
     {
         //proteksi cek jadwal sudah digunakan atau tidak
-        if(method_exists($practiceSchedules, 'queues') && $practiceSchedules->queues()->exists()) {
+        if(method_exists($practiceSchedule, 'queues') && $practiceSchedule->queues()->exists()) {
             return back()->with('error', 'Jadwal tidak dapat dihapus karena sudah memiliki data antrian.');
         }
-        $practiceSchedules->delete();
+        $practiceSchedule->delete();
         return back()->with('success', 'Jadwal praktik berhasil dihapus.');
     }
 }

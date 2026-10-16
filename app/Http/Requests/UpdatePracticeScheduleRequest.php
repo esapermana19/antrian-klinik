@@ -23,7 +23,7 @@ class UpdatePracticeScheduleRequest extends FormRequest
      */
     public function rules(): array
     {
-        $schedule = $this->route('practice_schedules');
+        $schedule = $this->route('practice_schedule');
         $scheduleId = is_object($schedule) ? ($schedule->schedule_id ?? $schedule->getKey()) : $schedule;
         return [
             'day' => [
@@ -48,7 +48,7 @@ class UpdatePracticeScheduleRequest extends FormRequest
     {
         return [
             'session.unique'        => 'Jadwal hari dan sesi ini sudah terdaftar.',
-            'closing_hourse.after'  => 'Jam tutup harus lebih besar dari jam buka',
+            'closing_hours.after'  => 'Jam tutup harus lebih besar dari jam buka',
         ];
     }
 }

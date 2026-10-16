@@ -12,11 +12,11 @@ const isEditMode = ref(false)
 const selectedScheduleId = ref(null)
 
 const form = useForm({
-    day: 'monday',
-    session: 'morning',
-    opening_hours: '08:00',
-    closing_hours: '12:00',
-    max_quota: 20,
+    day: '',
+    session: '',
+    opening_hours: '',
+    closing_hours: '',
+    max_quota: '',
     status: 'open',
 })
 
@@ -48,12 +48,12 @@ const closeModal = () => {
 }
 
 const submitForm = () => {
-    if (isModalOpen.value) {
-        form.put(`/practice-schedules/${selectedScheduleId.value}`, {
+    if (isEditMode.value) {
+        form.put(`/practice-schedule/${selectedScheduleId.value}`, {
             onSuccess: () => closeModal(),
         })
     } else {
-        form.post('/practice-schedules', {
+        form.post('/practice-schedule', {
             onSuccess: () => closeModal(),
         })
     }
@@ -62,7 +62,7 @@ const submitForm = () => {
 const deleteSchedule = (schedule) => {
     const id = schedule.schedule_id ?? schedule.id
     if (confirm(`Hapus jadwal hari ${schedule.day} sesi ${schedule.session}?`)) {
-        router.delete(`/practice-schedules/${id}`)
+        router.delete(`/practice-schedule/${id}`)
     }
 }
 
@@ -88,10 +88,10 @@ const formatDay = (day) => {
         <button type="button" @click="openAddModal">
             + Tambah Jadwal
         </button>
-        <hr/>
+        <hr />
 
         <!-- Tabel data jadwal -->
-         <table border="3" cellpadding="20" cellspacing="0">
+        <table border="3" cellpadding="20" cellspacing="0">
             <thead>
                 <tr>
                     <th>Kode</th>
@@ -104,7 +104,7 @@ const formatDay = (day) => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in schedules.data" :key="item.schedule_id?? item.id">
+                <tr v-for="item in schedules.data" :key="item.schedule_id ?? item.id">
                     <td>{{ item.schedule_code }}</td>
                     <td>{{ formatDay(item.day) }}</td>
                     <td>{{ item.session === 'morning' ? 'pagi' : 'sore' }}</td>
@@ -120,24 +120,25 @@ const formatDay = (day) => {
                     <td colspan="7">Belum ada jadwal yang dirambahkan</td>
                 </tr>
             </tbody>
-         </table>
+        </table>
 
-         <!-- Form tambah jadwal -->
-          <div v-if="isModalOpen">
-            <hr/>
+        <!-- Form tambah jadwal -->
+        <div v-if="isModalOpen">
+            <hr />
             <h2>{{ isEditMode ? 'Edit Jadwal Praktik' : 'Tambah Jadwal Baru' }}</h2>
 
             <form @submit.prevent="submitForm">
                 <div>
                     <label>Hari: </label>
                     <select v-model="form.day">
+                        <option value="">-- Pilih Hari --</option>
                         <option value="monday">Senin</option>
                         <option value="tuesday">Selasa</option>
                         <option value="wednesday">Rabu</option>
                         <option value="thursday">Kamis</option>
                         <option value="friday">Jumat</option>
                         <option value="saturday">Sabtu</option>
-                        <option value="msunday">Minggu</option>
+                        <option value="sunday">Minggu</option>
                     </select>
                     <span v-if="form.errors.day" style="color: red;">{{ form.errors.day }}</span>
                 </div>
@@ -145,6 +146,7 @@ const formatDay = (day) => {
                 <div>
                     <label>Sesi: </label>
                     <select v-model="form.session">
+                        <option value="">-- Pilih Sesi --</option>
                         <option value="morning">Pagi</option>
                         <option value="afternoon">Sore</option>
                     </select>
@@ -152,14 +154,19 @@ const formatDay = (day) => {
                 </div>
 
                 <div>
+                    <label>Jam Buka: </label>
+                    <input type="time" v-model="form.opening_hours" lang="id-ID" step="60" />
+                    <span v-if="form.errors.opening_hours" style="color: red;">{{ form.errors.opening_hours }}</span>
+                </div>
+                <div>
                     <label>Jam Tutup: </label>
-                    <input type="time" v-model="form.closing_hours"/>
+                    <input type="time" v-model="form.closing_hours" lang="id-ID" step="60" />
                     <span v-if="form.errors.closing_hours" style="color: red;">{{ form.errors.closing_hours }}</span>
                 </div>
 
                 <div>
                     <label>Maks. Kuota: </label>
-                    <input type="number" v-model="form.max_quota" min="1"/>
+                    <input type="number" v-model="form.max_quota" min="1" />
                     <span v-if="form.errors.max_quota" style="color: red;">{{ form.errors.max_quota }}</span>
                 </div>
 
@@ -172,7 +179,7 @@ const formatDay = (day) => {
                     <span v-if="form.errors.status" style="color: red;">{{ form.errors.status }}</span>
                 </div>
 
-                <br/>
+                <br />
                 <div>
                     <button type="button" @click="closeModal">Batal</button>
                     <button type="submit" :disabled="form.processing">
@@ -180,7 +187,7 @@ const formatDay = (day) => {
                     </button>
                 </div>
             </form>
-          </div>
+        </div>
     </div>
 </template>
 
@@ -191,13 +198,14 @@ table {
     margin-top: 10px;
 }
 
-th, td {
+th,
+td {
     padding: 6px 10px !important;
     text-align: left;
     border: 1px solid #ccc !important;
 }
 
-form > div{
+form>div {
     margin-bottom: 12px;
 }
 
