@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 #[Fillable(['user_id', 'nik', 'patient_name', 'date_of_birth', 'gender'])]
 class Patient extends Model
 {
+    use HasFactory;
+    
     protected $primaryKey = 'patient_id';
 
     protected function casts(): array

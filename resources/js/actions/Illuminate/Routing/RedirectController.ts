@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../wayfinder'
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
@@ -209,6 +208,6 @@ RedirectController.query = (options?: RouteQueryOptions): RouteDefinition<'query
                     }),
             method: 'post',
         })
-
+    
     RedirectController.form = RedirectControllerForm
 export default RedirectController
