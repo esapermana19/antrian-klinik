@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,13 +21,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $weight
  * @property string $diagnosis
  * @property string $notes_on_treatment
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \App\Models\Invoice|null $invoice
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MedicationPrescription> $medicationPrescriptions
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Invoice|null $invoice
+ * @property-read Collection<int, MedicationPrescription> $medicationPrescriptions
  * @property-read int|null $medication_prescriptions_count
- * @property-read \App\Models\Patient $patient
- * @property-read \App\Models\Queue $queue
+ * @property-read Patient $patient
+ * @property-read Queue $queue
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord query()
@@ -41,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereTemperature($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicalRecord whereWeight($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['queue_id', 'patient_id', 'medrec_code', 'main_complaint', 'blood_pressure', 'temperature', 'weight', 'diagnosis', 'notes_on_treatment'])]

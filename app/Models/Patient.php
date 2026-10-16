@@ -2,26 +2,29 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property int $patient_id
  * @property int $user_id
  * @property string $nik
  * @property string $patient_name
- * @property \Carbon\CarbonImmutable $date_of_birth
+ * @property CarbonImmutable $date_of_birth
  * @property string $gender
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MedicalRecord> $medicalRecords
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Collection<int, MedicalRecord> $medicalRecords
  * @property-read int|null $medical_records_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Queue> $queues
+ * @property-read Collection<int, Queue> $queues
  * @property-read int|null $queues_count
- * @property-read \App\Models\User $user
+ * @property-read User $user
+ *
  * @method static \Database\Factories\PatientFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Patient newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Patient newQuery()
@@ -34,13 +37,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Patient wherePatientName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Patient whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Patient whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['user_id', 'nik', 'patient_name', 'date_of_birth', 'gender'])]
 class Patient extends Model
 {
     use HasFactory;
-    
+
     protected $primaryKey = 'patient_id';
 
     protected function casts(): array

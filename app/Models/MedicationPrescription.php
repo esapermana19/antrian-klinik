@@ -15,8 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property numeric $total_price
  * @property int $qty
  * @property string $dosage
- * @property-read \App\Models\MedicalRecord $medicalRecord
- * @property-read \App\Models\Medication $medication
+ * @property-read MedicalRecord $medicalRecord
+ * @property-read Medication $medication
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription query()
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription whereQty($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription whereTotalPrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MedicationPrescription whereUnitPrice($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['medrec_id', 'medication_id', 'prescription_code', 'qty', 'unit_price', 'total_price', 'dosage'])]

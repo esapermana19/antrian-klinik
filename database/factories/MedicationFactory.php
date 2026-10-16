@@ -33,7 +33,7 @@ class MedicationFactory extends Factory
         ];
 
         return [
-            'medication_code' => 'MED-' . fake()->unique()->numberBetween(100, 999),
+            'medication_code' => 'MED-'.fake()->unique()->numberBetween(100, 999),
             'medication_name' => fake()->unique()->randomElement($medications),
             'stock' => fake()->numberBetween(50, 100),
             // Harga kelipatan 1.000 antara Rp10.000 - Rp50.000

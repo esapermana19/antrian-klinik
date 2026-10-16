@@ -1,6 +1,6 @@
 # 📋 Panduan & Flow Pengerjaan Mandiri: Sistem Antrean Klinik
 
-Dokumen ini disusun sebagai panduan pengerjaan manual langkah demi langkah (*step-by-step roadmap*) dengan standar **Laravel 13 & Vue 3 Inertia Best Practices**. Gunakan checklist `[ ]` untuk menandai kemajuan pengerjaan Anda.
+Dokumen ini disusun sebagai panduan pengerjaan manual langkah demi langkah (_step-by-step roadmap_) dengan standar **Laravel 13 & Vue 3 Inertia Best Practices**. Gunakan checklist `[ ]` untuk menandai kemajuan pengerjaan Anda.
 
 ---
 
@@ -36,26 +36,26 @@ Fase 7: Otorisasi & Policy   ──> Membatasi akses Admin vs Pasien
 
 ## 🚀 FASE 1: Factory & Database Seeder (Data Simulator)
 
-Tujuan: Memiliki data dummy yang konsisten dan mudah di-*reset* ulang kapan saja dengan `php artisan migrate:fresh --seed`.
+Tujuan: Memiliki data dummy yang konsisten dan mudah di-_reset_ ulang kapan saja dengan `php artisan migrate:fresh --seed`.
 
 - [ ] **1.1 Buat Factory untuk Master Data**
-  - Jalankan command:
-    ```bash
-    php artisan make:factory PracticeScheduleFactory
-    php artisan make:factory MedicationFactory
-    php artisan make:factory PatientFactory
-    ```
+    - Jalankan command:
+        ```bash
+        php artisan make:factory PracticeScheduleFactory
+        php artisan make:factory MedicationFactory
+        php artisan make:factory PatientFactory
+        ```
 - [ ] **1.2 Definisikan Dummy Data pada Factory**
-  - `PracticeScheduleFactory`: Isi `schedule_code` (misal: `P01`), `day` (`monday`-`sunday`), `session` (`morning`/`afternoon`), `opening_hours`, `closing_hours`, `max_quota` (misal: 20-30), `status` (`open`).
-  - `MedicationFactory`: Isi `medication_code`, `medication_name`, `stock` (misal: 50-100), `unit_price` (misal: 10000 - 50000).
-  - `PatientFactory`: Isi `user_id` (menggunakan `User::factory()`), `nik` (16 digit acak), `patient_name`, `date_of_birth`, `gender`.
+    - `PracticeScheduleFactory`: Isi `schedule_code` (misal: `P01`), `day` (`monday`-`sunday`), `session` (`morning`/`afternoon`), `opening_hours`, `closing_hours`, `max_quota` (misal: 20-30), `status` (`open`).
+    - `MedicationFactory`: Isi `medication_code`, `medication_name`, `stock` (misal: 50-100), `unit_price` (misal: 10000 - 50000).
+    - `PatientFactory`: Isi `user_id` (menggunakan `User::factory()`), `nik` (16 digit acak), `patient_name`, `date_of_birth`, `gender`.
 - [ ] **1.3 Konfigurasi `DatabaseSeeder.php`**
-  - Buat 1 User Admin: `role => 'administrator'`
-  - Buat 1 User Pasien: `role => 'user'`
-  - Buat jadwal praktek untuk hari Senin - Sabtu.
-  - Buat 10-15 data obat awal.
+    - Buat 1 User Admin: `role => 'administrator'`
+    - Buat 1 User Pasien: `role => 'user'`
+    - Buat jadwal praktek untuk hari Senin - Sabtu.
+    - Buat 10-15 data obat awal.
 - [ ] **1.4 Uji Coba Seeder**
-  - Jalankan `php artisan db:seed` atau `php artisan migrate:fresh --seed` dan pastikan data masuk tanpa error.
+    - Jalankan `php artisan db:seed` atau `php artisan migrate:fresh --seed` dan pastikan data masuk tanpa error.
 
 ---
 
@@ -64,26 +64,28 @@ Tujuan: Memiliki data dummy yang konsisten dan mudah di-*reset* ulang kapan saja
 Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan pada tabel transaksi lain.
 
 ### 2.A Jadwal Praktek (`PracticeSchedule`)
+
 - [ ] **2.A.1 Form Request Validasi**
-  - `php artisan make:request StorePracticeScheduleRequest`
-  - `php artisan make:request UpdatePracticeScheduleRequest`
-  - Validasi: `day` (harus enum valid), `session`, `opening_hours`, `closing_hours`, `max_quota` (`integer|min:1`).
+    - `php artisan make:request StorePracticeScheduleRequest`
+    - `php artisan make:request UpdatePracticeScheduleRequest`
+    - Validasi: `day` (harus enum valid), `session`, `opening_hours`, `closing_hours`, `max_quota` (`integer|min:1`).
 - [ ] **2.A.2 Lengkapi `PracticeScheduleController.php`**
-  - `index()`: Mengambil list jadwal dengan paginasi, render ke Vue `Inertia::render('PracticeSchedules/Index', [...])`.
-  - `store()`: Simpan jadwal baru menggunakan data dari Form Request.
-  - `update()` & `destroy()`: Update dan hapus jadwal (berikan proteksi jika jadwal sudah memiliki antrean).
+    - `index()`: Mengambil list jadwal dengan paginasi, render ke Vue `Inertia::render('PracticeSchedules/Index', [...])`.
+    - `store()`: Simpan jadwal baru menggunakan data dari Form Request.
+    - `update()` & `destroy()`: Update dan hapus jadwal (berikan proteksi jika jadwal sudah memiliki antrean).
 - [ ] **2.A.3 Frontend Halaman Jadwal**
-  - Buat halaman tabel jadwal di `resources/js/pages/PracticeSchedules/Index.vue`.
+    - Buat halaman tabel jadwal di `resources/js/pages/PracticeSchedules/Index.vue`.
 
 ### 2.B Data Obat (`Medication`)
+
 - [ ] **2.B.1 Form Request Validasi**
-  - `php artisan make:request StoreMedicationRequest`
-  - `php artisan make:request UpdateMedicationRequest`
-  - Validasi: `medication_code` (`unique:medications,medication_code`), `medication_name`, `stock` (`integer|min:0`), `unit_price` (`numeric|min:0`).
+    - `php artisan make:request StoreMedicationRequest`
+    - `php artisan make:request UpdateMedicationRequest`
+    - Validasi: `medication_code` (`unique:medications,medication_code`), `medication_name`, `stock` (`integer|min:0`), `unit_price` (`numeric|min:0`).
 - [ ] **2.B.2 Lengkapi `MedicationController.php`**
-  - Implementasi CRUD standar.
+    - Implementasi CRUD standar.
 - [ ] **2.B.3 Frontend Halaman Obat**
-  - Buat halaman manajemen obat di `resources/js/pages/Medications/Index.vue`.
+    - Buat halaman manajemen obat di `resources/js/pages/Medications/Index.vue`.
 
 ---
 
@@ -92,41 +94,41 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
 Tujuan: Menghubungkan akun user yang login dengan profil pasien (1 user bisa mendaftarkan dirinya sendiri atau anggota keluarganya).
 
 - [ ] **3.1 Form Request Validasi**
-  - `php artisan make:request StorePatientRequest`
-  - `php artisan make:request UpdatePatientRequest`
-  - Validasi: `nik` (`required|digits:16|unique:patients,nik`), `patient_name`, `date_of_birth`, `gender`.
+    - `php artisan make:request StorePatientRequest`
+    - `php artisan make:request UpdatePatientRequest`
+    - Validasi: `nik` (`required|digits:16|unique:patients,nik`), `patient_name`, `date_of_birth`, `gender`.
 - [ ] **3.2 Lengkapi `PatientController.php`**
-  - `index()`: Tampilkan pasien milik user yang sedang login (jika user biasa) atau semua pasien (jika admin).
-  - `store()`:
-    ```php
-    $request->user()->patients()->create($request->validated());
-    ```
-  - `show(Patient $patient)`: Tampilkan detail pasien beserta riwayat antrean & rekam medisnya (`load(['queues', 'medicalRecords'])`).
+    - `index()`: Tampilkan pasien milik user yang sedang login (jika user biasa) atau semua pasien (jika admin).
+    - `store()`:
+        ```php
+        $request->user()->patients()->create($request->validated());
+        ```
+    - `show(Patient $patient)`: Tampilkan detail pasien beserta riwayat antrean & rekam medisnya (`load(['queues', 'medicalRecords'])`).
 - [ ] **3.3 Frontend Halaman Pasien**
-  - Buat form pendaftaran pasien dan daftar anggota keluarga yang didaftarkan.
+    - Buat form pendaftaran pasien dan daftar anggota keluarga yang didaftarkan.
 
 ---
 
 ## ⏱️ FASE 4: Sistem Antrean Inti (`Queue`)
 
-Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan mengubah status antrean secara *real-time*.
+Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan mengubah status antrean secara _real-time_.
 
 - [ ] **4.1 Logika Bisnis Booking Antrean**
-  - Saat pasien memilih jadwal (`schedule_id`) dan tanggal (`queue_date`):
-    1. **Cek Kuota**: Hitung jumlah antrean aktif pada jadwal & tanggal tersebut (`Queue::where('schedule_id', ...)->where('queue_date', ...)->count()`). Jika `>= max_quota`, tolak dengan pesan bahwa kuota penuh.
-    2. **Generate Nomor Antrean Otomatis**: Misal format `P01`, `P02`, dsb., berdasarkan urutan pada hari dan sesi tersebut.
-    3. **Estimasi Waktu**: Jam buka jadwal + (urutan antrean * 15 menit).
-    4. **Status Awal**: Set default `waiting`.
+    - Saat pasien memilih jadwal (`schedule_id`) dan tanggal (`queue_date`):
+        1. **Cek Kuota**: Hitung jumlah antrean aktif pada jadwal & tanggal tersebut (`Queue::where('schedule_id', ...)->where('queue_date', ...)->count()`). Jika `>= max_quota`, tolak dengan pesan bahwa kuota penuh.
+        2. **Generate Nomor Antrean Otomatis**: Misal format `P01`, `P02`, dsb., berdasarkan urutan pada hari dan sesi tersebut.
+        3. **Estimasi Waktu**: Jam buka jadwal + (urutan antrean * 15 menit).
+        4. **Status Awal**: Set default `waiting`.
 - [ ] **4.2 Form Request Validasi**
-  - `php artisan make:request StoreQueueRequest`
-  - Validasi: `patient_id` (pastikan milik user login), `schedule_id` (jadwal harus `status = open`), `queue_date` (minimal hari ini).
+    - `php artisan make:request StoreQueueRequest`
+    - Validasi: `patient_id` (pastikan milik user login), `schedule_id` (jadwal harus `status = open`), `queue_date` (minimal hari ini).
 - [ ] **4.3 Lengkapi `QueueController.php`**
-  - `index()`: Tampilkan antrean hari ini untuk display ruang tunggu atau dashboard pasien.
-  - `store()`: Eksekusi logika booking antrean di atas.
-  - `updateStatus(Request $request, Queue $queue)`: Endpoint khusus untuk petugas/dokter memanggil atau memajukan status antrean (`waiting` $\rightarrow$ `called` $\rightarrow$ `checking` $\rightarrow$ `completed` / `cancel`).
+    - `index()`: Tampilkan antrean hari ini untuk display ruang tunggu atau dashboard pasien.
+    - `store()`: Eksekusi logika booking antrean di atas.
+    - `updateStatus(Request $request, Queue $queue)`: Endpoint khusus untuk petugas/dokter memanggil atau memajukan status antrean (`waiting` $\rightarrow$ `called` $\rightarrow$ `checking` $\rightarrow$ `completed` / `cancel`).
 - [ ] **4.4 Frontend Halaman Antrean**
-  - Halaman Ambil Antrean (untuk Pasien).
-  - Halaman Display TV Antrean / Panggilan Antrean (untuk Petugas Klinik).
+    - Halaman Ambil Antrean (untuk Pasien).
+    - Halaman Display TV Antrean / Panggilan Antrean (untuk Petugas Klinik).
 
 ---
 
@@ -135,48 +137,48 @@ Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan 
 Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan otomatis memotong stok obat di gudang farmasi.
 
 - [ ] **5.1 Form Request Validasi**
-  - `php artisan make:request StoreMedicalRecordRequest`
-  - Validasi struktur:
-    - Data diagnosa: `queue_id`, `patient_id`, `main_complaint`, `blood_pressure`, `temperature`, `weight`, `diagnosis`, `notes_on_treatment`.
-    - Data resep (array): `prescriptions.*.medication_id`, `prescriptions.*.qty`, `prescriptions.*.dosage`.
+    - `php artisan make:request StoreMedicalRecordRequest`
+    - Validasi struktur:
+        - Data diagnosa: `queue_id`, `patient_id`, `main_complaint`, `blood_pressure`, `temperature`, `weight`, `diagnosis`, `notes_on_treatment`.
+        - Data resep (array): `prescriptions.*.medication_id`, `prescriptions.*.qty`, `prescriptions.*.dosage`.
 - [ ] **5.2 Transaksi Database (`DB::transaction`) pada `MedicalRecordController@store`**
-  ```php
-  use Illuminate\Support\Facades\DB;
+    ```php
+    use Illuminate\Support\Facades\DB;
 
-  DB::transaction(function () use ($validated, $queue) {
-      // 1. Buat kode rekam medis unik (misal: RM-20261016-001)
-      // 2. Simpan MedicalRecord
-      $medrec = MedicalRecord::create([...]);
+    DB::transaction(function () use ($validated, $queue) {
+        // 1. Buat kode rekam medis unik (misal: RM-20261016-001)
+        // 2. Simpan MedicalRecord
+        $medrec = MedicalRecord::create([...]);
 
-      // 3. Loop resep obat
-      foreach ($validated['prescriptions'] as $item) {
-          $medication = Medication::findOrFail($item['medication_id']);
-          
-          // Pastikan stok mencukupi
-          if ($medication->stock < $item['qty']) {
-              throw new \Exception("Stok obat {$medication->medication_name} tidak mencukupi!");
-          }
+        // 3. Loop resep obat
+        foreach ($validated['prescriptions'] as $item) {
+            $medication = Medication::findOrFail($item['medication_id']);
 
-          // Simpan MedicationPrescription
-          $medrec->medicationPrescriptions()->create([
-              'medication_id' => $medication->medication_id,
-              'prescription_code' => 'RSP-' . uniqid(),
-              'qty' => $item['qty'],
-              'unit_price' => $medication->unit_price,
-              'total_price' => $medication->unit_price * $item['qty'],
-              'dosage' => $item['dosage'],
-          ]);
+            // Pastikan stok mencukupi
+            if ($medication->stock < $item['qty']) {
+                throw new \Exception("Stok obat {$medication->medication_name} tidak mencukupi!");
+            }
 
-          // Potong stok obat
-          $medication->decrement('stock', $item['qty']);
-      }
+            // Simpan MedicationPrescription
+            $medrec->medicationPrescriptions()->create([
+                'medication_id' => $medication->medication_id,
+                'prescription_code' => 'RSP-' . uniqid(),
+                'qty' => $item['qty'],
+                'unit_price' => $medication->unit_price,
+                'total_price' => $medication->unit_price * $item['qty'],
+                'dosage' => $item['dosage'],
+            ]);
 
-      // 4. Ubah status antrean menjadi 'completed'
-      $queue->update(['queue_status' => 'completed']);
-  });
-  ```
+            // Potong stok obat
+            $medication->decrement('stock', $item['qty']);
+        }
+
+        // 4. Ubah status antrean menjadi 'completed'
+        $queue->update(['queue_status' => 'completed']);
+    });
+    ```
 - [ ] **5.3 Frontend Halaman Dokter**
-  - Halaman form input rekam medis + dropdown dinamis memilih obat dan dosis.
+    - Halaman form input rekam medis + dropdown dinamis memilih obat dan dosis.
 
 ---
 
@@ -185,17 +187,17 @@ Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan o
 Tujuan: Mengkalkulasi total biaya pengobatan pasien dan memproses pembayaran.
 
 - [ ] **6.1 Logika Pembuatan Invoice Otomatis**
-  - Dapat di-trigger otomatis setelah rekam medis disimpan, atau dibuat via kasir:
-    - `examination_fee`: Biaya jasa dokter/klinik tetap (misal: Rp50.000).
-    - `medication_fee`: Jumlahkan `total_price` dari seluruh `medicationPrescriptions` pada rekam medis tersebut.
-    - `total_amount`: `examination_fee + medication_fee`.
-    - `payment_status`: `unpaid`.
+    - Dapat di-trigger otomatis setelah rekam medis disimpan, atau dibuat via kasir:
+        - `examination_fee`: Biaya jasa dokter/klinik tetap (misal: Rp50.000).
+        - `medication_fee`: Jumlahkan `total_price` dari seluruh `medicationPrescriptions` pada rekam medis tersebut.
+        - `total_amount`: `examination_fee + medication_fee`.
+        - `payment_status`: `unpaid`.
 - [ ] **6.2 Lengkapi `InvoiceController.php`**
-  - `index()`: Daftar tagihan kasir (filter `unpaid` / `paid`).
-  - `show(Invoice $invoice)`: Cetak struk/nota pembayaran dengan relasi obat dan pasien.
-  - `pay(Request $request, Invoice $invoice)`: Update `payment_status = 'paid'`, catat `payment_method` (`cash`/`transfer`).
+    - `index()`: Daftar tagihan kasir (filter `unpaid` / `paid`).
+    - `show(Invoice $invoice)`: Cetak struk/nota pembayaran dengan relasi obat dan pasien.
+    - `pay(Request $request, Invoice $invoice)`: Update `payment_status = 'paid'`, catat `payment_method` (`cash`/`transfer`).
 - [ ] **6.3 Frontend Halaman Kasir**
-  - Tampilan kasir & rincian nota tagihan.
+    - Tampilan kasir & rincian nota tagihan.
 
 ---
 
@@ -204,16 +206,16 @@ Tujuan: Mengkalkulasi total biaya pengobatan pasien dan memproses pembayaran.
 Tujuan: Mencegah kebocoran data antar pasien dan mengamankan rute backend.
 
 - [ ] **7.1 Buat Authorization Policies**
-  ```bash
-  php artisan make:policy PatientPolicy --model=Patient
-  php artisan make:policy QueuePolicy --model=Queue
-  php artisan make:policy MedicalRecordPolicy --model=MedicalRecord
-  ```
+    ```bash
+    php artisan make:policy PatientPolicy --model=Patient
+    php artisan make:policy QueuePolicy --model=Queue
+    php artisan make:policy MedicalRecordPolicy --model=MedicalRecord
+    ```
 - [ ] **7.2 Terapkan Aturan Akses**
-  - `Administrator`: Akses penuh ke seluruh data.
-  - `User`: Hanya boleh melihat data `Patient`, `Queue`, dan `MedicalRecord` yang `user_id`-nya cocok dengan dirinya (`$user->user_id === $patient->user_id`).
+    - `Administrator`: Akses penuh ke seluruh data.
+    - `User`: Hanya boleh melihat data `Patient`, `Queue`, dan `MedicalRecord` yang `user_id`-nya cocok dengan dirinya (`$user->user_id === $patient->user_id`).
 - [ ] **7.3 Lindungi Controller**
-  - Gunakan `$this->authorize('view', $patient)` atau method bawaan Policy di Controller.
+    - Gunakan `$this->authorize('view', $patient)` atau method bawaan Policy di Controller.
 
 ---
 
@@ -222,21 +224,21 @@ Tujuan: Mencegah kebocoran data antar pasien dan mengamankan rute backend.
 Tujuan: Memastikan fitur tidak rusak saat Anda melakukan perubahan di masa mendatang.
 
 - [ ] **8.1 Buat Test Antrean**
-  ```bash
-  php artisan make:test --pest QueueBookingTest
-  ```
-  - Test skenario: User berhasil booking antrean.
-  - Test skenario: User gagal booking jika kuota hari itu sudah penuh.
+    ```bash
+    php artisan make:test --pest QueueBookingTest
+    ```
+    - Test skenario: User berhasil booking antrean.
+    - Test skenario: User gagal booking jika kuota hari itu sudah penuh.
 - [ ] **8.2 Buat Test Rekam Medis & Stok Obat**
-  ```bash
-  php artisan make:test --pest MedicalRecordTest
-  ```
-  - Test skenario: Stok obat otomatis berkurang saat resep dibuat.
+    ```bash
+    php artisan make:test --pest MedicalRecordTest
+    ```
+    - Test skenario: Stok obat otomatis berkurang saat resep dibuat.
 - [ ] **8.3 Jalankan Seluruh Test Suite**
-  ```bash
-  php artisan test
-  ```
+    ```bash
+    php artisan test
+    ```
 
 ---
 
-*Semoga panduan ini membantu Anda belajar ngoding mandiri secara terstruktur dan terbiasa dengan standar industri Laravel!*
+_Semoga panduan ini membantu Anda belajar ngoding mandiri secara terstruktur dan terbiasa dengan standar industri Laravel!_

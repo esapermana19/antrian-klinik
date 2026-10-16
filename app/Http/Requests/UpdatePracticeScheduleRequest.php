@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\PracticeSchedule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,8 @@ class UpdatePracticeScheduleRequest extends FormRequest
     public function rules(): array
     {
         $schedule = $this->route('practice_schedule');
-        $scheduleId = is_object($schedule) ? ($schedule->schedule_id ?? $schedule->getKey()) : $schedule;
+        $scheduleId = $schedule instanceof PracticeSchedule ? $schedule->schedule_id : $schedule;
+
         return [
             'day' => [
                 'required',
@@ -39,16 +41,16 @@ class UpdatePracticeScheduleRequest extends FormRequest
             ],
             'opening_hours' => ['required', 'date_format:H:i'],
             'closing_hours' => ['required', 'date_format:H:i', 'after:opening_hours'],
-            'max_quota'     => ['required', 'integer', 'min:1', 'max:20'],
-            'status'        => ['required', Rule::in(['open', 'closed'])],
+            'max_quota' => ['required', 'integer', 'min:1', 'max:20'],
+            'status' => ['required', Rule::in(['open', 'closed'])],
         ];
     }
 
-    public function messages():array
+    public function messages(): array
     {
         return [
-            'session.unique'        => 'Jadwal hari dan sesi ini sudah terdaftar.',
-            'closing_hours.after'  => 'Jam tutup harus lebih besar dari jam buka',
+            'session.unique' => 'Jadwal hari dan sesi ini sudah terdaftar.',
+            'closing_hours.after' => 'Jam tutup harus lebih besar dari jam buka',
         ];
     }
 }

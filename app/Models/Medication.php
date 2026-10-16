@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,10 +15,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $medication_name
  * @property int $stock
  * @property numeric $unit_price
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\MedicationPrescription> $medicationPrescriptions
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Collection<int, MedicationPrescription> $medicationPrescriptions
  * @property-read int|null $medication_prescriptions_count
+ *
  * @method static \Database\Factories\MedicationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Medication newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Medication newQuery()
@@ -28,12 +31,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Medication whereStock($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Medication whereUnitPrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Medication whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['medication_code', 'medication_name', 'stock', 'unit_price'])]
 class Medication extends Model
 {
     use HasFactory;
+
     protected $primaryKey = 'medication_id';
 
     protected function casts(): array

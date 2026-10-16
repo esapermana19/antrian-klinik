@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Override;
 
 class StorePracticeScheduleRequest extends FormRequest
 {
@@ -24,33 +23,31 @@ class StorePracticeScheduleRequest extends FormRequest
      */
     public function rules(): array
     {
-        $schedule = $this->route('practice_schedules');
-        $scheduleId = is_object($schedule) ? ($schedule->schedule_id ?? $schedule->id) :$schedule;
         return [
             'day' => [
                 'required',
-                Rule::in(['monday','tuesday','wednesday','thursday','friday','saturday','sunday']),
+                Rule::in(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
             ],
             'session' => [
                 'required',
-                Rule::in(['morning','afternoon']),
-                Rule::unique('practice_schedules')->where(function ($query){
+                Rule::in(['morning', 'afternoon']),
+                Rule::unique('practice_schedules')->where(function ($query) {
                     return $query->where('day', $this->day);
                 }),
             ],
             'opening_hours' => ['required', 'date_format:H:i'],
             'closing_hours' => ['required', 'date_format:H:i', 'after:opening_hours'],
-            'max_quota'     => ['required', 'integer', 'min:1', 'max:20'],
-            'status'        => ['required', Rule::in(['open','closed'])],
+            'max_quota' => ['required', 'integer', 'min:1', 'max:20'],
+            'status' => ['required', Rule::in(['open', 'closed'])],
         ];
     }
 
-    public function messages():array
+    public function messages(): array
     {
-        return[
-            'session.unique'        => 'Jadwal hari dan sesi ini sudah pernah dibuat.',
-            'closing_hours.after'   => 'Jam tutup harus lebih besar dari jam buka.',
-            'max_quota.min'         => 'Kuota minimal adalah 1 pasien.',
+        return [
+            'session.unique' => 'Jadwal hari dan sesi ini sudah pernah dibuat.',
+            'closing_hours.after' => 'Jam tutup harus lebih besar dari jam buka.',
+            'max_quota.min' => 'Kuota minimal adalah 1 pasien.',
         ];
     }
 }

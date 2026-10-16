@@ -16,12 +16,14 @@ class PracticeScheduleFactory extends Factory
      * @return array<string, mixed>
      */
     protected $model = PracticeSchedule::class;
+
     public function definition(): array
     {
-        $session = fake()->randomElement(['morning','afternoon']);
+        $session = fake()->randomElement(['morning', 'afternoon']);
+
         return [
-            'schedule_code' => 'P' . str_pad((string) fake()->unique()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
-            'day' => fake()->randomElement(['monday','tuesday','wednesday','thursday','friday','saturday','sunday']),
+            'schedule_code' => 'P'.str_pad((string) fake()->unique()->numberBetween(1, 99), 2, '0', STR_PAD_LEFT),
+            'day' => fake()->randomElement(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
             'session' => $session,
             'opening_hours' => $session === 'morning' ? '08:00:00' : '13:00:00',
             'closing_hours' => $session === 'morning' ? '12:00:00' : '17:00:00',

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PracticeSchedule extends Model
 {
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -19,6 +20,7 @@ class PracticeSchedule extends Model
     }
 
     protected $table = 'practice_schedules';
+
     protected $primaryKey = 'schedule_id';
 
     // relasi ke queue

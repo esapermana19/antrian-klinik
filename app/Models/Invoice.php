@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,9 +16,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property numeric $total_amount
  * @property string $payment_status
  * @property string $payment_method
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \App\Models\MedicalRecord $medicalRecord
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read MedicalRecord $medicalRecord
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice query()
@@ -31,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice wherePaymentStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereTotalAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['medrec_id', 'invoice_code', 'examination_fee', 'medication_fee', 'total_amount', 'payment_status', 'payment_method'])]

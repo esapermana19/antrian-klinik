@@ -7,9 +7,9 @@ use App\Models\Patient;
 use App\Models\PracticeSchedule;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'administrator',
             'email' => 'admin@klinik.test',
             'password' => Hash::make('password'),
-            'role' => 'administrator'
+            'role' => 'administrator',
         ]);
 
         $user = User::factory()->create([
@@ -44,11 +44,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        //jadwal praktek
+        // jadwal praktek
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         PracticeSchedule::factory()
             ->count(count($days))
-            ->sequence(fn(Sequence $sequence) => [
+            ->sequence(fn (Sequence $sequence) => [
                 'schedule_code' => sprintf('P%02d', $sequence->index + 1),
                 'day' => $days[$sequence->index],
                 'session' => 'morning',
