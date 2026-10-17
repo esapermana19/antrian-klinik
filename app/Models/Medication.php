@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['medication_code', 'medication_name', 'stock', 'unit_price'])]
+#[Fillable(['medication_category_id','medication_code', 'medication_name', 'stock', 'unit_price'])]
 class Medication extends Model
 {
     use HasFactory;

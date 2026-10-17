@@ -65,27 +65,44 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
 
 ### 2.A Jadwal Praktek (`PracticeSchedule`)
 
-- [ ] **2.A.1 Form Request Validasi**
+- [x] **2.A.1 Form Request Validasi**
     - `php artisan make:request StorePracticeScheduleRequest`
     - `php artisan make:request UpdatePracticeScheduleRequest`
-    - Validasi: `day` (harus enum valid), `session`, `opening_hours`, `closing_hours`, `max_quota` (`integer|min:1`).
-- [ ] **2.A.2 Lengkapi `PracticeScheduleController.php`**
-    - `index()`: Mengambil list jadwal dengan paginasi, render ke Vue `Inertia::render('PracticeSchedules/Index', [...])`.
-    - `store()`: Simpan jadwal baru menggunakan data dari Form Request.
-    - `update()` & `destroy()`: Update dan hapus jadwal (berikan proteksi jika jadwal sudah memiliki antrean).
-- [ ] **2.A.3 Frontend Halaman Jadwal**
-    - Buat halaman tabel jadwal di `resources/js/pages/PracticeSchedules/Index.vue`.
+    - Validasi: `day` (enum valid), `session`, `opening_hours`, `closing_hours`, `max_quota` (`integer|min:1`), kombinasi unik `day + session`.
+- [x] **2.A.2 Lengkapi `PracticeScheduleController.php`**
+    - `index()`: Mengambil list jadwal dengan paginasi dan pengurutan hari/sesi, render ke Vue `Inertia::render('PracticeSchedules/Index', [...])`.
+    - `store()`: Auto-generate `schedule_code` (misal: `MON-1-S01`) dan simpan jadwal baru via Form Request.
+    - `update()`: Update jadwal via Form Request.
+    - `destroy()`: Hapus jadwal dengan proteksi cek relasi antrean aktif (`$practiceSchedule->queues()->exists()`).
+- [x] **2.A.3 Frontend Halaman Jadwal**
+    - Buat halaman tabel jadwal di `resources/js/pages/PracticeSchedules/Index.vue` lengkap dengan modal Create/Edit dan konfirmasi hapus.
 
-### 2.B Data Obat (`Medication`)
+### 2.B Kategori Obat (`MedicationCategory`)
 
-- [ ] **2.B.1 Form Request Validasi**
+- [x] **2.B.1 Migrasi & Relasi Tabel**
+    - Tabel `medication_categories` (`medication_category_id`, `medication_category_code`, `medication_category_name`).
+    - Foreign key `medication_category_id` di tabel `medications` dengan `restrictOnDelete()`.
+- [ ] **2.B.2 Form Request Validasi**
+    - `StoreMedicationCategoryRequest`: Validasi kode unik 1 karakter (`size:1|unique:medication_categories,medication_category_code`) dan nama kategori.
+    - `UpdateMedicationCategoryRequest`: Rule unik dengan ignore ID kategori yang sedang diedit.
+- [ ] **2.B.3 Lengkapi `MedicationCategoryController.php`**
+    - `index()`: Tampilkan list kategori obat dengan paginasi (`paginate(10)`).
+    - `store()` & `update()`: CRUD standar via Form Request.
+    - `destroy()`: Hapus kategori dengan proteksi jika masih digunakan oleh data obat (`$category->medications()->exists()`).
+- [ ] **2.B.4 Frontend Halaman Kategori Obat**
+    - Buat halaman di `resources/js/pages/MedicationCategories/Index.vue`.
+
+### 2.C Data Obat (`Medication`)
+
+- [ ] **2.C.1 Form Request Validasi**
     - `php artisan make:request StoreMedicationRequest`
     - `php artisan make:request UpdateMedicationRequest`
-    - Validasi: `medication_code` (`unique:medications,medication_code`), `medication_name`, `stock` (`integer|min:0`), `unit_price` (`numeric|min:0`).
-- [ ] **2.B.2 Lengkapi `MedicationController.php`**
+    - Validasi: `medication_category_id` (`required|exists:medication_categories,medication_category_id`), `medication_code` (`unique:medications,medication_code`), `medication_name`, `stock` (`integer|min:0`), `unit_price` (`numeric|min:0`).
+- [ ] **2.C.2 Lengkapi `MedicationController.php`**
+    - Eager load relasi kategori obat: `Medication::with('medicationCategory')->paginate(10)`.
     - Implementasi CRUD standar.
-- [ ] **2.B.3 Frontend Halaman Obat**
-    - Buat halaman manajemen obat di `resources/js/pages/Medications/Index.vue`.
+- [ ] **2.C.3 Frontend Halaman Obat**
+    - Buat halaman manajemen obat di `resources/js/pages/Medications/Index.vue` dengan dropdown pilihan Kategori Obat.
 
 ---
 

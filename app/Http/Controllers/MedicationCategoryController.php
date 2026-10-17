@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMedicationCategoryRequest;
+use App\Http\Requests\UpdateMedicationCategoryRequest;
 use App\Models\MedicationCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class MedicationCategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $medicationCategories = MedicationCategory::latest('medication_category_id')->paginate(10);
+        return Inertia::render('MedicationCategories/Index',[
+            'medication_categories' => $medicationCategories,
+        ]);
     }
 
     /**
@@ -26,9 +34,11 @@ class MedicationCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreMedicationCategoryRequest $request): RedirectResponse
     {
-        //
+        MedicationCategory::create($request->validated());
+        return back()->with('success', 'Kategori obat berhasil ditambahkan.');
+
     }
 
     /**
@@ -50,9 +60,10 @@ class MedicationCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MedicationCategory $medicationCategory)
+    public function update(UpdateMedicationCategoryRequest $request, MedicationCategory $medicationCategory): RedirectResponse
     {
-        //
+        $medicationCategory->update($request->validated());
+        return back()->with('success', 'Kategori obat berhasil diperbarui');
     }
 
     /**
@@ -60,6 +71,10 @@ class MedicationCategoryController extends Controller
      */
     public function destroy(MedicationCategory $medicationCategory)
     {
-        //
+        if($medicationCategory->medications()->exists()) {
+            return back()->with('error', 'Kategori tidak dapat dihapus karena masih digunakan data obat.');
+        }
+        $medicationCategory->delete();
+        return back()->with('success', 'Kategori obat berhasil dihapus.');
     }
 }
