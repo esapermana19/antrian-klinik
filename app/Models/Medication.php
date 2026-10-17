@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -52,5 +53,11 @@ class Medication extends Model
     public function medicationPrescriptions(): HasMany
     {
         return $this->hasMany(MedicationPrescription::class, 'medication_id', 'medication_id');
+    }
+
+    //mengambil relasi dari medicationCategory
+    public function medicationCategory():BelongsTo
+    {
+        return $this->belongsTo(MedicationCategory::class, 'medication_category_id', 'medication_category_id');
     }
 }
