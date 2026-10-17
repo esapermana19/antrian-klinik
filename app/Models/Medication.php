@@ -55,8 +55,8 @@ class Medication extends Model
         return $this->hasMany(MedicationPrescription::class, 'medication_id', 'medication_id');
     }
 
-    //mengambil relasi dari medicationCategory
-    public function medicationCategory():BelongsTo
+    // mengambil relasi dari medicationCategory
+    public function medicationCategory(): BelongsTo
     {
         return $this->belongsTo(MedicationCategory::class, 'medication_category_id', 'medication_category_id');
     }

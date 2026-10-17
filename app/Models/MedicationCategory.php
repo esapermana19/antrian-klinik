@@ -11,8 +11,8 @@ class MedicationCategory extends Model
 {
     protected $primaryKey = 'medication_category_id';
 
-    //relasi ke tabel medications
-    public function medications():HasMany
+    // relasi ke tabel medications
+    public function medications(): HasMany
     {
         return $this->hasMany(Medication::class, 'medication_category_id', 'medication_category_id');
     }
