@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\PracticeSchedules;
 
 use App\Models\PracticeSchedule;
 use Illuminate\Contracts\Validation\ValidationRule;

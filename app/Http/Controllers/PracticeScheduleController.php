@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePracticeScheduleRequest;
-use App\Http\Requests\UpdatePracticeScheduleRequest;
+use App\Http\Requests\PracticeSchedules\StorePracticeScheduleRequest;
+use App\Http\Requests\PracticeSchedules\UpdatePracticeScheduleRequest;
 use App\Models\PracticeSchedule;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\MedicationCategories;
 
 use App\Models\MedicationCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -26,13 +26,14 @@ class UpdateMedicationCategoryRequest extends FormRequest
     {
         $category = $this->route('medication_category');
         $categoryId = $category instanceof MedicationCategory ? $category->medication_category_id : $category;
+
         return [
             'medication_category_code' => [
                 'required',
                 'string',
                 'size:1',
                 Rule::unique('medication_categories', 'medication_category_code')
-                ->ignore($categoryId, 'medication_category_id'),
+                    ->ignore($categoryId, 'medication_category_id'),
             ],
             'medication_category_name' => ['required', 'string', 'max:30'],
         ];
@@ -41,7 +42,7 @@ class UpdateMedicationCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'medication_category_code.size' => 'Code maksimal 1 karakter'
+            'medication_category_code.size' => 'Code maksimal 1 karakter',
         ];
     }
 }

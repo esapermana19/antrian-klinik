@@ -9,39 +9,47 @@ Dokumen ini dibuat sebagai referensi praktis agar Anda dapat memahami alur kerja
 Di Vue 3 Composition API dengan Inertia.js, tag `<script setup>` di halaman index dibagi menjadi **6 blok fungsional utama**:
 
 ### A. Import Dependencies
+
 ```javascript
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 ```
-| Modul | Asal | Fungsi |
-| :--- | :--- | :--- |
-| `ref` | Vue Core | Membuat variabel primitif (boolean, string, number) menjadi **reaktif**. Nilai dibaca/diubah dengan `.value`. |
+
+| Modul     | Asal       | Fungsi                                                                                                                                                                                |
+| :-------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ref`     | Vue Core   | Membuat variabel primitif (boolean, string, number) menjadi **reaktif**. Nilai dibaca/diubah dengan `.value`.                                                                         |
 | `useForm` | Inertia.js | Wrapper reaktif khusus form. Otomatis mengurus data input, status loading (`form.processing`), penanganan error validasi (`form.errors`), serta method HTTP (`post`, `put`, `patch`). |
-| `router` | Inertia.js | Pengendali navigasi SPA. Digunakan untuk aksi HTTP yang tidak membungkus data form besar, contohnya tombol **Hapus** (`router.delete()`). |
+| `router`  | Inertia.js | Pengendali navigasi SPA. Digunakan untuk aksi HTTP yang tidak membungkus data form besar, contohnya tombol **Hapus** (`router.delete()`).                                             |
 
 ---
 
 ### B. Menerima Data dari Controller (`defineProps`)
+
 ```javascript
 const props = defineProps({
     schedules: Object,
     errors: Object,
 });
 ```
+
 - **Sumber Data**: Dikirim dari controller Laravel melalui `Inertia::render('PracticeSchedules/Index', ['schedules' => $schedules])`.
 - **Penggunaan di Template**: Objek paginasi Laravel memiliki properti `.data`. Di template dipanggil dengan:
-  ```html
-  <tr v-for="item in schedules.data" :key="item.id"> ... </tr>
-  ```
+    ```html
+    <tr v-for="item in schedules.data" :key="item.id">
+        ...
+    </tr>
+    ```
 
 ---
 
 ### C. State Kontrol Modal / UI
+
 ```javascript
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedScheduleId = ref(null);
 ```
+
 - **`isModalOpen`**: Mengatur visibilitas form modal (`v-if="isModalOpen"`).
 - **`isEditMode`**: Flag penanda apakah user sedang menambah data baru (`false`) atau mengedit data lama (`true`). Mengubah teks judul modal dan aksi submit.
 - **`selectedScheduleId`**: Menyimpan ID record yang sedang diedit agar saat submit sistem tahu target URL update-nya (`/practice-schedule/{id}`).
@@ -49,6 +57,7 @@ const selectedScheduleId = ref(null);
 ---
 
 ### D. Inisialisasi Objek Form (`useForm`)
+
 ```javascript
 const form = useForm({
     day: '',
@@ -59,26 +68,32 @@ const form = useForm({
     status: 'open',
 });
 ```
+
 - Menampung seluruh field input yang akan dikirim ke backend.
 - Di template diikat dua arah menggunakan `v-model`:
-  ```html
-  <select v-model="form.day">...</select>
-  <input v-model="form.max_quota" />
-  ```
+    ```html
+    <select v-model="form.day">
+        ...
+    </select>
+    <input v-model="form.max_quota" />
+    ```
 - Jika validasi backend gagal, pesan error otomatis dapat dibaca di template melalui `form.errors.nama_field`:
-  ```html
-  <span v-if="form.errors.day" class="text-red-500">{{ form.errors.day }}</span>
-  ```
+    ```html
+    <span v-if="form.errors.day" class="text-red-500"
+        >{{ form.errors.day }}</span
+    >
+    ```
 
 ---
 
 ### E. Handler Buka & Tutup Modal
+
 ```javascript
 // 1. Tambah Data Baru
 const openAddModal = () => {
     isEditMode.value = false;
-    form.reset();         // Mengosongkan field input form
-    form.clearErrors();   // Membersihkan error validasi merah sebelumnya
+    form.reset(); // Mengosongkan field input form
+    form.clearErrors(); // Membersihkan error validasi merah sebelumnya
     isModalOpen.value = true;
 };
 
@@ -109,6 +124,7 @@ const closeModal = () => {
 ---
 
 ### F. Eksekusi HTTP Request (`submitForm` & `deleteSchedule`)
+
 ```javascript
 const submitForm = () => {
     if (isEditMode.value) {
@@ -126,12 +142,15 @@ const submitForm = () => {
 
 const deleteSchedule = (schedule) => {
     const id = schedule.schedule_id ?? schedule.id;
-    if (confirm(`Hapus jadwal hari ${schedule.day} sesi ${schedule.session}?`)) {
+    if (
+        confirm(`Hapus jadwal hari ${schedule.day} sesi ${schedule.session}?`)
+    ) {
         // Hapus Data -> HTTP DELETE
         router.delete(`/practice-schedule/${id}`);
     }
 };
 ```
+
 - **Kelebihan Inertia**: Tidak memerlukan reload satu halaman penuh (page reload). Ketika backend selesai memproses request dan memanggil `redirect()->back()`, Inertia secara otomatis memperbarui data `props.schedules` di browser.
 
 ---
@@ -158,9 +177,9 @@ Berikut alur komunikasi data antara file Vue dan arsitektur Laravel:
 1. **[routes/web.php](file:///d:/Work/Antrian%20Klinik/antrian-klinik/routes/web.php)**:
    Mendefinisikan endpoint URL yang dituju oleh `form.post`, `form.put`, dan `router.delete`.
 2. **[PracticeScheduleController.php](file:///d:/Work/Antrian%20Klinik/antrian-klinik/app/Http/Controllers/PracticeScheduleController.php)**:
-   - `index()`: Mengambil data database (dengan pagination/ordering) lalu mengirimkannya sebagai prop ke Vue via `Inertia::render()`.
-   - `store()` / `update()`: Menerima data dari frontend, melakukan validasi Form Request, membuat/mengubah data di DB, lalu `to_route(...)` atau `back()`.
-   - `destroy()`: Menghapus record dan me-redirect kembali ke index.
+    - `index()`: Mengambil data database (dengan pagination/ordering) lalu mengirimkannya sebagai prop ke Vue via `Inertia::render()`.
+    - `store()` / `update()`: Menerima data dari frontend, melakukan validasi Form Request, membuat/mengubah data di DB, lalu `to_route(...)` atau `back()`.
+    - `destroy()`: Menghapus record dan me-redirect kembali ke index.
 3. **Form Request (`StorePracticeScheduleRequest.php`)**:
    Jika validasi gagal, Laravel langsung melempar error code 422 kembali ke Inertia, yang otomatis terikat ke properti `form.errors`.
 
@@ -249,17 +268,17 @@ const deleteItem = (item) => {
 Saat Anda ingin membuat halaman Index fitur baru dari nol:
 
 1. **Backend**:
-   - Buat Migration & Model (`php artisan make:model NamaModel -m`).
-   - Buat Controller & Form Request (`php artisan make:controller NamaController --resource`).
-   - Daftarkan route di `routes/web.php` (`Route::resource('nama-fitur', NamaController::class)`).
+    - Buat Migration & Model (`php artisan make:model NamaModel -m`).
+    - Buat Controller & Form Request (`php artisan make:controller NamaController --resource`).
+    - Daftarkan route di `routes/web.php` (`Route::resource('nama-fitur', NamaController::class)`).
 2. **Frontend**:
-   - Buat file page di `resources/js/pages/NamaFitur/Index.vue`.
-   - Salin kerangka blueprint script di atas, sesuaikan nama kolom dan rute URL-nya.
-   - Hubungkan tombol-tombol template ke fungsi:
-     - Tombol Tambah: `@click="openAddModal"`
-     - Looping Tabel: `v-for="item in items.data"`
-     - Tombol Edit di tabel: `@click="openEditModal(item)"`
-     - Tombol Hapus di tabel: `@click="deleteItem(item)"`
-     - Form Modal: `@submit.prevent="submitForm"`
-     - Input data: `v-model="form.nama_kolom"`
-     - Pesan error: `<span v-if="form.errors.nama_kolom">{{ form.errors.nama_kolom }}</span>`
+    - Buat file page di `resources/js/pages/NamaFitur/Index.vue`.
+    - Salin kerangka blueprint script di atas, sesuaikan nama kolom dan rute URL-nya.
+    - Hubungkan tombol-tombol template ke fungsi:
+        - Tombol Tambah: `@click="openAddModal"`
+        - Looping Tabel: `v-for="item in items.data"`
+        - Tombol Edit di tabel: `@click="openEditModal(item)"`
+        - Tombol Hapus di tabel: `@click="deleteItem(item)"`
+        - Form Modal: `@submit.prevent="submitForm"`
+        - Input data: `v-model="form.nama_kolom"`
+        - Pesan error: `<span v-if="form.errors.nama_kolom">{{ form.errors.nama_kolom }}</span>`
