@@ -32,7 +32,7 @@ class UpdateMedicationCategoryRequest extends FormRequest
                 'string',
                 'size:1',
                 Rule::unique('medication_categories', 'medication_category_code')
-                ->ignore($categoryId),
+                ->ignore($categoryId, 'medication_category_id'),
             ],
             'medication_category_name' => ['required', 'string', 'max:30'],
         ];

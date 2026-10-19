@@ -17,7 +17,9 @@ class MedicationCategoryController extends Controller
      */
     public function index(): Response
     {
-        $medicationCategories = MedicationCategory::latest('medication_category_id')->paginate(10);
+        $medicationCategories = MedicationCategory::query()
+        ->orderBy('medication_category_code', 'asc')
+        ->paginate(10);
         return Inertia::render('MedicationCategories/Index',[
             'medication_categories' => $medicationCategories,
         ]);

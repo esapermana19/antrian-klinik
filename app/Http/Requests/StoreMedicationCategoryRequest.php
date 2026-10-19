@@ -24,9 +24,8 @@ class StoreMedicationCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'medication_category_code' =>   ['required', 'string', 'size:1'],
+            'medication_category_code' =>   ['required', 'string', 'size:1', 'unique:medication_categories,medication_category_code'],
             'medication_category_name' =>   ['required', 'string', 'max:30'],
-            Rule::unique('medication_categories','medication_category_code'),
         ];
     }
 
@@ -34,6 +33,7 @@ class StoreMedicationCategoryRequest extends FormRequest
     {
         return[
             'medication_category_code.size' => 'Code maksimal 1 karakter',
+            'medication_category_code.unique' => 'Tidak boleh ada code kategori yang sama',
         ];
     }
 }

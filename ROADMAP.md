@@ -85,7 +85,7 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
 - [ ] **2.B.2 Form Request Validasi**
     - `StoreMedicationCategoryRequest`: Validasi kode unik 1 karakter (`size:1|unique:medication_categories,medication_category_code`) dan nama kategori.
     - `UpdateMedicationCategoryRequest`: Rule unik dengan ignore ID kategori yang sedang diedit.
-- [ ] **2.B.3 Lengkapi `MedicationCategoryController.php`**
+- [X] **2.B.3 Lengkapi `MedicationCategoryController.php`**
     - `index()`: Tampilkan list kategori obat dengan paginasi (`paginate(10)`).
     - `store()` & `update()`: CRUD standar via Form Request.
     - `destroy()`: Hapus kategori dengan proteksi jika masih digunakan oleh data obat (`$category->medications()->exists()`).
