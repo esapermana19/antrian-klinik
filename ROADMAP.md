@@ -89,7 +89,7 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
     - `index()`: Tampilkan list kategori obat dengan paginasi (`paginate(10)`).
     - `store()` & `update()`: CRUD standar via Form Request.
     - `destroy()`: Hapus kategori dengan proteksi jika masih digunakan oleh data obat (`$category->medications()->exists()`).
-- [ ] **2.B.4 Frontend Halaman Kategori Obat**
+- [X] **2.B.4 Frontend Halaman Kategori Obat**
     - Buat halaman di `resources/js/pages/MedicationCategories/Index.vue`.
 
 ### 2.C Data Obat (`Medication`)

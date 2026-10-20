@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,12 +37,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @mixin \Eloquent
  */
 #[Fillable(['medication_category_id', 'medication_code', 'medication_name', 'stock', 'unit_price'])]
+#[Table(key: 'medication_id')]
 class Medication extends Model
 {
     use HasFactory;
-
-    protected $primaryKey = 'medication_id';
-
+    
     protected function casts(): array
     {
         return [

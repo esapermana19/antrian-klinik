@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import { BookOpen, FolderGit2, LayoutGrid, Calendar, LayoutArrowDown, Layers } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -15,6 +15,8 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import practiceSchedule from '@/routes/practice-schedule';
+import medicationCategory from '@/routes/medication-category';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -23,6 +25,18 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+
+    {
+        title: 'Jadwal',
+        href: practiceSchedule.index(),
+        icon: Calendar,
+    },
+
+    {
+        title: 'Kategori Obat',
+        href: medicationCategory.index(),
+        icon: Layers,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
