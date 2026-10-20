@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['patient_id', 'schedule_id', 'queue_number', 'queue_date', 'session', 'estimate_time', 'queue_status', 'time_register'])]
-#[Table(key:'queue_id')]
+#[Table(key: 'queue_id')]
 class Queue extends Model
 {
     protected function casts(): array
