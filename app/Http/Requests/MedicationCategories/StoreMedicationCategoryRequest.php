@@ -31,8 +31,8 @@ class StoreMedicationCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'medication_category_code.size' => 'Code maksimal 1 karakter',
-            'medication_category_code.unique' => 'Tidak boleh ada code kategori yang sama',
+            'medication_category_code.size' => 'Kode harus 1 karakter',
+            'medication_category_code.unique' => 'Kode kategori obat sudah terdaftar',
         ];
     }
 }

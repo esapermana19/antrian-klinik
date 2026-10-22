@@ -23,7 +23,16 @@ class StoreMedicationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'medication_name'   => ['required', 'string', 'max:50'],
+            'stock'             => ['required', 'numeric', 'min:0'],
+            'unit_price'        => ['required', 'numeric', 'min:0'],
+        ];
+    }
 
+    public function messages(): array
+    {
+        return [
+            'medication_name.max'  => 'Nama maksimal 50 karakter.',
         ];
     }
 }

@@ -2,17 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Medications\StoreMedicationRequest;
+use App\Http\Requests\Medications\UpdateMedicationRequest;
 use App\Models\Medication;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Response;
+use Inertia\Inertia;
 
 class MedicationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $medication = Medication::query()
+            ->with('medicationCategory')
+            ->orderBy('medication_code', 'asc')
+            ->paginate(10);
+        return Inertia::render('Medications/Index', [
+            'medications' => $medication,
+        ]);
     }
 
     /**
@@ -26,9 +37,23 @@ class MedicationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreMedicationRequest $request): RedirectResponse
     {
-        //
+        $data = $request->validated();
+        $categoryCode = $data['medication_category_code'];
+        $prefix = "MED-{$categoryCode}-";
+        $lastCode = Medication::where('medication_code', 'LIKE', "$prefix%")
+            ->orderBy('medication_code', 'desc')
+            ->first();
+        $nextNumber = 1;
+        if ($lastCode) {
+            $lastNumber = (int) substr($lastCode->medication_code, -4);
+            $nextNumber = $lastNumber + 1;
+        }
+        $data['medication_code'] = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        Medication::create($data);
+
+        return back()->with('success', 'Data obat berhasil ditambahkan');
     }
 
     /**
@@ -50,16 +75,21 @@ class MedicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Medication $medication)
+    public function update(UpdateMedicationRequest $request, Medication $medication): RedirectResponse
     {
-        //
+        $medication->update($request->validated());
+        return back()->with('success', 'Data obat berhasil diperbarui');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Medication $medication)
+    public function destroy(Medication $medication): RedirectResponse
     {
-        //
+        if ($medication->medicationPrescriptions()->exists()) {
+            return back()->with('error', 'Data obat tidak dapat di hapus karena sudah memiliki data resep.');
+        }
+        $medication->delete();
+        return back()->with('success', 'Data obat berhasil dihapus');
     }
 }
