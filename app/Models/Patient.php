@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'nik', 'patient_name', 'date_of_birth', 'gender'])]
+#[Fillable(['user_id', 'nik', 'patient_name', 'date_of_birth', 'gender', 'address'])]
 #[Table(key: 'patient_id')]
 class Patient extends Model
 {
@@ -18,7 +18,7 @@ class Patient extends Model
     protected function casts(): array
     {
         return [
-            'date_of_birth' => 'date',
+            'date_of_birth' => 'date:Y-m-d',
         ];
     }
 

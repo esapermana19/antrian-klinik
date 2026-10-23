@@ -94,14 +94,14 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
 
 ### 2.C Data Obat (`Medication`)
 
-- [ ] **2.C.1 Form Request Validasi**
+- [X] **2.C.1 Form Request Validasi**
     - `php artisan make:request StoreMedicationRequest`
     - `php artisan make:request UpdateMedicationRequest`
     - Validasi: `medication_category_id` (`required|exists:medication_categories,medication_category_id`), `medication_code` (`unique:medications,medication_code`), `medication_name`, `stock` (`integer|min:0`), `unit_price` (`numeric|min:0`).
-- [ ] **2.C.2 Lengkapi `MedicationController.php`**
+- [X] **2.C.2 Lengkapi `MedicationController.php`**
     - Eager load relasi kategori obat: `Medication::with('medicationCategory')->paginate(10)`.
     - Implementasi CRUD standar.
-- [ ] **2.C.3 Frontend Halaman Obat**
+- [x] **2.C.3 Frontend Halaman Obat**
     - Buat halaman manajemen obat di `resources/js/pages/Medications/Index.vue` dengan dropdown pilihan Kategori Obat.
 
 ---
