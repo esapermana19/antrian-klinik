@@ -129,20 +129,26 @@ const formatGender = (gender) => {
             <form @submit.prevent="submitForm">
                 <div>
                     <label>NIK: </label>
-                    <input type="text" v-model="form.nik">
-                    <span v-if="form.errors.nik" style="color: red;">{{ form.errors.nik }}</span>
+                    <input type="text" v-model="form.nik" />
+                    <span v-if="form.errors.nik" style="color: red">{{
+                        form.errors.nik
+                    }}</span>
                 </div>
 
                 <div>
                     <label>Nama Pasien: </label>
-                    <input type="text" v-model="form.patient_name">
-                    <span v-if="form.errors.patient_name" style="color: red;"> {{ form.errors.patient_name }}</span>
+                    <input type="text" v-model="form.patient_name" />
+                    <span v-if="form.errors.patient_name" style="color: red">
+                        {{ form.errors.patient_name }}</span
+                    >
                 </div>
 
                 <div>
                     <label>Tanggal Lahir</label>
-                    <input type="date" v-model="form.date_of_birth">
-                    <span v-if="form.errors.date_of_birth" style="color: red;"> {{ form.errors.date_of_birth }}</span>
+                    <input type="date" v-model="form.date_of_birth" />
+                    <span v-if="form.errors.date_of_birth" style="color: red">
+                        {{ form.errors.date_of_birth }}</span
+                    >
                 </div>
 
                 <div>
@@ -152,13 +158,20 @@ const formatGender = (gender) => {
                         <option value="male">Laki-laki</option>
                         <option value="female">Perempuan</option>
                     </select>
-                    <span v-if="form.errors.gender" style="color: red;"> {{ form.errors.gender }}</span>
+                    <span v-if="form.errors.gender" style="color: red">
+                        {{ form.errors.gender }}</span
+                    >
                 </div>
 
                 <div>
                     <label>Alamat: </label>
-                    <textarea v-model="form.address" style="outline: auto;"></textarea>
-                    <span v-if="form.errors.address" style="color: red;"> {{ form.errors.address }}</span>
+                    <textarea
+                        v-model="form.address"
+                        style="outline: auto"
+                    ></textarea>
+                    <span v-if="form.errors.address" style="color: red">
+                        {{ form.errors.address }}</span
+                    >
                 </div>
 
                 <div>
@@ -171,7 +184,6 @@ const formatGender = (gender) => {
         </div>
     </div>
 </template>
-
 
 <style scoped>
 table {

@@ -42,6 +42,7 @@ class PatientController extends Controller
     public function store(StorePatientRequest $request): RedirectResponse
     {
         $request->user()->patients()->create($request->validated());
+
         return back()->with('success', 'Data pasien berhasil ditambahkan.');
     }
 
@@ -53,7 +54,7 @@ class PatientController extends Controller
         if ($request->user()->role !== 'administrator' && $patient->user_id !== $request->user()->user_id) {
             abort(403, 'anda tidak memiliki kases ke pasien ini.');
         }
-        //relasi queues dan medical record
+        // relasi queues dan medical record
         $patient->load([
             'queues.practiceSchedule',
             'medicalRecords',
@@ -81,6 +82,7 @@ class PatientController extends Controller
             abort(403);
         }
         $patient->update($request->validated());
+
         return back()->with('success', 'Data pasien berhasil diperbarui');
     }
 
@@ -99,6 +101,7 @@ class PatientController extends Controller
             ]);
         }
         $patient->delete();
+
         return back()->with('success', 'Data pasien berhasil dihapus.');
     }
 }

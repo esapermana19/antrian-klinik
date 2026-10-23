@@ -24,18 +24,18 @@ class StorePatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nik'           => ['digits:16','unique:patients,nik'],
-            'patient_name'  => ['required', 'string', 'max:50'],
+            'nik' => ['digits:16', 'unique:patients,nik'],
+            'patient_name' => ['required', 'string', 'max:50'],
             'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
-            'gender'        => ['required', Rule::in(['male', 'female'])],
-            'address'       => ['required'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'address' => ['required'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nik.unique'    => ['nik sudah terdaftar.'],
+            'nik.unique' => 'nik sudah terdaftar.',
         ];
     }
 }

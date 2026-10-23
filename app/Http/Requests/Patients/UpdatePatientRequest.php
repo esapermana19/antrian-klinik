@@ -26,22 +26,23 @@ class UpdatePatientRequest extends FormRequest
     {
         $patient = $this->route('patient');
         $patientId = $patient instanceof Patient ? $patient->patient_id : $patient;
+
         return [
             'nik' => [
                 'size:16',
                 Rule::unique('patients', 'nik')->ignore($patientId, 'patient_id'),
             ],
-            'patient_name'  => ['required', 'string', 'max:50'],
+            'patient_name' => ['required', 'string', 'max:50'],
             'date_of_birth' => ['required', 'date'],
-            'gender'        => ['required', Rule::in(['male', 'female'])],
-            'address'       => ['required'],
+            'gender' => ['required', Rule::in(['male', 'female'])],
+            'address' => ['required'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'nik.unique'    => ['nik sudah terdaftar.'],
+            'nik.unique' => 'nik sudah terdaftar.',
         ];
     }
 }
