@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Medications\StoreMedicationRequest;
 use App\Http\Requests\Medications\UpdateMedicationRequest;
 use App\Models\Medication;
+use App\Models\MedicationCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
@@ -19,10 +20,16 @@ class MedicationController extends Controller
     {
         $medication = Medication::query()
             ->with('medicationCategory')
-            ->orderBy('medication_code', 'asc')
+            ->orderBy(MedicationCategory::select('medication_category_name')
+                ->where('medication_categories.medication_category_id', 'medications.medication_category_id'), 'asc')
             ->paginate(10);
+
+        $medicationCategory = MedicationCategory::select('medication_category_id', 'medication_category_name')
+            ->orderBy('medication_category_name', 'asc')
+            ->get();
         return Inertia::render('Medications/Index', [
             'medications' => $medication,
+            'medication_categories' => $medicationCategory,
         ]);
     }
 
@@ -40,7 +47,7 @@ class MedicationController extends Controller
     public function store(StoreMedicationRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $categoryCode = $data['medication_category_code'];
+        $categoryCode = $data['medication_category_id'];
         $prefix = "MED-{$categoryCode}-";
         $lastCode = Medication::where('medication_code', 'LIKE', "$prefix%")
             ->orderBy('medication_code', 'desc')
@@ -50,7 +57,7 @@ class MedicationController extends Controller
             $lastNumber = (int) substr($lastCode->medication_code, -4);
             $nextNumber = $lastNumber + 1;
         }
-        $data['medication_code'] = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        $data['medication_code'] = $prefix . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
         Medication::create($data);
 
         return back()->with('success', 'Data obat berhasil ditambahkan');

@@ -5,6 +5,7 @@ import { useForm, router } from '@inertiajs/vue3';
 const props = defineProps({
     medications: Object,
     errors: Object,
+    medication_categories: Array,
 });
 
 const isModalOpen = ref(false);
@@ -12,6 +13,7 @@ const isEditMode = ref(false);
 const selectedMedicationId = ref(null);
 
 const form = useForm({
+    medication_category_id: '',
     medication_name: '',
     stock: '',
     unit_price: '',
@@ -28,7 +30,7 @@ const openEditModal = (medication) => {
     isEditMode.value = true;
     selectedMedicationId.value = medication.medication_id ?? medication.id;
     form.clearErrors();
-
+    form.medication_category_id = medication.medication_category_id ?? medication.medication_category?.medication_category_id ?? '';
     form.medication_name = medication.medication_name;
     form.stock = medication.stock;
     form.unit_price = medication.unit_price;
@@ -36,12 +38,12 @@ const openEditModal = (medication) => {
     isModalOpen.value = true;
 };
 
- const closeModal = () => {
+const closeModal = () => {
     isModalOpen.value = false;
     form.reset();
- };
+};
 
- const submitForm = () => {
+const submitForm = () => {
     if (isEditMode.value) {
         form.put(`/medication/${selectedMedicationId.value}`, {
             onSuccess: () => closeModal(),
@@ -49,18 +51,19 @@ const openEditModal = (medication) => {
     } else {
         form.post('/medication', {
             onSuccess: () => closeModal(),
+            onError: (errors) => console.log('Error validasi tambah:', errors),
         });
     }
- };
+};
 
- const deleteMedication = (medication) => {
+const deleteMedication = (medication) => {
     const id = medication.medication_id ?? medication.id;
     if (
         confirm(`Hapus data obat?`)
     ) {
         router.delete(`/medication/${id}`);
     }
- };
+};
 
 
 </script>
@@ -70,11 +73,12 @@ const openEditModal = (medication) => {
         <h1>Master Data Obat</h1>
         <p>Kelola ketersediaan obat di klinik.</p>
         <button type="button" @click="openAddModal">+ Tambah Obat</button>
-        <hr/>
+        <hr />
 
         <table cellpadding="20" cellspacing="0">
             <thead>
                 <tr>
+                    <th>No</th>
                     <th>Kategori Obat</th>
                     <th>Kode Obat</th>
                     <th>Nama Obat</th>
@@ -84,8 +88,9 @@ const openEditModal = (medication) => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in medications.data" :key="item.medication_id ?? item.id">
-                    <td>{{ item.medication_category?.medication_name ?? '-' }}</td>
+                <tr v-for="(item, index) in medications.data" :key="item.medication_id ?? item.id">
+                    <td>{{ (medications.current_page - 1) * medications.per_page + (index + 1) }}</td>
+                    <td>{{ item.medicationCategory?.medication_category_name ?? item.medication_category?.medication_category_name ?? '-' }}</td>
                     <td>{{ item.medication_code }}</td>
                     <td>{{ item.medication_name }}</td>
                     <td>{{ item.stock }}</td>
@@ -104,6 +109,57 @@ const openEditModal = (medication) => {
                 </tr>
             </tbody>
         </table>
+
+        <div v-if="isModalOpen">
+            <hr />
+            <h2>
+                {{ isEditMode ? 'Edit Data Obat' : 'Tambah Data Obat' }}
+            </h2>
+
+            <form @submit.prevent="submitForm">
+                <div>
+                    <label>Kategori: </label>
+                    <select v-model="form.medication_category_id">
+                        <option value="">--Pilih Kategori--</option>
+                        <option v-for="cat in medication_categories" :key="cat.medication_category_id"
+                            :value="cat.medication_category_id">
+                            {{ cat.medication_category_name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Nama Obat: </label>
+                    <input type="text" v-model="form.medication_name">
+                    <span v-if="form.errors.medication_name" style="color: red;">
+                        {{ form.errors.medication_name }}
+                    </span>
+                </div>
+
+                <div>
+                    <label>Stok: </label>
+                    <input type="number" v-model="form.stock" min="0">
+                    <span v-if="form.errors.stock" style="color: red;">
+                        {{ form.errors.stock }}
+                    </span>
+                </div>
+
+                <div>
+                    <label>Unit Price: </label>
+                    <input type="number" v-model="form.unit_price">
+                    <span v-if="form.errors.unit_price" style="color: red;">
+                        {{ form.errors.unit_price }}
+                    </span>
+                </div>
+
+                <div>
+                    <button type="button" @click="closeModal">Batal</button>
+                    <button type="submit" :disabled="form.processing">
+                        {{ form.processing ? 'Menyimpan..' : 'SImpan' }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
 
@@ -121,7 +177,7 @@ td {
     border: 1px solid #ccc !important;
 }
 
-form > div {
+form>div {
     margin-bottom: 12px;
 }
 

@@ -23,9 +23,10 @@ class StoreMedicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'medication_name'   => ['required', 'string', 'max:50'],
-            'stock'             => ['required', 'numeric', 'min:0'],
-            'unit_price'        => ['required', 'numeric', 'min:0'],
+            'medication_category_id'   => ['required', 'exists:medication_categories,medication_category_id'],
+            'medication_name'       => ['required', 'string', 'max:50'],
+            'stock'                 => ['required', 'numeric', 'min:0'],
+            'unit_price'            => ['required', 'numeric', 'min:0'],
         ];
     }
 

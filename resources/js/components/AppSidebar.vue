@@ -25,6 +25,7 @@ import { dashboard } from '@/routes';
 import practiceSchedule from '@/routes/practice-schedule';
 import medicationCategory from '@/routes/medication-category';
 import type { NavItem } from '@/types';
+import medication from '@/routes/medication';
 
 const mainNavItems: NavItem[] = [
     {
@@ -44,6 +45,12 @@ const mainNavItems: NavItem[] = [
         href: medicationCategory.index(),
         icon: Layers,
     },
+
+    {
+        title: 'Data Obat',
+        href: medication.index(),
+        icon: LayoutGrid,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
