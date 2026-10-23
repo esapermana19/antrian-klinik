@@ -18,6 +18,7 @@ const form = useForm({
     patient_name: '',
     date_of_birth: '',
     gender: '',
+    address: '',
 });
 
 const openAddModal = () => {
@@ -36,6 +37,7 @@ const openEditModal = (patient) => {
     form.patient_name = patient.patient_name;
     form.date_of_birth = patient.date_of_birth;
     form.gender = patient.gender;
+    form.address = patient.address;
     isModalOpen.value = true;
 };
 
@@ -58,12 +60,12 @@ const submitForm = () => {
 
 const deletePatient = (patient) => {
     const id = patient.patient_id ?? patient.id;
-    if (confirm(`hapus data pasien?`)) {
+    if (confirm(`hapus data pasien? "${patient.patient_name}"`)) {
         router.delete(`/patient/${id}`);
     }
 };
 
-const formatGender = (day) => {
+const formatGender = (gender) => {
     const genderName = {
         male: 'Laki-laki',
         female: 'Perempuan',
@@ -105,24 +107,72 @@ const formatGender = (day) => {
                     <td>{{ item.nik }}</td>
                     <td>{{ item.patient_name }}</td>
                     <td>{{ item.date_of_birth }}</td>
-                    <td>{{ item.gender }}</td>
+                    <td>{{ formatGender(item.gender) }}</td>
                     <td>{{ item.address }}</td>
                     <td>
-                        <button type="button" @click="openEditModal">
+                        <button type="button" @click="openEditModal(item)">
                             Edit
                         </button>
-                        <button type="button" @click="deletePatient">
+                        <button type="button" @click="deletePatient(item)">
                             Hapus
                         </button>
                     </td>
                 </tr>
                 <tr v-if="patients.data.length === 0">
-                    <td colspan="5">Belum ada data pasien</td>
+                    <td colspan="7">Belum ada data pasien</td>
                 </tr>
             </tbody>
         </table>
+        <div v-if="isModalOpen">
+            <h2>{{ isEditMode ? 'Edit Data Pasien' : 'Tambah Data' }}</h2>
+
+            <form @submit.prevent="submitForm">
+                <div>
+                    <label>NIK: </label>
+                    <input type="text" v-model="form.nik">
+                    <span v-if="form.errors.nik" style="color: red;">{{ form.errors.nik }}</span>
+                </div>
+
+                <div>
+                    <label>Nama Pasien: </label>
+                    <input type="text" v-model="form.patient_name">
+                    <span v-if="form.errors.patient_name" style="color: red;"> {{ form.errors.patient_name }}</span>
+                </div>
+
+                <div>
+                    <label>Tanggal Lahir</label>
+                    <input type="date" v-model="form.date_of_birth">
+                    <span v-if="form.errors.date_of_birth" style="color: red;"> {{ form.errors.date_of_birth }}</span>
+                </div>
+
+                <div>
+                    <label>Jenis Kelamin: </label>
+                    <select v-model="form.gender">
+                        <option value="">--Jenis Kelamin--</option>
+                        <option value="male">Laki-laki</option>
+                        <option value="female">Perempuan</option>
+                    </select>
+                    <span v-if="form.errors.gender" style="color: red;"> {{ form.errors.gender }}</span>
+                </div>
+
+                <div>
+                    <label>Alamat: </label>
+                    <textarea v-model="form.address" style="outline: auto;"></textarea>
+                    <span v-if="form.errors.address" style="color: red;"> {{ form.errors.address }}</span>
+                </div>
+
+                <div>
+                    <button type="button" @click="closeModal">Batal</button>
+                    <button type="submit" :disabled="form.processing">
+                        {{ form.processing ? 'Menyimapn..' : 'Simpan' }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </template>
+
+
 <style scoped>
 table {
     width: 100%;

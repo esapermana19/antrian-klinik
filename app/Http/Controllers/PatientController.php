@@ -93,7 +93,7 @@ class PatientController extends Controller
             abort(403);
         }
 
-        if ($patient->exists() || $patient->medicalRecords()->exists()) {
+        if ($patient->queues()->exists() || $patient->medicalRecords()->exists()) {
             return back()->withErrors([
                 'delete' => 'Pasien tidak dapat dihapus karena sudah memiliki riwayat antrean dan rekam medis',
             ]);
