@@ -66,7 +66,7 @@ const deletePatient = (patient) => {
 const formatGender = (day) => {
     const genderName = {
         male: 'Laki-laki',
-        female: 'Perempuan'
+        female: 'Perempuan',
     };
     return genderName[gender] || gender;
 };
@@ -92,16 +92,28 @@ const formatGender = (day) => {
             </thead>
 
             <tbody>
-                <tr v-for="(item, index) in patients.data" :key="item.patient_id ?? item.id">
-                    <td>{{ (patients.current_page - 1) * patients.per_page + (index + 1) }}</td>
+                <tr
+                    v-for="(item, index) in patients.data"
+                    :key="item.patient_id ?? item.id"
+                >
+                    <td>
+                        {{
+                            (patients.current_page - 1) * patients.per_page +
+                            (index + 1)
+                        }}
+                    </td>
                     <td>{{ item.nik }}</td>
                     <td>{{ item.patient_name }}</td>
                     <td>{{ item.date_of_birth }}</td>
                     <td>{{ item.gender }}</td>
                     <td>{{ item.address }}</td>
                     <td>
-                        <button type="button" @click="openEditModal">Edit</button>
-                        <button type="button" @click="deletePatient">Hapus</button>
+                        <button type="button" @click="openEditModal">
+                            Edit
+                        </button>
+                        <button type="button" @click="deletePatient">
+                            Hapus
+                        </button>
                     </td>
                 </tr>
                 <tr v-if="patients.data.length === 0">
