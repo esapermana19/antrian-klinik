@@ -5,7 +5,6 @@ namespace App\Http\Requests\Medications;
 use App\Models\Medication;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateMedicationRequest extends FormRequest
 {
@@ -25,20 +24,20 @@ class UpdateMedicationRequest extends FormRequest
     public function rules(): array
     {
         $medication = $this->route('medications');
-        $medicationId = $medication instanceof Medication ?$medication->medication_id : $medication;
+        $medicationId = $medication instanceof Medication ? $medication->medication_id : $medication;
 
         return [
-            'medication_category_id'    => ['required', 'exists:medication_categories,medication_category_id'],
-            'medication_name'           => ['required', 'string', 'max:50'],
-            'stock'                     => ['required', 'numeric', 'min:0'],
-            'unit_price'                => ['required', 'numeric', 'min:0'],
+            'medication_category_id' => ['required', 'exists:medication_categories,medication_category_id'],
+            'medication_name' => ['required', 'string', 'max:50'],
+            'stock' => ['required', 'numeric', 'min:0'],
+            'unit_price' => ['required', 'numeric', 'min:0'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'medication_name.max'  => 'Maksimal nama obat 50 karakter.',
+            'medication_name.max' => 'Maksimal nama obat 50 karakter.',
         ];
     }
 }

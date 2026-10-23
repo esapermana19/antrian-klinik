@@ -6,10 +6,9 @@ use App\Http\Requests\Medications\StoreMedicationRequest;
 use App\Http\Requests\Medications\UpdateMedicationRequest;
 use App\Models\Medication;
 use App\Models\MedicationCategory;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Inertia\Response;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class MedicationController extends Controller
 {
@@ -27,6 +26,7 @@ class MedicationController extends Controller
         $medicationCategory = MedicationCategory::select('medication_category_id', 'medication_category_name')
             ->orderBy('medication_category_name', 'asc')
             ->get();
+
         return Inertia::render('Medications/Index', [
             'medications' => $medication,
             'medication_categories' => $medicationCategory,
@@ -57,7 +57,7 @@ class MedicationController extends Controller
             $lastNumber = (int) substr($lastCode->medication_code, -4);
             $nextNumber = $lastNumber + 1;
         }
-        $data['medication_code'] = $prefix . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        $data['medication_code'] = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
         Medication::create($data);
 
         return back()->with('success', 'Data obat berhasil ditambahkan');
@@ -85,6 +85,7 @@ class MedicationController extends Controller
     public function update(UpdateMedicationRequest $request, Medication $medication): RedirectResponse
     {
         $medication->update($request->validated());
+
         return back()->with('success', 'Data obat berhasil diperbarui');
     }
 
@@ -97,6 +98,7 @@ class MedicationController extends Controller
             return back()->with('error', 'Data obat tidak dapat di hapus karena sudah memiliki data resep.');
         }
         $medication->delete();
+
         return back()->with('success', 'Data obat berhasil dihapus');
     }
 }

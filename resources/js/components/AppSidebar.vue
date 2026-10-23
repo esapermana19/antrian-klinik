@@ -50,7 +50,7 @@ const mainNavItems: NavItem[] = [
         title: 'Data Obat',
         href: medication.index(),
         icon: LayoutGrid,
-    }
+    },
 ];
 
 const footerNavItems: NavItem[] = [

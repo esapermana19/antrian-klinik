@@ -30,7 +30,10 @@ const openEditModal = (medication) => {
     isEditMode.value = true;
     selectedMedicationId.value = medication.medication_id ?? medication.id;
     form.clearErrors();
-    form.medication_category_id = medication.medication_category_id ?? medication.medication_category?.medication_category_id ?? '';
+    form.medication_category_id =
+        medication.medication_category_id ??
+        medication.medication_category?.medication_category_id ??
+        '';
     form.medication_name = medication.medication_name;
     form.stock = medication.stock;
     form.unit_price = medication.unit_price;
@@ -58,14 +61,10 @@ const submitForm = () => {
 
 const deleteMedication = (medication) => {
     const id = medication.medication_id ?? medication.id;
-    if (
-        confirm(`Hapus data obat?`)
-    ) {
+    if (confirm(`Hapus data obat?`)) {
         router.delete(`/medication/${id}`);
     }
 };
-
-
 </script>
 
 <template>
@@ -88,9 +87,25 @@ const deleteMedication = (medication) => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in medications.data" :key="item.medication_id ?? item.id">
-                    <td>{{ (medications.current_page - 1) * medications.per_page + (index + 1) }}</td>
-                    <td>{{ item.medicationCategory?.medication_category_name ?? item.medication_category?.medication_category_name ?? '-' }}</td>
+                <tr
+                    v-for="(item, index) in medications.data"
+                    :key="item.medication_id ?? item.id"
+                >
+                    <td>
+                        {{
+                            (medications.current_page - 1) *
+                                medications.per_page +
+                            (index + 1)
+                        }}
+                    </td>
+                    <td>
+                        {{
+                            item.medicationCategory?.medication_category_name ??
+                            item.medication_category
+                                ?.medication_category_name ??
+                            '-'
+                        }}
+                    </td>
                     <td>{{ item.medication_code }}</td>
                     <td>{{ item.medication_name }}</td>
                     <td>{{ item.stock }}</td>
@@ -121,8 +136,11 @@ const deleteMedication = (medication) => {
                     <label>Kategori: </label>
                     <select v-model="form.medication_category_id">
                         <option value="">--Pilih Kategori--</option>
-                        <option v-for="cat in medication_categories" :key="cat.medication_category_id"
-                            :value="cat.medication_category_id">
+                        <option
+                            v-for="cat in medication_categories"
+                            :key="cat.medication_category_id"
+                            :value="cat.medication_category_id"
+                        >
                             {{ cat.medication_category_name }}
                         </option>
                     </select>
@@ -130,24 +148,24 @@ const deleteMedication = (medication) => {
 
                 <div>
                     <label>Nama Obat: </label>
-                    <input type="text" v-model="form.medication_name">
-                    <span v-if="form.errors.medication_name" style="color: red;">
+                    <input type="text" v-model="form.medication_name" />
+                    <span v-if="form.errors.medication_name" style="color: red">
                         {{ form.errors.medication_name }}
                     </span>
                 </div>
 
                 <div>
                     <label>Stok: </label>
-                    <input type="number" v-model="form.stock" min="0">
-                    <span v-if="form.errors.stock" style="color: red;">
+                    <input type="number" v-model="form.stock" min="0" />
+                    <span v-if="form.errors.stock" style="color: red">
                         {{ form.errors.stock }}
                     </span>
                 </div>
 
                 <div>
                     <label>Unit Price: </label>
-                    <input type="number" v-model="form.unit_price">
-                    <span v-if="form.errors.unit_price" style="color: red;">
+                    <input type="number" v-model="form.unit_price" />
+                    <span v-if="form.errors.unit_price" style="color: red">
                         {{ form.errors.unit_price }}
                     </span>
                 </div>
@@ -177,7 +195,7 @@ td {
     border: 1px solid #ccc !important;
 }
 
-form>div {
+form > div {
     margin-bottom: 12px;
 }
 
