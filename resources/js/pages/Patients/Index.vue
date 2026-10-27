@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import patientRoute from '@/routes/patient';
 
-
 const props = defineProps({
     patients: Object,
     errors: Object,

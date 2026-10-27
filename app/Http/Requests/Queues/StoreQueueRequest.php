@@ -34,7 +34,7 @@ class StoreQueueRequest extends FormRequest
             'patient_name' => ['required', 'string', 'max:50'],
             'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
             'gender' => ['required', 'in:male,female'],
-            'address' => ['required']
+            'address' => ['required'],
         ];
     }
 }

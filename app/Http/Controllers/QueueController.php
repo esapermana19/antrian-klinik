@@ -33,7 +33,7 @@ class QueueController extends Controller
 
         // 3. Ambil data antrean yang sudah booked pada tanggal tersebut
         $bookedQueues = Queue::whereDate('queue_date', $selectedDate)->get()->keyBy(function ($queue) {
-            return $queue->schedule_id . '_' . Carbon::parse($queue->estimate_time)->format('H:i:s');
+            return $queue->schedule_id.'_'.Carbon::parse($queue->estimate_time)->format('H:i:s');
         });
 
         // 4. Generate kartu antrian
@@ -45,13 +45,13 @@ class QueueController extends Controller
             // looping sebanyak kuota
             for ($i = 0; $i < $schedule->max_quota; $i++) {
                 $time = $openingTime->copy()->addMinute($i * 15)->format('H:i:s');
-                $queueNumber = 'P' . str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+                $queueNumber = 'P'.str_pad($i + 1, 2, '0', STR_PAD_LEFT);
 
                 // cache locking
                 $lockKey = "lock_slot_{$schedule->schedule_id}_{$selectedDate}_{$time}";
 
-                //filter jam sudah lewat
-                $slotDateTime = Carbon::parse($selectedDate . ' ' . $time);
+                // filter jam sudah lewat
+                $slotDateTime = Carbon::parse($selectedDate.' '.$time);
 
                 // penentuan status kartu
                 $status = 'available';
@@ -134,15 +134,16 @@ class QueueController extends Controller
             Cache::forget($previousLockKey);
         }
 
-        //simpan lock
+        // simpan lock
         Cache::put($newLockKey, $user->user_id, now()->addMinute(5));
 
-        //catat slot aktif milik user ini
+        // catat slot aktif milik user ini
         Cache::put($userLockKey, [
             'schedule_id' => $request->schedule_id,
-            'date'  => $request->date,
-            'time'  => $request->time,
+            'date' => $request->date,
+            'time' => $request->time,
         ], now()->addMinute(5));
+
         return back();
     }
 

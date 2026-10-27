@@ -42,9 +42,14 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(medicationCategoryRoute.update.url(selectedMedicationCategoryId.value), {
-            onSuccess: () => closeModal(),
-        });
+        form.put(
+            medicationCategoryRoute.update.url(
+                selectedMedicationCategoryId.value,
+            ),
+            {
+                onSuccess: () => closeModal(),
+            },
+        );
     } else {
         form.post(medicationCategoryRoute.store.url(), {
             onSuccess: () => closeModal(),
