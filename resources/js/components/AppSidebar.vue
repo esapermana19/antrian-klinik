@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import {
-    BookOpen,
-    FolderGit2,
-    LayoutGrid,
-    Calendar,
-    LayoutArrowDown,
-    Layers,
-} from '@lucide/vue';
+import * as LucideIcons from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -22,40 +15,49 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import practiceSchedule from '@/routes/practice-schedule';
-import medicationCategory from '@/routes/medication-category';
 import type { NavItem } from '@/types';
-import medication from '@/routes/medication';
-import patient from '@/routes/patient';
+import medicationRoute from '@/routes/medication';
+import patientRoute from '@/routes/patient';
+import scheduleRoute from '@/routes/practice-schedule';
+import medicationCategoryRoute from '@/routes/medication-category';
+import queueRoute from '@/routes/queue';
+import profile from '@/routes/profile';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: LucideIcons.LucideLayoutDashboard,
     },
 
     {
         title: 'Jadwal',
-        href: practiceSchedule.index(),
-        icon: Calendar,
+        href: scheduleRoute.index(),
+        icon: LucideIcons.Calendar,
     },
 
     {
         title: 'Kategori Obat',
-        href: medicationCategory.index(),
-        icon: Layers,
+        href: medicationCategoryRoute.index(),
+        icon: LucideIcons.Layers,
     },
 
     {
         title: 'Data Obat',
-        href: medication.index(),
-        icon: LayoutGrid,
+        href: medicationRoute.index(),
+        icon: LucideIcons.LayoutGrid,
     },
 
     {
         title: 'Pasien',
-        href: patient.index(),
+        href: patientRoute.index(),
+        icon: LucideIcons.User2,
+    },
+
+    {
+        title: 'Antrian',
+        href: queueRoute.index(),
+        icon: LucideIcons.ListEnd,
     },
 ];
 
@@ -63,12 +65,12 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
         href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
+        icon: LucideIcons.FolderGit2,
     },
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        icon: LucideIcons.BookOpen,
     },
 ];
 </script>

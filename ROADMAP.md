@@ -110,18 +110,18 @@ Tujuan: Mengimplementasikan CRUD data master yang tidak memiliki ketergantungan 
 
 Tujuan: Menghubungkan akun user yang login dengan profil pasien (1 user bisa mendaftarkan dirinya sendiri atau anggota keluarganya).
 
-- [ ] **3.1 Form Request Validasi**
+- [x] **3.1 Form Request Validasi**
     - `php artisan make:request StorePatientRequest`
     - `php artisan make:request UpdatePatientRequest`
     - Validasi: `nik` (`required|digits:16|unique:patients,nik`), `patient_name`, `date_of_birth`, `gender`.
-- [ ] **3.2 Lengkapi `PatientController.php`**
+- [x] **3.2 Lengkapi `PatientController.php`**
     - `index()`: Tampilkan pasien milik user yang sedang login (jika user biasa) atau semua pasien (jika admin).
     - `store()`:
         ```php
         $request->user()->patients()->create($request->validated());
         ```
     - `show(Patient $patient)`: Tampilkan detail pasien beserta riwayat antrean & rekam medisnya (`load(['queues', 'medicalRecords'])`).
-- [ ] **3.3 Frontend Halaman Pasien**
+- [x] **3.3 Frontend Halaman Pasien**
     - Buat form pendaftaran pasien dan daftar anggota keluarga yang didaftarkan.
 
 ---

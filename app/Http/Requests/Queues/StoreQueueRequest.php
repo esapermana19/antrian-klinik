@@ -23,7 +23,18 @@ class StoreQueueRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // Validasi Data Jadwal & Slot
+            'schedule_id' => ['required', 'exists:practice_schedules,schedule_id'],
+            'queue_date' => ['required', 'date', 'after_or_equal:today'],
+            'time' => ['required', 'string'],
+            'queue_number' => ['required', 'string'],
+
+            // Validasi Data Pasien (Form Input Langsung)
+            'nik' => ['required', 'string', 'digits:16'],
+            'patient_name' => ['required', 'string', 'max:50'],
+            'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
+            'gender' => ['required', 'in:male,female'],
+            'address' => ['required']
         ];
     }
 }

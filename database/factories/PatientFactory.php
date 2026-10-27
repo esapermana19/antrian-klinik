@@ -26,6 +26,7 @@ class PatientFactory extends Factory
             'patient_name' => fake()->name(),
             'date_of_birth' => fake()->dateTimeBetween('-60 years', '-15 years')->format('Y-m-d'),
             'gender' => fake()->randomElement(['male', 'female']),
+            'address' => fake()->address(),
         ];
     }
 }

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import medicationCategoryRoute from '@/routes/medication-category';
 
 const props = defineProps({
     medication_categories: Object,
@@ -41,11 +42,11 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(`/medication-category/${selectedMedicationCategoryId.value}`, {
+        form.put(medicationCategoryRoute.update.url(selectedMedicationCategoryId.value), {
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post('/medication-category', {
+        form.post(medicationCategoryRoute.store.url(), {
             onSuccess: () => closeModal(),
         });
     }
@@ -54,7 +55,7 @@ const submitForm = () => {
 const deleteMedicationCategory = (dataCategory) => {
     const id = dataCategory.medication_category_id ?? dataCategory.id;
     if (confirm(`Hapus kategori obat?`)) {
-        router.delete(`/medication-category/${id}`);
+        router.delete(medicationCategoryRoute.destroy.url(id));
     }
 };
 </script>

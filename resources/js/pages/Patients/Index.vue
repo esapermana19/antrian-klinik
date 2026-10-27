@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import patientRoute from '@/routes/patient';
+
 
 const props = defineProps({
     patients: Object,
@@ -48,11 +50,11 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(`/patient/${selectedPatientId.value}`, {
+        form.put(patientRoute.update.url(selectedPatientId.value), {
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post('/patient', {
+        form.post(patientRoute.store.url(), {
             onSuccess: () => closeModal(),
         });
     }
@@ -61,7 +63,7 @@ const submitForm = () => {
 const deletePatient = (patient) => {
     const id = patient.patient_id ?? patient.id;
     if (confirm(`hapus data pasien? "${patient.patient_name}"`)) {
-        router.delete(`/patient/${id}`);
+        router.delete(patientRoute.destroy.url(id));
     }
 };
 

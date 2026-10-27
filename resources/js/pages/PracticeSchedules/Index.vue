@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import scheduleRoute from '@/routes/practice-schedule';
 
 const props = defineProps({
     schedules: Object,
@@ -49,11 +50,11 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(`/practice-schedule/${selectedScheduleId.value}`, {
+        form.put(scheduleRoute.update.url(selectedScheduleId.value), {
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post('/practice-schedule', {
+        form.post(scheduleRoute.store.url(), {
             onSuccess: () => closeModal(),
         });
     }
@@ -64,7 +65,7 @@ const deleteSchedule = (schedule) => {
     if (
         confirm(`Hapus jadwal hari ${schedule.day} sesi ${schedule.session}?`)
     ) {
-        router.delete(`/practice-schedule/${id}`);
+        router.delete(scheduleRoute.destroy.url(id));
     }
 };
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import medicationRoute from '@/routes/medication';
 
 const props = defineProps({
     medications: Object,
@@ -48,11 +49,11 @@ const closeModal = () => {
 
 const submitForm = () => {
     if (isEditMode.value) {
-        form.put(`/medication/${selectedMedicationId.value}`, {
+        form.put(medicationRoute.update.url(selectedMedicationId.value), {
             onSuccess: () => closeModal(),
         });
     } else {
-        form.post('/medication', {
+        form.post(medicationRoute.store.url(), {
             onSuccess: () => closeModal(),
             onError: (errors) => console.log('Error validasi tambah:', errors),
         });
@@ -62,7 +63,7 @@ const submitForm = () => {
 const deleteMedication = (medication) => {
     const id = medication.medication_id ?? medication.id;
     if (confirm(`Hapus data obat?`)) {
-        router.delete(`/medication/${id}`);
+        router.delete(medicationRoute.destroy.url(id));
     }
 };
 </script>
