@@ -20,7 +20,7 @@ const changeDate = () => {
     );
 };
 
-const selectedPatientMode = ref ('new');
+const selectedPatientMode = ref('new');
 
 const bookingForm = useForm({
     patient_id: '',
@@ -44,7 +44,9 @@ const onSelectPatientChange = () => {
         bookingForm.gender = '';
         bookingForm.address = '';
     } else {
-        const patient = props.patients.find(p => p.patient_id === Number(selectedPatientMode.value));
+        const patient = props.patients.find(
+            (p) => p.patient_id === Number(selectedPatientMode.value),
+        );
         if (patient) {
             bookingForm.patient_id = patient.patient_id;
             bookingForm.nik = patient.nik;
@@ -54,7 +56,7 @@ const onSelectPatientChange = () => {
             bookingForm.address = patient.address || '';
         }
     }
-}
+};
 
 const isModalOpen = ref(false);
 
@@ -246,11 +248,18 @@ const minDate = new Date().toISOString().split('T')[0];
                 Jam: <strong>{{ bookingForm.time }}</strong>
             </p>
 
-            <div style="margin-bottom: 15px;">
-                <label><strong>Pilih Pasien: </strong></label><br>
-                <select v-model="selectedPatientMode" @click="onSelectPatientChange">
+            <div style="margin-bottom: 15px">
+                <label><strong>Pilih Pasien: </strong></label><br />
+                <select
+                    v-model="selectedPatientMode"
+                    @click="onSelectPatientChange"
+                >
                     <option value="new">+ Pasien baru</option>
-                    <option v-for="p in props.patients" :key="p.patient_id" :value="p.patient_id">
+                    <option
+                        v-for="p in props.patients"
+                        :key="p.patient_id"
+                        :value="p.patient_id"
+                    >
                         {{ p.patient_name }} (NIK: {{ p.nik }})
                     </option>
                 </select>
