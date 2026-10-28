@@ -32,11 +32,11 @@ class StoreQueueRequest extends FormRequest
             'patient_id' => ['nullable', 'exists:patients,patient_id'],
 
             // Validasi Data Pasien (Form Input Langsung)
-            'nik' => ['required', 'string', 'digits:16'],
-            'patient_name' => ['required', 'string', 'max:50'],
-            'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
-            'gender' => ['required', 'in:male,female'],
-            'address' => ['required'],
+            'nik' => ['required_without:patient_id', 'string', 'digits:16'],
+            'patient_name' => ['required_without:patient_id', 'string', 'max:50'],
+            'date_of_birth' => ['required_without:patient_id', 'date', 'before_or_equal:today'],
+            'gender' => ['required_without:patient_id', 'in:male,female'],
+            'address' => ['required_without:patient_id'],
         ];
     }
 }

@@ -33,7 +33,7 @@ class QueueController extends Controller
 
         // 3. Ambil data antrean yang sudah booked pada tanggal tersebut
         $bookedQueues = Queue::whereDate('queue_date', $selectedDate)->get()->keyBy(function ($queue) {
-            return $queue->schedule_id.'_'.Carbon::parse($queue->estimate_time)->format('H:i:s');
+            return $queue->schedule_id . '_' . Carbon::parse($queue->estimate_time)->format('H:i:s');
         });
 
         // 4. data pasien dalam modal
@@ -58,7 +58,7 @@ class QueueController extends Controller
                 $lockKey = "lock_slot_{$schedule->schedule_id}_{$selectedDate}_{$time}";
 
                 // filter jam sudah lewat
-                $slotDateTime = Carbon::parse($selectedDate.' '.$time);
+                $slotDateTime = Carbon::parse($selectedDate . ' ' . $time);
 
                 // penentuan status kartu
                 $status = 'available';
@@ -187,15 +187,15 @@ class QueueController extends Controller
                 $patient = $user->patients()->findOrFail($request->patient_id);
             } else {
                 $patient = Patient::firstOrCreate(
-                ['nik' => $request->nik], // Cari NIK-nya
-                [
-                    'user_id' => $request->user()->user_id,
-                    'patient_name' => $request->patient_name,
-                    'date_of_birth' => $request->date_of_birth,
-                    'gender' => $request->gender,
-                    'address' => $request->address,
-                ] // Buat baru jika NIK tidak ditemukan
-            );
+                    ['nik' => $request->nik, 'user_id' => $request->user()->user_id],
+                    [
+                        'user_id' => $request->user()->user_id,
+                        'patient_name' => $request->patient_name,
+                        'date_of_birth' => $request->date_of_birth,
+                        'gender' => $request->gender,
+                        'address' => $request->address,
+                    ]
+                );
             }
 
 
@@ -232,22 +232,6 @@ class QueueController extends Controller
     public function edit(Queue $queue)
     {
         //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function updateStatus(Request $request, Queue $queue): RedirectResponse
-    {
-        $validated = $request->validate([
-            'queue_status' => 'required|in:waiting,called,checking,completed,cancel',
-        ]);
-
-        $queue->update([
-            'queue_status' => $validated['queue_status'],
-        ]);
-
-        return back()->with('success', 'status antrian berhasil di perbarui.');
     }
 
     /**

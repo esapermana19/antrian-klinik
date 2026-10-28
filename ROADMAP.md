@@ -130,16 +130,16 @@ Tujuan: Menghubungkan akun user yang login dengan profil pasien (1 user bisa men
 
 Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan mengubah status antrean secara _real-time_.
 
-- [ ] **4.1 Logika Bisnis Booking Antrean**
+- [x] **4.1 Logika Bisnis Booking Antrean**
     - Saat pasien memilih jadwal (`schedule_id`) dan tanggal (`queue_date`):
         1. **Cek Kuota**: Hitung jumlah antrean aktif pada jadwal & tanggal tersebut (`Queue::where('schedule_id', ...)->where('queue_date', ...)->count()`). Jika `>= max_quota`, tolak dengan pesan bahwa kuota penuh.
         2. **Generate Nomor Antrean Otomatis**: Misal format `P01`, `P02`, dsb., berdasarkan urutan pada hari dan sesi tersebut.
         3. **Estimasi Waktu**: Jam buka jadwal + (urutan antrean * 15 menit).
         4. **Status Awal**: Set default `waiting`.
-- [ ] **4.2 Form Request Validasi**
+- [x] **4.2 Form Request Validasi**
     - `php artisan make:request StoreQueueRequest`
     - Validasi: `patient_id` (pastikan milik user login), `schedule_id` (jadwal harus `status = open`), `queue_date` (minimal hari ini).
-- [ ] **4.3 Lengkapi `QueueController.php`**
+- [x] **4.3 Lengkapi `QueueController.php`**
     - `index()`: Tampilkan antrean hari ini untuk display ruang tunggu atau dashboard pasien.
     - `store()`: Eksekusi logika booking antrean di atas.
     - `updateStatus(Request $request, Queue $queue)`: Endpoint khusus untuk petugas/dokter memanggil atau memajukan status antrean (`waiting` $\rightarrow$ `called` $\rightarrow$ `checking` $\rightarrow$ `completed` / `cancel`).
