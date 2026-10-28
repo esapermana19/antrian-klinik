@@ -36,7 +36,12 @@ class QueueController extends Controller
             return $queue->schedule_id.'_'.Carbon::parse($queue->estimate_time)->format('H:i:s');
         });
 
-        // 4. Generate kartu antrian
+        // 4. data pasien dalam modal
+        $myPatients = $user->patients()
+            ->select(['patient_id', 'nik', 'patient_name', 'date_of_birth', 'gender', 'address'])
+            ->get();
+
+        // 5. Generate kartu antrian
         $generateSchedules = [];
         foreach ($schedules as $schedule) {
             $openingTime = Carbon::parse($schedule->opening_hours);
@@ -45,7 +50,9 @@ class QueueController extends Controller
             // looping sebanyak kuota
             for ($i = 0; $i < $schedule->max_quota; $i++) {
                 $time = $openingTime->copy()->addMinute($i * 15)->format('H:i:s');
-                $queueNumber = 'P'.str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+                $datePrefix = Carbon::parse($selectedDate)->format('dmy');
+                $sessionPrefix = $schedule->session === 'morning' ? 'P' : 'S';
+                $queueNumber = $datePrefix . '-' . $sessionPrefix . str_pad($i + 1, 2, 0, STR_PAD_LEFT);
 
                 // cache locking
                 $lockKey = "lock_slot_{$schedule->schedule_id}_{$selectedDate}_{$time}";
@@ -81,11 +88,6 @@ class QueueController extends Controller
                 'slots' => $slots,
             ];
         }
-
-        // 5. data pasien dalam modal
-        $myPatients = $user->role === 'administrator'
-            ? Patient::all()
-            : Patient::where('user_id', $user->user_id)->get();
 
         return Inertia::render('Queues/Index', [
             'date' => $selectedDate,
@@ -171,6 +173,7 @@ class QueueController extends Controller
     public function store(StoreQueueRequest $request): RedirectResponse
     {
         return DB::transaction(function () use ($request) {
+            $user = $request->user();
             $schedule = PracticeSchedule::findOrFail($request->schedule_id);
 
             // 1. Validasi kunci slot
@@ -179,8 +182,11 @@ class QueueController extends Controller
                 return back()->withErrors(['message' => 'Sesi booking Anda telah habis. Silakan pilih slot lagi.']);
             }
 
-            // 2. ONE-STEP PATIENT CREATION
-            $patient = Patient::firstOrCreate(
+            // 2. ONE-STEP PATIENT CREATION/PILIH PASIEN
+            if ($request->filled('patient_id')) {
+                $patient = $user->patients()->findOrFail($request->patient_id);
+            } else {
+                $patient = Patient::firstOrCreate(
                 ['nik' => $request->nik], // Cari NIK-nya
                 [
                     'user_id' => $request->user()->user_id,
@@ -190,6 +196,8 @@ class QueueController extends Controller
                     'address' => $request->address,
                 ] // Buat baru jika NIK tidak ditemukan
             );
+            }
+
 
             // 3. Simpan Antrean
             Queue::create([

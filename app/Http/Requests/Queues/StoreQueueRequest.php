@@ -27,7 +27,9 @@ class StoreQueueRequest extends FormRequest
             'schedule_id' => ['required', 'exists:practice_schedules,schedule_id'],
             'queue_date' => ['required', 'date', 'after_or_equal:today'],
             'time' => ['required', 'string'],
-            'queue_number' => ['required', 'string'],
+            'queue_number' => ['required', 'string', 'size:10'],
+
+            'patient_id' => ['nullable', 'exists:patients,patient_id'],
 
             // Validasi Data Pasien (Form Input Langsung)
             'nik' => ['required', 'string', 'digits:16'],

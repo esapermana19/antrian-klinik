@@ -4,7 +4,7 @@ import { useForm, router } from '@inertiajs/vue3';
 import queueRoute from '@/routes/queue';
 
 const props = defineProps({
-    patients: Object,
+    patients: Array,
     schedulesData: Array,
     date: String,
     errors: Object,
@@ -20,6 +20,8 @@ const changeDate = () => {
     );
 };
 
+const selectedPatientMode = ref ('new');
+
 const bookingForm = useForm({
     patient_id: '',
     schedule_id: '',
@@ -32,6 +34,27 @@ const bookingForm = useForm({
     gender: 'male',
     address: '',
 });
+
+const onSelectPatientChange = () => {
+    if (selectedPatientMode.value === 'new') {
+        bookingForm.patient_id = '';
+        bookingForm.nik = '';
+        bookingForm.patient_name = '';
+        bookingForm.date_of_birth = '';
+        bookingForm.gender = '';
+        bookingForm.address = '';
+    } else {
+        const patient = props.patients.find(p => p.patient_id === Number(selectedPatientMode.value));
+        if (patient) {
+            bookingForm.patient_id = patient.patient_id;
+            bookingForm.nik = patient.nik;
+            bookingForm.patient_name = patient.patient_name;
+            bookingForm.date_of_birth = patient.date_of_birth;
+            bookingForm.gender = patient.gender;
+            bookingForm.address = patient.address || '';
+        }
+    }
+}
 
 const isModalOpen = ref(false);
 
@@ -132,7 +155,7 @@ const minDate = new Date().toISOString().split('T')[0];
 
 <template>
     <div>
-        <h1>pilih jadwal dan antreank</h1>
+        <h1>pilih jadwal dan antrean</h1>
 
         <div style="margin-bottom: 20px">
             <label>Cari Tanggal Booking: </label>
@@ -223,6 +246,15 @@ const minDate = new Date().toISOString().split('T')[0];
                 Jam: <strong>{{ bookingForm.time }}</strong>
             </p>
 
+            <div style="margin-bottom: 15px;">
+                <label><strong>Pilih Pasien: </strong></label><br>
+                <select v-model="selectedPatientMode" @click="onSelectPatientChange">
+                    <option value="new">+ Pasien baru</option>
+                    <option v-for="p in props.patients" :key="p.patient_id" :value="p.patient_id">
+                        {{ p.patient_name }} (NIK: {{ p.nik }})
+                    </option>
+                </select>
+            </div>
             <form @submit.prevent="submitBooking">
                 <div>
                     <label>NIK: </label><br />
