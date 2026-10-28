@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('queues', function (Blueprint $table) {
+            $table->dropUnique(['queue_number']);
             $table->dropColumn('queue_number');
-            $table->string('queue_number',10)->after('schedule_id')->unique();
+        });
+
+        Schema::table('queues', function (Blueprint $table) {
+            $table->string('queue_number', 10)->after('schedule_id')->unique();
         });
     }
 
@@ -23,8 +27,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('queues', function (Blueprint $table) {
+            $table->dropUnique(['queue_number']);
             $table->dropColumn('queue_number');
-            $table->string('queue_number', 10)->unique()->after('schedule_id');
+        });
+
+        Schema::table('queues', function (Blueprint $table) {
+            $table->string('queue_number', 10)->unique();
         });
     }
 };
