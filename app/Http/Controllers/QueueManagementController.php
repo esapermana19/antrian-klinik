@@ -15,7 +15,7 @@ class QueueManagementController extends Controller
         $todayQueues = Queue::with(['patient', 'practiceSchedule'])
             ->whereDate('queue_date', Carbon::today())
             ->orderBy('estimate_time', 'asc')
-            ->get();
+            ->paginate(10);
         return Inertia::render('Queues/Manage', ['todayQueues' => $todayQueues]);
     }
 

@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import scheduleRoute from '@/routes/practice-schedule';
+import medication from '@/routes/medication';
 
 const props = defineProps({
     schedules: Object,
@@ -37,7 +38,6 @@ const openEditModal = (schedule) => {
     form.session = schedule.session;
     form.opening_hours = schedule.opening_hours.substring(0, 5);
     form.closing_hours = schedule.closing_hours.substring(0, 5);
-    form.max_quota = schedule.max_quota;
     form.status = schedule.status;
 
     isModalOpen.value = true;
@@ -92,9 +92,10 @@ const formatDay = (day) => {
         <hr />
 
         <!-- Tabel data jadwal -->
-        <table border="3" cellpadding="20" cellspacing="0">
+        <table border="3" cellpadding="10" cellspacing="0">
             <thead>
                 <tr>
+                    <th>No.</th>
                     <th>Kode</th>
                     <th>Hari</th>
                     <th>Sesi</th>
@@ -105,10 +106,8 @@ const formatDay = (day) => {
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    v-for="item in schedules.data"
-                    :key="item.schedule_id ?? item.id"
-                >
+                <tr v-for="(item, index) in schedules.data" :key="item.schedule_id ?? item.id">
+                    <td>{{ (schedules.current_page -1) * (schedules. per_page) + (index + 1) }}</td>
                     <td>{{ item.schedule_code }}</td>
                     <td>{{ formatDay(item.day) }}</td>
                     <td>{{ item.session === 'morning' ? 'pagi' : 'sore' }}</td>
@@ -133,6 +132,22 @@ const formatDay = (day) => {
             </tbody>
         </table>
 
+        <div>
+            <Link v-if="schedules.prev_page_url" :href="schedules.prev_page_url">
+                Previous
+            </Link>
+            <button v-else disabled style="border: 1px solid black;">Previous</button>
+
+            <span>
+                Halaman {{ schedules.current_page }} dari {{ schedules.last_page }}
+            </span>
+
+            <Link v-if="schedules.next_page_url" :href="schedules.next_page_url">
+                Next
+            </Link>
+            <button v-else disabled style="border: 1px solid black;">Next</button>
+        </div>
+
         <!-- Form tambah jadwal -->
         <div v-if="isModalOpen">
             <hr />
@@ -155,7 +170,7 @@ const formatDay = (day) => {
                     </select>
                     <span v-if="form.errors.day" style="color: red">{{
                         form.errors.day
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <div>
@@ -167,40 +182,22 @@ const formatDay = (day) => {
                     </select>
                     <span v-if="form.errors.session" style="color: red">{{
                         form.errors.session
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <div>
                     <label>Jam Buka: </label>
-                    <input
-                        type="time"
-                        v-model="form.opening_hours"
-                        lang="id-ID"
-                        step="60"
-                    />
+                    <input type="time" v-model="form.opening_hours" lang="id-ID" step="60" />
                     <span v-if="form.errors.opening_hours" style="color: red">{{
                         form.errors.opening_hours
-                    }}</span>
+                        }}</span>
                 </div>
                 <div>
                     <label>Jam Tutup: </label>
-                    <input
-                        type="time"
-                        v-model="form.closing_hours"
-                        lang="id-ID"
-                        step="60"
-                    />
+                    <input type="time" v-model="form.closing_hours" lang="id-ID" step="60" />
                     <span v-if="form.errors.closing_hours" style="color: red">{{
                         form.errors.closing_hours
-                    }}</span>
-                </div>
-
-                <div>
-                    <label>Maks. Kuota: </label>
-                    <input type="number" v-model="form.max_quota" min="1" />
-                    <span v-if="form.errors.max_quota" style="color: red">{{
-                        form.errors.max_quota
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <div>
@@ -211,7 +208,7 @@ const formatDay = (day) => {
                     </select>
                     <span v-if="form.errors.status" style="color: red">{{
                         form.errors.status
-                    }}</span>
+                        }}</span>
                 </div>
 
                 <br />
@@ -240,7 +237,7 @@ td {
     border: 1px solid #ccc !important;
 }
 
-form > div {
+form>div {
     margin-bottom: 12px;
 }
 

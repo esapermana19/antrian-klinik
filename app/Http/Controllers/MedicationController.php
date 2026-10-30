@@ -57,7 +57,7 @@ class MedicationController extends Controller
             $lastNumber = (int) substr($lastCode->medication_code, -4);
             $nextNumber = $lastNumber + 1;
         }
-        $data['medication_code'] = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        $data['medication_code'] = $prefix . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
         Medication::create($data);
 
         return back()->with('success', 'Data obat berhasil ditambahkan');

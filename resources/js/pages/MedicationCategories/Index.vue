@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import medicationCategoryRoute from '@/routes/medication-category';
 
 const props = defineProps({
@@ -76,26 +76,23 @@ const deleteMedicationCategory = (dataCategory) => {
         <table>
             <thead>
                 <tr>
+                    <th>No</th>
                     <th>Kode</th>
                     <th>Kategori Obat</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <tr
-                    v-for="item in medication_categories.data"
-                    :key="item.medication_category_id ?? item.id"
-                >
+                <tr v-for="(item, index) in medication_categories.data" :key="item.medication_category_id ?? item.id">
+                    <td>{{ (medication_categories.current_page - 1) * (medication_categories.per_page) + (index + 1) }}
+                    </td>
                     <td>{{ item.medication_category_code }}</td>
                     <td>{{ item.medication_category_name }}</td>
                     <td>
                         <button type="button" @click="openEditModal(item)">
                             Edit
                         </button>
-                        <button
-                            type="button"
-                            @click="deleteMedicationCategory(item)"
-                        >
+                        <button type="button" @click="deleteMedicationCategory(item)">
                             Hapus
                         </button>
                     </td>
@@ -108,6 +105,22 @@ const deleteMedicationCategory = (dataCategory) => {
             </tbody>
         </table>
 
+        <div>
+            <Link v-if="medication_categories.prev_page_url" :href="medication_categories.prev_page_url">
+            Previous
+            </Link>
+            <button v-else disabled>Previous</button>
+
+            <span>
+                Halaman {{ medication_categories.current_page }} dari {{ medication_categories.last_page }}
+            </span>
+
+            <Link v-if="medication_categories.next_page_url" :href="medication_categories.next_page_url">
+            Next
+            </Link>
+            <button v-else disabled>Next</button>
+        </div>
+
         <div v-if="isModalOpen">
             <hr />
             <h2>
@@ -116,28 +129,15 @@ const deleteMedicationCategory = (dataCategory) => {
             <form @submit.prevent="submitForm">
                 <div>
                     <label>Kode Kategori: </label>
-                    <input
-                        type="text"
-                        v-model="form.medication_category_code"
-                        size="1"
-                    />
-                    <span
-                        v-if="form.errors.medication_category_code"
-                        style="color: red"
-                    >
+                    <input type="text" v-model="form.medication_category_code" size="1" />
+                    <span v-if="form.errors.medication_category_code" style="color: red">
                         {{ form.errors.medication_category_code }}
                     </span>
                 </div>
                 <div>
                     <label>Nama Kategori: </label>
-                    <input
-                        type="text"
-                        v-model="form.medication_category_name"
-                    />
-                    <span
-                        v-if="form.errors.medication_category_name"
-                        style="color: red"
-                    >
+                    <input type="text" v-model="form.medication_category_name" />
+                    <span v-if="form.errors.medication_category_name" style="color: red">
                         {{ form.errors.medication_category_name }}
                     </span>
                 </div>
@@ -166,7 +166,7 @@ td {
     border: 1px solid #ccc !important;
 }
 
-form > div {
+form>div {
     margin-bottom: 12px;
 }
 

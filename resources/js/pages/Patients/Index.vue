@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import patientRoute from '@/routes/patient';
 
 const props = defineProps({
@@ -124,6 +124,23 @@ const formatGender = (gender) => {
                 </tr>
             </tbody>
         </table>
+
+        <div>
+            <Link v-if="patients.prev_page_url" :href="patients.prev_page_url">
+                Previous
+            </Link>
+            <button v-else disabled>Previous</button>
+
+            <span>
+                Halaman {{ patients.current_page }} dari {{ patients.last_page }}
+            </span>
+
+            <Link v-if="patients.next_page_url" :href="patients.next_page_url">
+                Next
+            </Link>
+            <button v-else disabled>Next</button>
+        </div>
+
         <div v-if="isModalOpen">
             <h2>{{ isEditMode ? 'Edit Data Pasien' : 'Tambah Data' }}</h2>
 

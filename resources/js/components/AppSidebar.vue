@@ -21,6 +21,8 @@ import patientRoute from '@/routes/patient';
 import scheduleRoute from '@/routes/practice-schedule';
 import medicationCategoryRoute from '@/routes/medication-category';
 import queueRoute from '@/routes/queue';
+import queueManagement from '@/routes/queue-management';
+import myQueue from '@/routes/my-queue';
 import profile from '@/routes/profile';
 
 const mainNavItems: NavItem[] = [
@@ -55,9 +57,21 @@ const mainNavItems: NavItem[] = [
     },
 
     {
-        title: 'Antrian',
+        title: 'Kelola Antrian',
+        href: queueManagement.index(),
+        icon: LucideIcons.ListCheck,
+    },
+
+    {
+        title: 'Ambil Antrian',
         href: queueRoute.index(),
-        icon: LucideIcons.ListEnd,
+        icon: LucideIcons.Ticket,
+    },
+
+    {
+        title: 'Antrian Saya',
+        href: myQueue.index(),
+        icon: LucideIcons.TicketCheck,
     },
 ];
 

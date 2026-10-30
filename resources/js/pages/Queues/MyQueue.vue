@@ -20,7 +20,7 @@ const formatSession = (session) => {
     <div>
         <h1>Tiket Antrian Saya</h1>
         <p>Daftar Antrean yang pernah kamu daftarkan.
-            <Link href="/queue">+ Ambil Antrean Baru</Link>
+            <button type="button" style="background-color: aquamarine;"><Link href="/queue">+ Ambil Antrean Baru</Link></button>
         </p>
 
         <div v-if="props.myQueues && props.myQueues.length > 0">

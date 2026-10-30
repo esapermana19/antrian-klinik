@@ -37,7 +37,6 @@ class StorePracticeScheduleRequest extends FormRequest
             ],
             'opening_hours' => ['required', 'date_format:H:i'],
             'closing_hours' => ['required', 'date_format:H:i', 'after:opening_hours'],
-            'max_quota' => ['required', 'integer', 'min:1', 'max:20'],
             'status' => ['required', Rule::in(['open', 'closed'])],
         ];
     }

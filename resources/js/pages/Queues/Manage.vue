@@ -1,8 +1,8 @@
 <script setup>
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    todayQueues: Array,
+    todayQueues: Object,
 });
 
 const updateStatus = (queueId, newStatus) => {
@@ -42,7 +42,7 @@ const formatSession = (session) => {
             </thead>
 
             <tbody>
-                <tr v-for="q in props.todayQueues" :key="q.queue_id">
+                <tr v-for="q in todayQueues.data" :key="q.queue_id">
                     <td><strong>{{ q.queue_number }}</strong></td>
                     <td>{{ q.patient?.patient_name }}</td>
                     <td>{{ formatSession(q.session) }}</td>
@@ -68,11 +68,28 @@ const formatSession = (session) => {
                         </button>
                     </td>
                 </tr>
-                <tr v-if="!props.todayQueues || props.todayQueues.length === 0">
+                <tr v-if="!todayQueues.data || todayQueues.data.length === 0">
                     <td colspan="6">Tidak ada antrian untuk hari ini</td>
                 </tr>
             </tbody>
         </table>
+
+        <div>
+            <Link v-if="todayQueues.prev_page_url" :href="todayQueues.prev_page_url">
+            Previous
+            </Link>
+            <button v-else disabled>Previous</button>
+
+            <span>
+                Halaman {{ todayQueues.current_page }} dari {{ todayQueues.last_page }}
+            </span>
+
+            <Link v-if="todayQueues.next_page_url" :href="todayQueues.next_page_url">
+            Next
+            </Link>
+            <button v-else disabled>Next</button>
+        </div>
+
     </div>
 </template>
 

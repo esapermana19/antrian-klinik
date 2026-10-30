@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import medicationRoute from '@/routes/medication';
 
 const props = defineProps({
@@ -125,6 +125,22 @@ const deleteMedication = (medication) => {
                 </tr>
             </tbody>
         </table>
+
+                <div>
+            <Link v-if="medications.prev_page_url" :href="medications.prev_page_url">
+                Previous
+            </Link>
+            <button v-else disabled>Previous</button>
+
+            <span>
+                Halaman {{ medications.current_page }} dari {{ medications.last_page }}
+            </span>
+
+            <Link v-if="medications.next_page_url" :href="medications.next_page_url">
+                Next
+            </Link>
+            <button v-else disabled>Next</button>
+        </div>
 
         <div v-if="isModalOpen">
             <hr />

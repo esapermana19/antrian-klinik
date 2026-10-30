@@ -148,7 +148,7 @@ Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan 
     - Halaman Display TV Antrean / Panggilan Antrean (untuk Petugas Klinik).
 
 ---
-
+    
 ## 🩺 FASE 5: Pemeriksaan Medis & Resep Obat (`MedicalRecord` & `MedicationPrescription`)
 
 Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan otomatis memotong stok obat di gudang farmasi.

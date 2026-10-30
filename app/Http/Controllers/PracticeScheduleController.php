@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PracticeSchedules\StorePracticeScheduleRequest;
 use App\Http\Requests\PracticeSchedules\UpdatePracticeScheduleRequest;
 use App\Models\PracticeSchedule;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -56,8 +57,13 @@ class PracticeScheduleController extends Controller
             $lastNumber = (int) substr($lastSchedule->schedule_code, -2);
             $nextNumber = $lastNumber + 1;
         }
+        $opening = Carbon::parse($request->opening_hours);
+        $closing = Carbon::parse($request->closing_hours);
+        $totalMinutes = $opening->diffInMinutes($closing);
+        $maxKuota = floor($totalMinutes/15);
         // gabungan
         $data['schedule_code'] = $prefix.str_pad((string) $nextNumber, 2, '0', STR_PAD_LEFT);
+        $data['max_quota'] = $maxKuota;
 
         PracticeSchedule::create($data);
 
