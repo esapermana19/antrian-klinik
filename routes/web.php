@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DisplayQueueController;
 use App\Http\Controllers\MedicationCategoryController;
 use App\Http\Controllers\MedicationController;
 use App\Http\Controllers\MyQueueController;
@@ -24,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/queues/{queue}/status', [QueueController::class, 'updateStatus'])->name('queue.status');
 
     Route::get('/my-queue', [MyQueueController::class, 'index'])->name('my-queue.index');
+    Route::get('/display-queue', [DisplayQueueController::class, 'index'])->name('display.index');
 
     Route::middleware(['role:administrator'])->group(function () {
         Route::get('/queue-management', [QueueManagementController::class, 'index'])->name('queue-management.index');

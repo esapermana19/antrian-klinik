@@ -143,7 +143,7 @@ Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan 
     - `index()`: Tampilkan antrean hari ini untuk display ruang tunggu atau dashboard pasien.
     - `store()`: Eksekusi logika booking antrean di atas.
     - `updateStatus(Request $request, Queue $queue)`: Endpoint khusus untuk petugas/dokter memanggil atau memajukan status antrean (`waiting` $\rightarrow$ `called` $\rightarrow$ `checking` $\rightarrow$ `completed` / `cancel`).
-- [ ] **4.4 Frontend Halaman Antrean**
+- [] **4.4 Frontend Halaman Antrean**
     - Halaman Ambil Antrean (untuk Pasien).
     - Halaman Display TV Antrean / Panggilan Antrean (untuk Petugas Klinik).
 
