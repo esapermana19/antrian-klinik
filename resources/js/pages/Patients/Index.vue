@@ -1,7 +1,32 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router, Link } from '@inertiajs/vue3';
+import { useForm, router, Link, Head } from '@inertiajs/vue3';
 import patientRoute from '@/routes/patient';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
+import {
+    Plus,
+    FileText,
+    Pencil,
+    Trash2,
+    ChevronLeft,
+    ChevronRight,
+    X,
+    HeartPulse,
+    Thermometer,
+    Weight,
+    Stethoscope,
+    Pill,
+} from 'lucide-vue-next';
 
 const props = defineProps({
     patients: Object,
@@ -12,6 +37,12 @@ const props = defineProps({
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedPatientId = ref(null);
+
+// State untuk Modal Riwayat Rekam Medis
+const isHistoryOpen = ref(false);
+const selectedPatient = ref(null);
+const medicalRecords = ref([]);
+const isLoadingHistory = ref(false);
 
 const form = useForm({
     user_id: '',
@@ -59,9 +90,37 @@ const submitForm = () => {
     }
 };
 
+const openHistoryModal = async (patient) => {
+    selectedPatient.value = patient;
+    medicalRecords.value = [];
+    isLoadingHistory.value = true;
+    isHistoryOpen.value = true;
+
+    try {
+        const id = patient.patient_id ?? patient.id;
+        const response = await fetch(`/patients/${id}/medical-records`);
+        if (!response.ok) {
+            throw new Error('Gagal mengambil data rekam medis.');
+        }
+        const data = await response.json();
+        medicalRecords.value = data;
+    } catch (error) {
+        console.error('Error fetching medical records:', error);
+        alert('Gagal mengambil riwayat rekam medis.');
+    } finally {
+        isLoadingHistory.value = false;
+    }
+};
+
+const closeHistoryModal = () => {
+    isHistoryOpen.value = false;
+    selectedPatient.value = null;
+    medicalRecords.value = [];
+};
+
 const deletePatient = (patient) => {
     const id = patient.patient_id ?? patient.id;
-    if (confirm(`hapus data pasien? "${patient.patient_name}"`)) {
+    if (confirm(`Hapus data pasien: "${patient.patient_name}"?`)) {
         router.delete(patientRoute.destroy.url(id));
     }
 };
@@ -73,168 +132,318 @@ const formatGender = (gender) => {
     };
     return genderName[gender] || gender;
 };
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    } catch {
+        return dateStr;
+    }
+};
 </script>
 
 <template>
-    <div>
-        <h1>Master Data Pasien</h1>
-        <p>Kelola data pasien di klinik.</p>
-        <button type="button" @click="openAddModal">+ Tambah Data</button>
+    <Head title="Master Data Pasien" />
 
-        <table cellpadding="20" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>NIK</th>
-                    <th>Nama Pasien</th>
-                    <th>Tanggal Lahir</th>
-                    <th>Jenis Kelamin</th>
-                    <th>Alamat</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr
-                    v-for="(item, index) in patients.data"
-                    :key="item.patient_id ?? item.id"
-                >
-                    <td>
-                        {{
-                            (patients.current_page - 1) * patients.per_page +
-                            (index + 1)
-                        }}
-                    </td>
-                    <td>{{ item.nik }}</td>
-                    <td>{{ item.patient_name }}</td>
-                    <td>{{ item.date_of_birth }}</td>
-                    <td>{{ formatGender(item.gender) }}</td>
-                    <td>{{ item.address }}</td>
-                    <td>
-                        <button type="button" @click="openEditModal(item)">
-                            Edit
-                        </button>
-                        <button type="button" @click="deletePatient(item)">
-                            Hapus
-                        </button>
-                    </td>
-                </tr>
-                <tr v-if="patients.data.length === 0">
-                    <td colspan="7">Belum ada data pasien</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div>
-            <Link v-if="patients.prev_page_url" :href="patients.prev_page_url">
-                Previous
-            </Link>
-            <button v-else disabled>Previous</button>
-
-            <span>
-                Halaman {{ patients.current_page }} dari {{ patients.last_page }}
-            </span>
-
-            <Link v-if="patients.next_page_url" :href="patients.next_page_url">
-                Next
-            </Link>
-            <button v-else disabled>Next</button>
+    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+        <!-- Top Action / Header Area -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Data Pasien</h1>
+                <p class="text-xs text-slate-500">Kelola dan pantau seluruh data pasien klinik dengan rekam medis terpadu.</p>
+            </div>
+            <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                <Plus class="size-3.5" />
+                Tambah Pasien
+            </Button>
         </div>
 
-        <div v-if="isModalOpen">
-            <h2>{{ isEditMode ? 'Edit Data Pasien' : 'Tambah Data' }}</h2>
-
-            <form @submit.prevent="submitForm">
-                <div>
-                    <label>NIK: </label>
-                    <input type="text" v-model="form.nik" />
-                    <span v-if="form.errors.nik" style="color: red">{{
-                        form.errors.nik
-                    }}</span>
-                </div>
-
-                <div>
-                    <label>Nama Pasien: </label>
-                    <input type="text" v-model="form.patient_name" />
-                    <span v-if="form.errors.patient_name" style="color: red">
-                        {{ form.errors.patient_name }}</span
+        <!-- Main Card & Clean Table (Shadcn Style) -->
+        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-xl">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead class="w-12 text-center">No</TableHead>
+                        <TableHead class="w-40">NIK</TableHead>
+                        <TableHead>Nama Pasien</TableHead>
+                        <TableHead>Tgl Lahir</TableHead>
+                        <TableHead>Gender</TableHead>
+                        <TableHead>Alamat</TableHead>
+                        <TableHead class="text-right pr-4">Aksi</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow
+                        v-for="(item, index) in patients.data"
+                        :key="item.patient_id ?? item.id"
                     >
-                </div>
+                        <!-- No -->
+                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
+                            {{ (patients.current_page - 1) * patients.per_page + (index + 1) }}
+                        </TableCell>
 
-                <div>
-                    <label>Tanggal Lahir</label>
-                    <input type="date" v-model="form.date_of_birth" />
-                    <span v-if="form.errors.date_of_birth" style="color: red">
-                        {{ form.errors.date_of_birth }}</span
+                        <!-- NIK -->
+                        <TableCell class="font-mono text-xs text-slate-700">
+                            {{ item.nik }}
+                        </TableCell>
+
+                        <!-- Nama Pasien -->
+                        <TableCell class="font-medium text-xs text-slate-900">
+                            {{ item.patient_name }}
+                        </TableCell>
+
+                        <!-- Tgl Lahir -->
+                        <TableCell class="text-xs text-slate-600 font-mono">
+                            {{ item.date_of_birth || '-' }}
+                        </TableCell>
+
+                        <!-- Gender -->
+                        <TableCell class="text-xs text-slate-600">
+                            {{ formatGender(item.gender) }}
+                        </TableCell>
+
+                        <!-- Alamat -->
+                        <TableCell class="text-xs text-slate-500 max-w-xs truncate">
+                            {{ item.address || '-' }}
+                        </TableCell>
+
+                        <!-- Aksi -->
+                        <TableCell class="text-right pr-4">
+                            <div class="flex items-center justify-end gap-1">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    class="h-7 px-2 text-xs font-normal text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 border-slate-200"
+                                    @click="openHistoryModal(item)"
+                                >
+                                    <FileText class="size-3 mr-1" />
+                                    Riwayat
+                                </Button>
+                                <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    @click="openEditModal(item)"
+                                    title="Edit"
+                                >
+                                    <Pencil class="size-3" />
+                                </Button>
+                                <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    @click="deletePatient(item)"
+                                    title="Hapus"
+                                >
+                                    <Trash2 class="size-3" />
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+
+                    <TableEmpty v-if="patients.data.length === 0" :colspan="7">
+                        <div class="py-10 text-center text-slate-400 text-xs">
+                            Belum ada data pasien terdaftar.
+                        </div>
+                    </TableEmpty>
+                </TableBody>
+            </Table>
+
+            <!-- Pagination Bar -->
+            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+                <span>
+                    Hal <strong class="text-slate-700">{{ patients.current_page }}</strong> dari {{ patients.last_page }} (Total: {{ patients.total }})
+                </span>
+                <div class="flex items-center gap-1">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-7 px-2 text-xs"
+                        :disabled="!patients.prev_page_url"
+                        as-child
                     >
-                </div>
-
-                <div>
-                    <label>Jenis Kelamin: </label>
-                    <select v-model="form.gender">
-                        <option value="">--Jenis Kelamin--</option>
-                        <option value="male">Laki-laki</option>
-                        <option value="female">Perempuan</option>
-                    </select>
-                    <span v-if="form.errors.gender" style="color: red">
-                        {{ form.errors.gender }}</span
+                        <Link v-if="patients.prev_page_url" :href="patients.prev_page_url">
+                            <ChevronLeft class="size-3" />
+                            Prev
+                        </Link>
+                        <span v-else class="opacity-40 flex items-center">
+                            <ChevronLeft class="size-3" />
+                            Prev
+                        </span>
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-7 px-2 text-xs"
+                        :disabled="!patients.next_page_url"
+                        as-child
                     >
+                        <Link v-if="patients.next_page_url" :href="patients.next_page_url">
+                            Next
+                            <ChevronRight class="size-3" />
+                        </Link>
+                        <span v-else class="opacity-40 flex items-center">
+                            Next
+                            <ChevronRight class="size-3" />
+                        </span>
+                    </Button>
                 </div>
+            </div>
+        </Card>
 
-                <div>
-                    <label>Alamat: </label>
-                    <textarea
-                        v-model="form.address"
-                        style="outline: auto"
-                    ></textarea>
-                    <span v-if="form.errors.address" style="color: red">
-                        {{ form.errors.address }}</span
-                    >
-                </div>
-
-                <div>
-                    <button type="button" @click="closeModal">Batal</button>
-                    <button type="submit" :disabled="form.processing">
-                        {{ form.processing ? 'Menyimapn..' : 'Simpan' }}
+        <!-- Modal Tambah / Edit Pasien -->
+        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
+            <div class="w-full max-w-md bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                    <h2 class="text-sm font-bold text-slate-900">
+                        {{ isEditMode ? 'Edit Data Pasien' : 'Tambah Pasien Baru' }}
+                    </h2>
+                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                        <X class="size-4" />
                     </button>
                 </div>
-            </form>
+
+                <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">NIK (16 Digit)</label>
+                        <input
+                            type="text"
+                            v-model="form.nik"
+                            placeholder="320..."
+                            class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        />
+                        <span v-if="form.errors.nik" class="text-[10px] text-rose-500">{{ form.errors.nik }}</span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Nama Lengkap Pasien</label>
+                        <input
+                            type="text"
+                            v-model="form.patient_name"
+                            placeholder="Nama pasien..."
+                            class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        />
+                        <span v-if="form.errors.patient_name" class="text-[10px] text-rose-500">{{ form.errors.patient_name }}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-1">
+                            <label class="font-semibold text-slate-700">Tanggal Lahir</label>
+                            <input
+                                type="date"
+                                v-model="form.date_of_birth"
+                                class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            />
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="font-semibold text-slate-700">Jenis Kelamin</label>
+                            <select
+                                v-model="form.gender"
+                                class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            >
+                                <option value="">Pilih</option>
+                                <option value="male">Laki-laki</option>
+                                <option value="female">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Alamat Rumah</label>
+                        <textarea
+                            v-model="form.address"
+                            rows="2"
+                            placeholder="Alamat domisili..."
+                            class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                        <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                        <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Riwayat Rekam Medis (Compact & Clean) -->
+        <div v-if="isHistoryOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
+            <div class="w-full max-w-xl max-h-[85vh] bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900">Riwayat Rekam Medis</h2>
+                        <p class="text-[11px] text-slate-500">
+                            {{ selectedPatient?.patient_name }} (NIK: {{ selectedPatient?.nik }})
+                        </p>
+                    </div>
+                    <button type="button" @click="closeHistoryModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                        <X class="size-4" />
+                    </button>
+                </div>
+
+                <div class="p-4 overflow-y-auto space-y-3 text-xs">
+                    <div v-if="isLoadingHistory" class="text-center py-8 text-slate-400">
+                        Memuat riwayat medis...
+                    </div>
+                    <div v-else-if="medicalRecords.length === 0" class="text-center py-8 text-slate-400">
+                        Belum ada riwayat rekam medis.
+                    </div>
+                    <div v-else class="space-y-3">
+                        <div
+                            v-for="record in medicalRecords"
+                            :key="record.medrec_id"
+                            class="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2"
+                        >
+                            <div class="flex items-center justify-between pb-1.5 border-b border-slate-200/80">
+                                <span class="font-mono font-bold text-slate-800">
+                                    {{ record.medrec_code }}
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono">
+                                    {{ formatDate(record.created_at) }}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-[11px] text-slate-600">
+                                <div>Tensi: <strong class="text-slate-800 font-mono">{{ record.blood_pressure || '-' }}</strong></div>
+                                <div>Suhu: <strong class="text-slate-800 font-mono">{{ record.temperature || '-' }}°C</strong></div>
+                                <div>Berat: <strong class="text-slate-800 font-mono">{{ record.weight || '-' }}kg</strong></div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div><span class="text-slate-500">Keluhan:</span> {{ record.main_complaint || '-' }}</div>
+                                <div><span class="text-slate-500">Diagnosa:</span> <strong class="text-slate-900">{{ record.diagnosis || '-' }}</strong></div>
+                                <div v-if="record.notes_on_treatment"><span class="text-slate-500">Tindakan:</span> {{ record.notes_on_treatment }}</div>
+                            </div>
+
+                            <div v-if="record.prescriptions && record.prescriptions.length > 0" class="pt-1.5 border-t border-slate-200/80 text-[11px]">
+                                <span class="text-slate-500 font-medium">Resep: </span>
+                                <span
+                                    v-for="rx in record.prescriptions"
+                                    :key="rx.prescription_id"
+                                    class="inline-block mr-2 text-slate-700"
+                                >
+                                    {{ rx.medication?.medication_name }} ({{ rx.qty }} unit, {{ rx.dosage }})
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 py-2 border-t border-slate-100 bg-slate-50/80 flex justify-end">
+                    <Button variant="outline" size="sm" @click="closeHistoryModal">Tutup</Button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-th,
-td {
-    padding: 6px 10px !important;
-    text-align: left;
-    border: 1px solid #ccc !important;
-}
-
-form > div {
-    margin-bottom: 12px;
-}
-
-label {
-    display: inline-block;
-    min-width: 110px;
-}
-
-input[type='time'],
-input[type='number'],
-input[type='text'],
-select {
-    border: 1px solid #777 !important;
-}
-
-button {
-    border: 1px solid #777 !important;
-    margin-right: 8px;
-}
-</style>

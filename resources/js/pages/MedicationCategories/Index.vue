@@ -1,7 +1,26 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router, Link } from '@inertiajs/vue3';
+import { useForm, router, Link, Head } from '@inertiajs/vue3';
 import medicationCategoryRoute from '@/routes/medication-category';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableEmpty,
+} from '@/components/ui/table';
+import {
+    Plus,
+    Pencil,
+    Trash2,
+    ChevronLeft,
+    ChevronRight,
+    X,
+} from 'lucide-vue-next';
 
 const props = defineProps({
     medication_categories: Object,
@@ -59,131 +78,164 @@ const submitForm = () => {
 
 const deleteMedicationCategory = (dataCategory) => {
     const id = dataCategory.medication_category_id ?? dataCategory.id;
-    if (confirm(`Hapus kategori obat?`)) {
+    if (confirm(`Hapus kategori obat "${dataCategory.medication_category_name}"?`)) {
         router.delete(medicationCategoryRoute.destroy.url(id));
     }
 };
 </script>
+
 <template>
-    <div>
-        <h1>Master Kategori Obat</h1>
-        <p>Kelola kategori obat untuk mempermudah pengelolaan data obat.</p>
-        <button type="button" @click="openAddModal">
-            + Tambah Kategori Obat
-        </button>
-        <hr />
+    <Head title="Kategori Obat" />
 
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Kode</th>
-                    <th>Kategori Obat</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in medication_categories.data" :key="item.medication_category_id ?? item.id">
-                    <td>{{ (medication_categories.current_page - 1) * (medication_categories.per_page) + (index + 1) }}
-                    </td>
-                    <td>{{ item.medication_category_code }}</td>
-                    <td>{{ item.medication_category_name }}</td>
-                    <td>
-                        <button type="button" @click="openEditModal(item)">
-                            Edit
-                        </button>
-                        <button type="button" @click="deleteMedicationCategory(item)">
-                            Hapus
-                        </button>
-                    </td>
-                </tr>
-                <tr v-if="medication_categories.data.length === 0">
-                    <td colspan="7">
-                        Belum ada kategori obat yang ditambahkan.
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div>
-            <Link v-if="medication_categories.prev_page_url" :href="medication_categories.prev_page_url">
-            Previous
-            </Link>
-            <button v-else disabled>Previous</button>
-
-            <span>
-                Halaman {{ medication_categories.current_page }} dari {{ medication_categories.last_page }}
-            </span>
-
-            <Link v-if="medication_categories.next_page_url" :href="medication_categories.next_page_url">
-            Next
-            </Link>
-            <button v-else disabled>Next</button>
+    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Kategori Obat</h1>
+                <p class="text-xs text-slate-500">Kelola kategori obat untuk mempermudah klasifikasi data inventaris.</p>
+            </div>
+            <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" @click="openAddModal">
+                <Plus class="size-3.5" />
+                Tambah Kategori
+            </Button>
         </div>
 
-        <div v-if="isModalOpen">
-            <hr />
-            <h2>
-                {{ isEditMode ? 'Edit kategori obat' : 'Tambah kategori obat' }}
-            </h2>
-            <form @submit.prevent="submitForm">
-                <div>
-                    <label>Kode Kategori: </label>
-                    <input type="text" v-model="form.medication_category_code" size="1" />
-                    <span v-if="form.errors.medication_category_code" style="color: red">
-                        {{ form.errors.medication_category_code }}
-                    </span>
+        <!-- Clean Standard Table -->
+        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-lg">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead class="w-12 text-center">No</TableHead>
+                        <TableHead class="w-36">Kode</TableHead>
+                        <TableHead>Nama Kategori</TableHead>
+                        <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow
+                        v-for="(item, index) in medication_categories.data"
+                        :key="item.medication_category_id ?? item.id"
+                    >
+                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
+                            {{ (medication_categories.current_page - 1) * medication_categories.per_page + (index + 1) }}
+                        </TableCell>
+                        <TableCell class="font-mono text-xs font-semibold text-slate-700">
+                            {{ item.medication_category_code }}
+                        </TableCell>
+                        <TableCell class="font-medium text-xs text-slate-900">
+                            {{ item.medication_category_name }}
+                        </TableCell>
+                        <TableCell class="text-right pr-4">
+                            <div class="flex items-center justify-end gap-1">
+                                <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    @click="openEditModal(item)"
+                                    title="Edit"
+                                >
+                                    <Pencil class="size-3" />
+                                </Button>
+                                <Button
+                                    size="icon-sm"
+                                    variant="outline"
+                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    @click="deleteMedicationCategory(item)"
+                                    title="Hapus"
+                                >
+                                    <Trash2 class="size-3" />
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+
+                    <TableEmpty v-if="medication_categories.data.length === 0" :colspan="4">
+                        <div class="py-10 text-center text-slate-400 text-xs">
+                            Belum ada kategori obat ditambahkan.
+                        </div>
+                    </TableEmpty>
+                </TableBody>
+            </Table>
+
+            <!-- Pagination Bar -->
+            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+                <span>
+                    Hal <strong class="text-slate-700">{{ medication_categories.current_page }}</strong> dari {{ medication_categories.last_page }}
+                </span>
+                <div class="flex items-center gap-1">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-7 px-2 text-xs"
+                        :disabled="!medication_categories.prev_page_url"
+                        as-child
+                    >
+                        <Link v-if="medication_categories.prev_page_url" :href="medication_categories.prev_page_url">
+                            <ChevronLeft class="size-3" /> Prev
+                        </Link>
+                        <span v-else class="opacity-40 flex items-center">
+                            <ChevronLeft class="size-3" /> Prev
+                        </span>
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        class="h-7 px-2 text-xs"
+                        :disabled="!medication_categories.next_page_url"
+                        as-child
+                    >
+                        <Link v-if="medication_categories.next_page_url" :href="medication_categories.next_page_url">
+                            Next <ChevronRight class="size-3" />
+                        </Link>
+                        <span v-else class="opacity-40 flex items-center">
+                            Next <ChevronRight class="size-3" />
+                        </span>
+                    </Button>
                 </div>
-                <div>
-                    <label>Nama Kategori: </label>
-                    <input type="text" v-model="form.medication_category_name" />
-                    <span v-if="form.errors.medication_category_name" style="color: red">
-                        {{ form.errors.medication_category_name }}
-                    </span>
-                </div>
-                <div>
-                    <button type="button" @click="closeModal">Batal</button>
-                    <button type="submit" :disabled="form.processing">
-                        {{ form.processing ? 'Menyimpan..' : 'Simpan' }}
+            </div>
+        </Card>
+
+        <!-- Modal Form -->
+        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
+            <div class="w-full max-w-md bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                    <h2 class="text-sm font-bold text-slate-900">
+                        {{ isEditMode ? 'Edit Kategori Obat' : 'Tambah Kategori Obat' }}
+                    </h2>
+                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                        <X class="size-4" />
                     </button>
                 </div>
-            </form>
+
+                <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Kode Kategori</label>
+                        <input
+                            type="text"
+                            v-model="form.medication_category_code"
+                            placeholder="Contoh: ABX, ANAL"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Nama Kategori</label>
+                        <input
+                            type="text"
+                            v-model="form.medication_category_name"
+                            placeholder="Contoh: Antibiotik, Analgesik"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                        <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                        <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan Kategori' }}
+                        </Button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-th,
-td {
-    padding: 6px 10px !important;
-    text-align: left;
-    border: 1px solid #ccc !important;
-}
-
-form>div {
-    margin-bottom: 12px;
-}
-
-label {
-    display: inline-block;
-    min-width: 110px;
-}
-
-input[type='time'],
-input[type='number'],
-input[type='text'],
-select {
-    border: 1px solid #777 !important;
-}
-
-button {
-    border: 1px solid #777 !important;
-    margin-right: 8px;
-}
-</style>

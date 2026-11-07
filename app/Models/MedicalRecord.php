@@ -38,6 +38,11 @@ class MedicalRecord extends Model
         return $this->hasMany(MedicationPrescription::class, 'medrec_id', 'medrec_id');
     }
 
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(MedicationPrescription::class, 'medrec_id', 'medrec_id');
+    }
+
     // relasi ke invoices
     public function invoice(): HasOne
     {

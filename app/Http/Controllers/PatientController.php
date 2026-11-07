@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Patients\StorePatientRequest;
 use App\Http\Requests\Patients\UpdatePatientRequest;
 use App\Models\Patient;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,6 +27,19 @@ class PatientController extends Controller
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
         ]);
+    }
+
+    /**
+     * Mendapatkan riwayat rekam medis pasien (JSON).
+     */
+    public function medicalRecords(Patient $patient): JsonResponse
+    {
+        $records = $patient->medicalRecords()
+            ->with(['prescriptions.medication', 'queue'])
+            ->latest()
+            ->get();
+
+        return response()->json($records);
     }
 
     /**
