@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from 'motion-v';
 import {
     Dialog,
     DialogClose,
+    MotionDialogContent,
 } from '@/components/ui/dialog';
-import DialogContent from '@/components/ui/dialog/DialogContent.vue';
 import { X } from 'lucide-vue-next';
 
 interface Props {
@@ -38,11 +38,7 @@ const overlayTransition = {
 
 <template>
     <Dialog :open="props.open" @update:open="emit('update:open', $event)">
-        <DialogContent
-            :force-mount="true"
-            :show-close-button="false"
-            class="p-0 border-0 bg-transparent shadow-none w-full max-w-none flex items-center justify-center"
-        >
+        <MotionDialogContent :force-mount="true" class="p-0 border-0 bg-transparent shadow-none">
             <AnimatePresence>
                 <!-- Backdrop Overlay (Fade-in / Fade-out) -->
                 <motion.div
@@ -60,7 +56,7 @@ const overlayTransition = {
                 <motion.div
                     v-if="props.open"
                     key="spring-modal-card"
-                    :initial="{ opacity: 0, scale: 0.82, y: 14 }"
+                    :initial="{ opacity: 0, scale: 0.8, y: 16 }"
                     :animate="{ opacity: 1, scale: 1, y: 0 }"
                     :exit="{ opacity: 0, scale: 0.92, y: 10, transition: { duration: 0.18, ease: 'easeIn' } }"
                     :transition="springTransition"
@@ -71,7 +67,7 @@ const overlayTransition = {
                     <button
                         type="button"
                         @click="emit('update:open', false)"
-                        class="absolute right-4 top-4 rounded-md p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        class="absolute right-4 top-4 rounded-md p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                         <X class="size-4" />
                         <span class="sr-only">Tutup</span>
@@ -93,12 +89,11 @@ const overlayTransition = {
                     </div>
 
                     <!-- Footer Slot -->
-                    <div v-if="$slots.footer" class="mt-6 flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <div v-if="$slots.footer" class="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                         <slot name="footer" />
                     </div>
                 </motion.div>
             </AnimatePresence>
-        </DialogContent>
+        </MotionDialogContent>
     </Dialog>
 </template>
-

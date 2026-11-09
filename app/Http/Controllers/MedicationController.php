@@ -15,13 +15,23 @@ class MedicationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(\Illuminate\Http\Request $request): Response
     {
+        $search = $request->query('search');
+        $categoryId = $request->query('category_id');
+
         $medication = Medication::query()
             ->with('medicationCategory')
+            ->when($search, function ($query, $search) {
+                $query->where('medication_name', 'like', "%{$search}%");
+            })
+            ->when($categoryId, function ($query, $categoryId) {
+                $query->where('medication_category_id', $categoryId);
+            })
             ->orderBy(MedicationCategory::select('medication_category_name')
                 ->where('medication_categories.medication_category_id', 'medications.medication_category_id'), 'asc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $medicationCategory = MedicationCategory::select('medication_category_id', 'medication_category_name')
             ->orderBy('medication_category_name', 'asc')
@@ -30,6 +40,10 @@ class MedicationController extends Controller
         return Inertia::render('Medications/Index', [
             'medications' => $medication,
             'medication_categories' => $medicationCategory,
+            'filters' => [
+                'search' => $search ?? '',
+                'category_id' => $categoryId ?? '',
+            ],
         ]);
     }
 

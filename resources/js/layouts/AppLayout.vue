@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import SmoothDashboardLayout from '@/components/SmoothDashboardLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
-const { breadcrumbs = [] } = defineProps<{
+defineProps<{
     breadcrumbs?: BreadcrumbItem[];
 }>();
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <SmoothDashboardLayout>
         <slot />
-    </AppLayout>
+    </SmoothDashboardLayout>
 </template>

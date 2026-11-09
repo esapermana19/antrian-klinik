@@ -31,6 +31,8 @@ import {
     Tv,
     FileEdit,
 } from 'lucide-vue-next';
+import MotionModal from '@/components/MotionModal.vue';
+import SpringModal from '@/components/SpringModal.vue';
 
 const props = defineProps({
     todayQueues: Object,
@@ -42,10 +44,29 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
 });
+
+const selectedDate = ref(props.filters?.date || new Date().toISOString().split('T')[0]);
+
+const handleDateChange = () => {
+    router.get(
+        '/queue-management',
+        { date: selectedDate.value },
+        { preserveState: true, preserveScroll: true, replace: true }
+    );
+};
 
 const isModalOpen = ref(false);
 const activeQueue = ref(null);
+
+// State untuk Dialog Alert Ubah / Batalkan Status Antrean
+const isStatusModalOpen = ref(false);
+const statusModalData = ref(null);
+const isUpdatingStatus = ref(false);
 
 const form = useForm({
     patient_id: null,
@@ -105,14 +126,49 @@ const submitMedicalRecord = () => {
     });
 };
 
-const updateStatus = (queueId, newStatus) => {
-    if (confirm(`Ubah status antrean menjadi ${newStatus}?`)) {
-        router.patch(`/queue-management/${queueId}/status`, {
-            queue_status: newStatus,
-        }, {
-            preserveScroll: true,
-        });
+const getStatusLabel = (status) => {
+    switch (status) {
+        case 'called':
+            return 'Dipanggil';
+        case 'checking':
+            return 'Diperiksa';
+        case 'completed':
+            return 'Selesai';
+        case 'cancel':
+            return 'Dibatalkan';
+        default:
+            return status;
     }
+};
+
+const promptUpdateStatus = (queue, newStatus) => {
+    statusModalData.value = {
+        queue,
+        newStatus,
+        title: newStatus === 'cancel' ? 'Batalkan Antrean' : 'Ubah Status Antrean',
+        label: getStatusLabel(newStatus),
+    };
+    isStatusModalOpen.value = true;
+};
+
+const confirmUpdateStatus = () => {
+    if (!statusModalData.value) return;
+    const { queue, newStatus } = statusModalData.value;
+    isUpdatingStatus.value = true;
+    router.patch(
+        `/queue-management/${queue.queue_id}/status`,
+        {
+            queue_status: newStatus,
+        },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isUpdatingStatus.value = false;
+                isStatusModalOpen.value = false;
+                statusModalData.value = null;
+            },
+        }
+    );
 };
 
 const handleEnterExaminationRoom = (queue) => {
@@ -146,12 +202,26 @@ const formatSession = (session) => {
                 <h1 class="text-xl font-bold tracking-tight text-slate-900">Kelola Antrean Pasien</h1>
                 <p class="text-xs text-slate-500">Panggilan antrean, periksa rekam medis, dan input resep obat klinik.</p>
             </div>
-            <Button variant="outline" size="sm" as-child>
-                <Link href="/display-queue" target="_blank" class="gap-1.5 text-xs text-slate-700">
-                    <Tv class="size-3.5 text-indigo-600" />
-                    Buka Display TV
-                </Link>
-            </Button>
+            <div class="flex items-center gap-2">
+                <!-- Filter Tanggal Antrean -->
+                <div class="flex items-center gap-1.5 bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
+                    <Clock class="size-3.5 text-slate-400" />
+                    <label class="text-[11px] text-slate-500 font-medium">Tanggal:</label>
+                    <input
+                        type="date"
+                        v-model="selectedDate"
+                        @change="handleDateChange"
+                        class="text-xs font-mono text-slate-800 bg-transparent outline-none cursor-pointer"
+                    />
+                </div>
+
+                <Button variant="outline" size="sm" as-child>
+                    <Link href="/display-queue" target="_blank" class="gap-1.5 text-xs text-slate-700">
+                        <Tv class="size-3.5 text-indigo-600" />
+                        Buka Display TV
+                    </Link>
+                </Button>
+            </div>
         </div>
 
         <!-- Table Card Shadcn Clean Design -->
@@ -241,7 +311,7 @@ const formatSession = (session) => {
                                     v-if="q.queue_status === 'waiting'"
                                     size="sm"
                                     class="h-7 px-2.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-normal"
-                                    @click="updateStatus(q.queue_id, 'called')"
+                                    @click="promptUpdateStatus(q, 'called')"
                                 >
                                     <PhoneCall class="size-3 mr-1" />
                                     Panggil
@@ -276,7 +346,7 @@ const formatSession = (session) => {
                                     variant="outline"
                                     class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200"
                                     title="Batalkan Antrean"
-                                    @click="updateStatus(q.queue_id, 'cancel')"
+                                    @click="promptUpdateStatus(q, 'cancel')"
                                 >
                                     <Ban class="size-3.5" />
                                 </Button>
@@ -509,5 +579,54 @@ const formatSession = (session) => {
                 </div>
             </div>
         </div>
+
+        <!-- Spring / Bounce Modal Konfirmasi Perubahan Status Antrean -->
+        <SpringModal
+            :open="isStatusModalOpen"
+            @update:open="isStatusModalOpen = $event"
+            :title="statusModalData?.title || 'Ubah Status Antrean'"
+            :description="`Konfirmasi perubahan status nomor antrean ${statusModalData?.queue?.queue_number}.`"
+        >
+            <div class="py-2 text-xs text-slate-600 leading-relaxed">
+                <template v-if="statusModalData?.newStatus === 'cancel'">
+                    <div class="p-3 bg-rose-50/70 border border-rose-100 rounded-lg text-rose-700">
+                        Apakah Anda yakin ingin <strong class="font-bold">membatalkan</strong> antrean pasien
+                        <strong>"{{ statusModalData?.queue?.patient?.patient_name }}"</strong>
+                        (No: {{ statusModalData?.queue?.queue_number }})? Pasien tidak akan dipanggil lagi hari ini.
+                    </div>
+                </template>
+                <template v-else>
+                    <div class="p-3 bg-indigo-50/70 border border-indigo-100 rounded-lg text-indigo-900">
+                        Ubah status antrean <strong>"{{ statusModalData?.queue?.patient?.patient_name }}"</strong>
+                        (No: {{ statusModalData?.queue?.queue_number }}) menjadi
+                        <strong class="font-bold text-indigo-700">"{{ statusModalData?.label }}"</strong>?
+                    </div>
+                </template>
+            </div>
+
+            <template #footer>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    class="h-8 text-xs border-slate-200"
+                    :disabled="isUpdatingStatus"
+                    @click="isStatusModalOpen = false"
+                >
+                    Batal
+                </Button>
+                <Button
+                    type="button"
+                    :variant="statusModalData?.newStatus === 'cancel' ? 'destructive' : 'default'"
+                    size="sm"
+                    class="h-8 text-xs"
+                    :class="statusModalData?.newStatus === 'cancel' ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
+                    :disabled="isUpdatingStatus"
+                    @click="confirmUpdateStatus"
+                >
+                    {{ isUpdatingStatus ? 'Memproses...' : (statusModalData?.newStatus === 'cancel' ? 'Ya, Batalkan' : 'Ya, Ubah') }}
+                </Button>
+            </template>
+        </SpringModal>
     </div>
 </template>

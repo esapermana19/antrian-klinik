@@ -45,6 +45,11 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'pendingQueuesCount' => fn () => $request->user()
+                ? \App\Models\Queue::whereDate('queue_date', \Carbon\Carbon::today()->toDateString())
+                    ->whereIn('queue_status', ['waiting', 'called', 'checking'])
+                    ->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

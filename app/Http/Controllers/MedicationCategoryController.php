@@ -14,14 +14,24 @@ class MedicationCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(\Illuminate\Http\Request $request): Response
     {
+        $search = $request->query('search');
+
         $medicationCategories = MedicationCategory::query()
+            ->when($search, function ($query, $search) {
+                $query->where('medication_category_name', 'like', "%{$search}%")
+                    ->orWhere('medication_category_code', 'like', "%{$search}%");
+            })
             ->orderBy('medication_category_code', 'asc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('MedicationCategories/Index', [
             'medication_categories' => $medicationCategories,
+            'filters' => [
+                'search' => $search ?? '',
+            ],
         ]);
     }
 

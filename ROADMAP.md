@@ -153,12 +153,12 @@ Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan 
 
 Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan otomatis memotong stok obat di gudang farmasi.
 
-- [ ] **5.1 Form Request Validasi**
+- [x] **5.1 Form Request Validasi**
     - `php artisan make:request StoreMedicalRecordRequest`
     - Validasi struktur:
         - Data diagnosa: `queue_id`, `patient_id`, `main_complaint`, `blood_pressure`, `temperature`, `weight`, `diagnosis`, `notes_on_treatment`.
         - Data resep (array): `prescriptions.*.medication_id`, `prescriptions.*.qty`, `prescriptions.*.dosage`.
-- [ ] **5.2 Transaksi Database (`DB::transaction`) pada `MedicalRecordController@store`**
+- [x] **5.2 Transaksi Database (`DB::transaction`) pada `MedicalRecordController@store`**
     ```php
     use Illuminate\Support\Facades\DB;
 
@@ -194,7 +194,7 @@ Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan o
         $queue->update(['queue_status' => 'completed']);
     });
     ```
-- [ ] **5.3 Frontend Halaman Dokter**
+- [x] **5.3 Frontend Halaman Dokter**
     - Halaman form input rekam medis + dropdown dinamis memilih obat dan dosis.
 
 ---

@@ -19,13 +19,27 @@ class PatientController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
+        $search = $request->query('search');
+
         $patients = Patient::query()
             ->when($user->role !== 'administrator', function ($query) use ($user) {
                 $query->where('user_id', $user->user_id);
-            })->latest()->paginate(10);
+            })
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('patient_name', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
+            'filters' => [
+                'search' => $search ?? '',
+            ],
         ]);
     }
 

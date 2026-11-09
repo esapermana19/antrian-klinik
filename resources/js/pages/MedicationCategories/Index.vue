@@ -20,16 +20,39 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
+    Search,
 } from 'lucide-vue-next';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
+import MotionModal from '@/components/MotionModal.vue';
 
 const props = defineProps({
     medication_categories: Object,
     errors: Object,
+    filters: Object,
 });
+
+const searchQuery = ref(props.filters?.search || '');
+let searchTimeout = null;
+
+const handleSearch = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        router.get(
+            '/medication-category',
+            { search: searchQuery.value || undefined },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
+    }, 300);
+};
 
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedMedicationCategoryId = ref(null);
+
+// State untuk Dialog Alert Konfirmasi Hapus Data
+const isDeleteModalOpen = ref(false);
+const categoryToDelete = ref(null);
+const isDeleting = ref(false);
 
 const form = useForm({
     medication_category_code: '',
@@ -76,11 +99,22 @@ const submitForm = () => {
     }
 };
 
-const deleteMedicationCategory = (dataCategory) => {
-    const id = dataCategory.medication_category_id ?? dataCategory.id;
-    if (confirm(`Hapus kategori obat "${dataCategory.medication_category_name}"?`)) {
-        router.delete(medicationCategoryRoute.destroy.url(id));
-    }
+const confirmDeleteCategory = (dataCategory) => {
+    categoryToDelete.value = dataCategory;
+    isDeleteModalOpen.value = true;
+};
+
+const handleDeleteCategory = () => {
+    if (!categoryToDelete.value) return;
+    const id = categoryToDelete.value.medication_category_id ?? categoryToDelete.value.id;
+    isDeleting.value = true;
+    router.delete(medicationCategoryRoute.destroy.url(id), {
+        onFinish: () => {
+            isDeleting.value = false;
+            isDeleteModalOpen.value = false;
+            categoryToDelete.value = null;
+        },
+    });
 };
 </script>
 
@@ -94,10 +128,23 @@ const deleteMedicationCategory = (dataCategory) => {
                 <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Kategori Obat</h1>
                 <p class="text-xs text-slate-500">Kelola kategori obat untuk mempermudah klasifikasi data inventaris.</p>
             </div>
-            <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" @click="openAddModal">
-                <Plus class="size-3.5" />
-                Tambah Kategori
-            </Button>
+            <div class="flex items-center gap-2">
+                <!-- Search Input Kategori Obat -->
+                <div class="relative w-64">
+                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        @input="handleSearch"
+                        placeholder="Cari nama atau kode kategori..."
+                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                    />
+                </div>
+                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs" @click="openAddModal">
+                    <Plus class="size-3.5" />
+                    Tambah Kategori
+                </Button>
+            </div>
         </div>
 
         <!-- Clean Standard Table -->
@@ -140,7 +187,7 @@ const deleteMedicationCategory = (dataCategory) => {
                                     size="icon-sm"
                                     variant="outline"
                                     class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
-                                    @click="deleteMedicationCategory(item)"
+                                    @click="confirmDeleteCategory(item)"
                                     title="Hapus"
                                 >
                                     <Trash2 class="size-3" />
@@ -195,47 +242,60 @@ const deleteMedicationCategory = (dataCategory) => {
             </div>
         </Card>
 
-        <!-- Modal Form -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
-            <div class="w-full max-w-md bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-                    <h2 class="text-sm font-bold text-slate-900">
-                        {{ isEditMode ? 'Edit Kategori Obat' : 'Tambah Kategori Obat' }}
-                    </h2>
-                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
-                        <X class="size-4" />
-                    </button>
+        <!-- Modal Form (Physics Spring Motion) -->
+        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                <h2 class="text-sm font-bold text-slate-900">
+                    {{ isEditMode ? 'Edit Kategori Obat' : 'Tambah Kategori Obat' }}
+                </h2>
+                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <X class="size-4" />
+                </button>
+            </div>
+
+            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-700">Kode Kategori</label>
+                    <input
+                        type="text"
+                        v-model="form.medication_category_code"
+                        placeholder="Contoh: ABX, ANAL"
+                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
+                    />
                 </div>
 
-                <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
-                    <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Kode Kategori</label>
-                        <input
-                            type="text"
-                            v-model="form.medication_category_code"
-                            placeholder="Contoh: ABX, ANAL"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
-                        />
-                    </div>
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-700">Nama Kategori</label>
+                    <input
+                        type="text"
+                        v-model="form.medication_category_name"
+                        placeholder="Contoh: Antibiotik, Analgesik"
+                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                    />
+                </div>
 
-                    <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Nama Kategori</label>
-                        <input
-                            type="text"
-                            v-model="form.medication_category_name"
-                            placeholder="Contoh: Antibiotik, Analgesik"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
-                        />
-                    </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan Kategori' }}
+                    </Button>
+                </div>
+            </form>
+        </MotionModal>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                        <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                        <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan Kategori' }}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <!-- Dialog Alert Konfirmasi Hapus Data (Spring Modal) -->
+        <ConfirmDeleteModal
+            :open="isDeleteModalOpen"
+            @update:open="isDeleteModalOpen = $event"
+            title="Hapus Kategori Obat"
+            description="Konfirmasi penghapusan data kategori obat terpilih."
+            :processing="isDeleting"
+            @confirm="handleDeleteCategory"
+            @cancel="isDeleteModalOpen = false"
+        >
+            Apakah Anda yakin ingin menghapus kategori obat
+            <span class="font-semibold text-slate-900">"{{ categoryToDelete?.medication_category_name }}"</span>?
+            Obat yang terdaftar dalam kategori ini dapat terpengaruh.
+        </ConfirmDeleteModal>
     </div>
 </template>

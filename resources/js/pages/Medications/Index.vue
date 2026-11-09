@@ -20,17 +20,65 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
+    Search,
+    Filter,
 } from 'lucide-vue-next';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import MotionModal from '@/components/MotionModal.vue';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 
 const props = defineProps({
     medications: Object,
     errors: Object,
     medication_categories: Array,
+    filters: Object,
 });
+
+const searchQuery = ref(props.filters?.search || '');
+const selectedCategoryFilter = ref(props.filters?.category_id ? String(props.filters.category_id) : 'all');
+let searchTimeout = null;
+
+const applyFilters = () => {
+    const params = {};
+    if (searchQuery.value) {
+        params.search = searchQuery.value;
+    }
+    if (selectedCategoryFilter.value && selectedCategoryFilter.value !== 'all') {
+        params.category_id = selectedCategoryFilter.value;
+    }
+    router.get(
+        '/medication',
+        params,
+        { preserveState: true, preserveScroll: true, replace: true }
+    );
+};
+
+const handleSearch = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        applyFilters();
+    }, 300);
+};
+
+const handleCategoryFilterChange = (val) => {
+    selectedCategoryFilter.value = val;
+    applyFilters();
+};
 
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedMedicationId = ref(null);
+
+// State untuk Dialog Alert Konfirmasi Hapus Obat
+const isDeleteModalOpen = ref(false);
+const medicationToDelete = ref(null);
+const isDeleting = ref(false);
 
 const form = useForm({
     medication_category_id: '',
@@ -78,11 +126,22 @@ const submitForm = () => {
     }
 };
 
-const deleteMedication = (medication) => {
-    const id = medication.medication_id ?? medication.id;
-    if (confirm(`Hapus data obat "${medication.medication_name}"?`)) {
-        router.delete(medicationRoute.destroy.url(id));
-    }
+const confirmDeleteMedication = (medication) => {
+    medicationToDelete.value = medication;
+    isDeleteModalOpen.value = true;
+};
+
+const handleDeleteMedication = () => {
+    if (!medicationToDelete.value) return;
+    const id = medicationToDelete.value.medication_id ?? medicationToDelete.value.id;
+    isDeleting.value = true;
+    router.delete(medicationRoute.destroy.url(id), {
+        onFinish: () => {
+            isDeleting.value = false;
+            isDeleteModalOpen.value = false;
+            medicationToDelete.value = null;
+        },
+    });
 };
 
 const formatCurrency = (val) => {
@@ -105,10 +164,44 @@ const formatCurrency = (val) => {
                 <h1 class="text-xl font-bold tracking-tight text-slate-900">Data Obat & Farmasi</h1>
                 <p class="text-xs text-slate-500">Kelola inventaris obat-obatan, stok persediaan, dan harga satuan klinik.</p>
             </div>
-            <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" @click="openAddModal">
-                <Plus class="size-3.5" />
-                Tambah Obat
-            </Button>
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Filter Kategori Shadcn Select -->
+                <div class="w-44">
+                    <Select :model-value="selectedCategoryFilter" @update:model-value="handleCategoryFilterChange">
+                        <SelectTrigger class="w-full h-8 text-xs bg-white/80 border-slate-200/80 shadow-2xs">
+                            <SelectValue placeholder="Semua Kategori" />
+                        </SelectTrigger>
+                        <SelectContent class="bg-white border-slate-200">
+                            <SelectItem value="all" class="text-xs font-medium">Semua Kategori</SelectItem>
+                            <SelectItem
+                                v-for="cat in medication_categories"
+                                :key="cat.medication_category_id ?? cat.id"
+                                :value="String(cat.medication_category_id ?? cat.id)"
+                                class="text-xs"
+                            >
+                                {{ cat.medication_category_name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <!-- Search Input Nama Obat -->
+                <div class="relative w-56">
+                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        @input="handleSearch"
+                        placeholder="Cari nama obat..."
+                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                    />
+                </div>
+
+                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs" @click="openAddModal">
+                    <Plus class="size-3.5" />
+                    Tambah Obat
+                </Button>
+            </div>
         </div>
 
         <!-- Clean Standard Table (Tanpa Badge AI) -->
@@ -159,7 +252,7 @@ const formatCurrency = (val) => {
                                     size="icon-sm"
                                     variant="outline"
                                     class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
-                                    @click="deleteMedication(item)"
+                                    @click="confirmDeleteMedication(item)"
                                     title="Hapus"
                                 >
                                     <Trash2 class="size-3" />
@@ -214,78 +307,96 @@ const formatCurrency = (val) => {
             </div>
         </Card>
 
-        <!-- Modal Form Tambah / Edit -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
-            <div class="w-full max-w-md bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-                    <h2 class="text-sm font-bold text-slate-900">
-                        {{ isEditMode ? 'Edit Data Obat' : 'Tambah Obat Baru' }}
-                    </h2>
-                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
-                        <X class="size-4" />
-                    </button>
-                </div>
+        <!-- Modal Form Tambah / Edit (Physics Spring Motion + Shadcn Select) -->
+        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                <h2 class="text-sm font-bold text-slate-900">
+                    {{ isEditMode ? 'Edit Data Obat' : 'Tambah Obat Baru' }}
+                </h2>
+                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <X class="size-4" />
+                </button>
+            </div>
 
-                <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
-                    <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Kategori Obat</label>
-                        <select
-                            v-model="form.medication_category_id"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 bg-white focus:border-indigo-500 focus:outline-none"
-                        >
-                            <option value="">Pilih Kategori</option>
-                            <option
+            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-700">Kategori Obat</label>
+                    <Select
+                        :model-value="form.medication_category_id ? String(form.medication_category_id) : ''"
+                        @update:model-value="(val) => form.medication_category_id = val"
+                    >
+                        <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                            <SelectValue placeholder="Pilih Kategori Obat" />
+                        </SelectTrigger>
+                        <SelectContent class="bg-white border-slate-200">
+                            <SelectItem
                                 v-for="category in medication_categories"
                                 :key="category.medication_category_id ?? category.id"
-                                :value="category.medication_category_id ?? category.id"
+                                :value="String(category.medication_category_id ?? category.id)"
+                                class="text-xs"
                             >
                                 {{ category.medication_category_name }}
-                            </option>
-                        </select>
-                    </div>
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-700">Nama Obat</label>
+                    <input
+                        type="text"
+                        v-model="form.medication_name"
+                        placeholder="Contoh: Paracetamol 500mg"
+                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Nama Obat</label>
+                        <label class="font-semibold text-slate-700">Stok</label>
                         <input
-                            type="text"
-                            v-model="form.medication_name"
-                            placeholder="Contoh: Paracetamol 500mg"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            type="number"
+                            v-model="form.stock"
+                            min="0"
+                            placeholder="0"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
                         />
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Stok</label>
-                            <input
-                                type="number"
-                                v-model="form.stock"
-                                min="0"
-                                placeholder="0"
-                                class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
-                            />
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Harga Satuan (Rp)</label>
-                            <input
-                                type="number"
-                                v-model="form.unit_price"
-                                min="0"
-                                placeholder="0"
-                                class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
-                            />
-                        </div>
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Harga Satuan (Rp)</label>
+                        <input
+                            type="number"
+                            v-model="form.unit_price"
+                            min="0"
+                            placeholder="0"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                        />
                     </div>
+                </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                        <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                        <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
+                    </Button>
+                </div>
+            </form>
+        </MotionModal>
+
+        <!-- Dialog Alert Konfirmasi Hapus Obat (Spring Modal) -->
+        <ConfirmDeleteModal
+            :open="isDeleteModalOpen"
+            @update:open="isDeleteModalOpen = $event"
+            title="Hapus Data Obat"
+            description="Konfirmasi penghapusan data obat dari inventaris farmasi."
+            :processing="isDeleting"
+            @confirm="handleDeleteMedication"
+            @cancel="isDeleteModalOpen = false"
+        >
+            Apakah Anda yakin ingin menghapus obat
+            <span class="font-semibold text-slate-900">"{{ medicationToDelete?.medication_name }}"</span>?
+            Data riwayat transaksi obat ini dapat terpengaruh.
+        </ConfirmDeleteModal>
     </div>
 </template>

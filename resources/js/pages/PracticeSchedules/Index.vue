@@ -29,6 +29,8 @@ import {
     X,
     Clock,
 } from 'lucide-vue-next';
+import MotionModal from '@/components/MotionModal.vue';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 
 const props = defineProps({
     schedules: Object,
@@ -38,6 +40,11 @@ const props = defineProps({
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedScheduleId = ref(null);
+
+// State untuk Dialog Alert Konfirmasi Hapus Jadwal
+const isDeleteModalOpen = ref(false);
+const scheduleToDelete = ref(null);
+const isDeleting = ref(false);
 
 const form = useForm({
     day: 'monday',
@@ -128,11 +135,22 @@ const submitForm = () => {
     }
 };
 
-const deleteSchedule = (schedule) => {
-    const id = schedule.schedule_id ?? schedule.id;
-    if (confirm(`Hapus jadwal hari ${formatDay(schedule.day)} sesi ${formatSession(schedule.session)}?`)) {
-        router.delete(scheduleRoute.destroy.url(id));
-    }
+const confirmDeleteSchedule = (schedule) => {
+    scheduleToDelete.value = schedule;
+    isDeleteModalOpen.value = true;
+};
+
+const handleDeleteSchedule = () => {
+    if (!scheduleToDelete.value) return;
+    const id = scheduleToDelete.value.schedule_id ?? scheduleToDelete.value.id;
+    isDeleting.value = true;
+    router.delete(scheduleRoute.destroy.url(id), {
+        onFinish: () => {
+            isDeleting.value = false;
+            isDeleteModalOpen.value = false;
+            scheduleToDelete.value = null;
+        },
+    });
 };
 
 const formatTime = (timeStr) => {
@@ -218,7 +236,7 @@ const formatTime = (timeStr) => {
                                     size="icon-sm"
                                     variant="outline"
                                     class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
-                                    @click="deleteSchedule(item)"
+                                    @click="confirmDeleteSchedule(item)"
                                     title="Hapus"
                                 >
                                     <Trash2 class="size-3" />
@@ -273,115 +291,130 @@ const formatTime = (timeStr) => {
             </div>
         </Card>
 
-        <!-- Modal Form Tambah / Edit -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
-            <div class="w-full max-w-md bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-                    <h2 class="text-sm font-bold text-slate-900">
-                        {{ isEditMode ? 'Edit Jadwal Praktik' : 'Tambah Jadwal Praktik' }}
-                    </h2>
-                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
-                        <X class="size-4" />
-                    </button>
+        <!-- Modal Form Tambah / Edit (Physics Spring Motion) -->
+        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                <h2 class="text-sm font-bold text-slate-900">
+                    {{ isEditMode ? 'Edit Jadwal Praktik' : 'Tambah Jadwal Praktik' }}
+                </h2>
+                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <X class="size-4" />
+                </button>
+            </div>
+
+            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Shadcn Select Hari -->
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Hari Praktik</label>
+                        <Select :model-value="form.day" @update:model-value="(val) => form.day = val">
+                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                                <SelectValue placeholder="Pilih Hari" />
+                            </SelectTrigger>
+                            <SelectContent class="bg-white border-slate-200">
+                                <SelectItem value="monday" class="text-xs">Senin</SelectItem>
+                                <SelectItem value="tuesday" class="text-xs">Selasa</SelectItem>
+                                <SelectItem value="wednesday" class="text-xs">Rabu</SelectItem>
+                                <SelectItem value="thursday" class="text-xs">Kamis</SelectItem>
+                                <SelectItem value="friday" class="text-xs">Jumat</SelectItem>
+                                <SelectItem value="saturday" class="text-xs">Sabtu</SelectItem>
+                                <SelectItem value="sunday" class="text-xs">Minggu</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <!-- Shadcn Select Sesi -->
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Sesi Pelayanan</label>
+                        <Select :model-value="form.session" @update:model-value="(val) => form.session = val">
+                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                                <SelectValue placeholder="Pilih Sesi" />
+                            </SelectTrigger>
+                            <SelectContent class="bg-white border-slate-200">
+                                <SelectItem value="morning" class="text-xs">Pagi</SelectItem>
+                                <SelectItem value="afternoon" class="text-xs">Sore</SelectItem>
+                                <SelectItem value="evening" class="text-xs">Malam</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <!-- Shadcn Select Hari -->
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Hari Praktik</label>
-                            <Select :model-value="form.day" @update:model-value="(val) => form.day = val">
-                                <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
-                                    <SelectValue placeholder="Pilih Hari" />
-                                </SelectTrigger>
-                                <SelectContent class="bg-white border-slate-200">
-                                    <SelectItem value="monday" class="text-xs">Senin</SelectItem>
-                                    <SelectItem value="tuesday" class="text-xs">Selasa</SelectItem>
-                                    <SelectItem value="wednesday" class="text-xs">Rabu</SelectItem>
-                                    <SelectItem value="thursday" class="text-xs">Kamis</SelectItem>
-                                    <SelectItem value="friday" class="text-xs">Jumat</SelectItem>
-                                    <SelectItem value="saturday" class="text-xs">Sabtu</SelectItem>
-                                    <SelectItem value="sunday" class="text-xs">Minggu</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <!-- Shadcn Select Sesi -->
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Sesi Pelayanan</label>
-                            <Select :model-value="form.session" @update:model-value="(val) => form.session = val">
-                                <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
-                                    <SelectValue placeholder="Pilih Sesi" />
-                                </SelectTrigger>
-                                <SelectContent class="bg-white border-slate-200">
-                                    <SelectItem value="morning" class="text-xs">Pagi</SelectItem>
-                                    <SelectItem value="afternoon" class="text-xs">Sore</SelectItem>
-                                    <SelectItem value="evening" class="text-xs">Malam</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <!-- Shadcn Time Picker Controls -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Jam Buka</label>
-                            <div class="relative flex items-center">
-                                <input
-                                    type="time"
-                                    v-model="form.opening_hours"
-                                    class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Jam Tutup</label>
-                            <div class="relative flex items-center">
-                                <input
-                                    type="time"
-                                    v-model="form.closing_hours"
-                                    class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Kuota Maks Pasien</label>
+                <!-- Shadcn Time Picker Controls -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Jam Buka</label>
+                        <div class="relative flex items-center">
                             <input
-                                type="number"
-                                v-model="form.max_quota"
-                                placeholder="Contoh: 30"
-                                min="1"
-                                class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                                type="time"
+                                v-model="form.opening_hours"
+                                class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
                             />
                         </div>
+                    </div>
 
-                        <!-- Shadcn Select Status -->
-                        <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Status Operasional</label>
-                            <Select :model-value="form.status" @update:model-value="(val) => form.status = val">
-                                <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
-                                    <SelectValue placeholder="Pilih Status" />
-                                </SelectTrigger>
-                                <SelectContent class="bg-white border-slate-200">
-                                    <SelectItem value="open" class="text-xs">Buka</SelectItem>
-                                    <SelectItem value="closed" class="text-xs">Tutup</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Jam Tutup</label>
+                        <div class="relative flex items-center">
+                            <input
+                                type="time"
+                                v-model="form.closing_hours"
+                                class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
+                            />
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                        <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                        <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan Jadwal' }}
-                        </Button>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Kuota Maks Pasien</label>
+                        <input
+                            type="number"
+                            v-model="form.max_quota"
+                            placeholder="Contoh: 30"
+                            min="1"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                        />
                     </div>
-                </form>
-            </div>
-        </div>
+
+                    <!-- Shadcn Select Status -->
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Status Operasional</label>
+                        <Select :model-value="form.status" @update:model-value="(val) => form.status = val">
+                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                                <SelectValue placeholder="Pilih Status" />
+                            </SelectTrigger>
+                            <SelectContent class="bg-white border-slate-200">
+                                <SelectItem value="open" class="text-xs">Buka</SelectItem>
+                                <SelectItem value="closed" class="text-xs">Tutup</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        {{ form.processing ? 'Menyimpan...' : 'Simpan Jadwal' }}
+                    </Button>
+                </div>
+            </form>
+        </MotionModal>
+
+        <!-- Dialog Alert Konfirmasi Hapus Jadwal (Spring Modal) -->
+        <ConfirmDeleteModal
+            :open="isDeleteModalOpen"
+            @update:open="isDeleteModalOpen = $event"
+            title="Hapus Jadwal Praktik"
+            description="Konfirmasi penghapusan jadwal operasional klinik."
+            :processing="isDeleting"
+            @confirm="handleDeleteSchedule"
+            @cancel="isDeleteModalOpen = false"
+        >
+            Apakah Anda yakin ingin menghapus jadwal praktik
+            <span class="font-semibold text-slate-900">
+                Hari {{ formatDay(scheduleToDelete?.day) }} Sesi {{ formatSession(scheduleToDelete?.session) }}
+            </span>
+            ({{ formatTime(scheduleToDelete?.opening_hours) }} - {{ formatTime(scheduleToDelete?.closing_hours) }})?
+        </ConfirmDeleteModal>
     </div>
 </template>

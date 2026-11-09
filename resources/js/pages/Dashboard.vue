@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { motion } from 'motion-v';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import AnimatedCounter from '@/components/AnimatedCounter.vue';
 import {
     Table,
     TableHeader,
@@ -123,69 +125,98 @@ const getStatusBadge = (status: string) => {
             </div>
         </div>
 
-        <!-- 4 Top Stat Cards (Compact Shadcn Style) -->
+        <!-- 4 Top Stat Cards (Compact Shadcn Style with Motion Slide-Up & Counting Physics) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Card class="p-3 rounded-lg border-slate-200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-medium text-slate-500">Total Pasien</p>
-                        <h3 class="text-lg font-bold text-slate-900 mt-0.5">
-                            {{ props.stats?.totalPatients ?? 0 }}
-                        </h3>
+            <motion.div
+                :initial="{ opacity: 0, y: 20 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :transition="{ type: 'spring', stiffness: 300, damping: 25, delay: 0.05 }"
+            >
+                <Card class="p-3.5 rounded-xl border-slate-200/90 shadow-2xs hover:shadow-xs transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium text-slate-500">Total Pasien</p>
+                            <h3 class="text-xl font-bold text-slate-900 mt-0.5 tracking-tight">
+                                <AnimatedCounter :value="props.stats?.totalPatients ?? 0" />
+                            </h3>
+                        </div>
+                        <div class="size-8 rounded-xl bg-indigo-50 border border-indigo-100/60 text-indigo-600 flex items-center justify-center">
+                            <Users class="size-4" />
+                        </div>
                     </div>
-                    <div class="size-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <Users class="size-3.5" />
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </motion.div>
 
-            <Card class="p-3 rounded-lg border-slate-200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-medium text-slate-500">Antrean Hari Ini</p>
-                        <h3 class="text-lg font-bold text-slate-900 mt-0.5">
-                            {{ props.stats?.todayQueuesCount ?? 0 }}
-                        </h3>
+            <motion.div
+                :initial="{ opacity: 0, y: 20 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :transition="{ type: 'spring', stiffness: 300, damping: 25, delay: 0.12 }"
+            >
+                <Card class="p-3.5 rounded-xl border-slate-200/90 shadow-2xs hover:shadow-xs transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium text-slate-500">Antrean Hari Ini</p>
+                            <h3 class="text-xl font-bold text-slate-900 mt-0.5 tracking-tight">
+                                <AnimatedCounter :value="props.stats?.todayQueuesCount ?? 0" />
+                            </h3>
+                        </div>
+                        <div class="size-8 rounded-xl bg-blue-50 border border-blue-100/60 text-blue-600 flex items-center justify-center">
+                            <Ticket class="size-4" />
+                        </div>
                     </div>
-                    <div class="size-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <Ticket class="size-3.5" />
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </motion.div>
 
-            <Card class="p-3 rounded-lg border-slate-200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-medium text-slate-500">Menunggu / Cek</p>
-                        <h3 class="text-lg font-bold text-amber-600 mt-0.5">
-                            {{ props.stats?.waitingToday ?? 0 }}
-                        </h3>
+            <motion.div
+                :initial="{ opacity: 0, y: 20 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :transition="{ type: 'spring', stiffness: 300, damping: 25, delay: 0.19 }"
+            >
+                <Card class="p-3.5 rounded-xl border-slate-200/90 shadow-2xs hover:shadow-xs transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium text-slate-500">Menunggu / Cek</p>
+                            <h3 class="text-xl font-bold text-amber-600 mt-0.5 tracking-tight">
+                                <AnimatedCounter :value="props.stats?.waitingToday ?? 0" />
+                            </h3>
+                        </div>
+                        <div class="size-8 rounded-xl bg-amber-50 border border-amber-100/60 text-amber-600 flex items-center justify-center">
+                            <Clock class="size-4" />
+                        </div>
                     </div>
-                    <div class="size-7 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <Clock class="size-3.5" />
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </motion.div>
 
-            <Card class="p-3 rounded-lg border-slate-200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[11px] font-medium text-slate-500">Selesai Dilayani</p>
-                        <h3 class="text-lg font-bold text-emerald-600 mt-0.5">
-                            {{ props.stats?.completedToday ?? 0 }}
-                        </h3>
+            <motion.div
+                :initial="{ opacity: 0, y: 20 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :transition="{ type: 'spring', stiffness: 300, damping: 25, delay: 0.26 }"
+            >
+                <Card class="p-3.5 rounded-xl border-slate-200/90 shadow-2xs hover:shadow-xs transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-medium text-slate-500">Selesai Dilayani</p>
+                            <h3 class="text-xl font-bold text-emerald-600 mt-0.5 tracking-tight">
+                                <AnimatedCounter :value="props.stats?.completedToday ?? 0" />
+                            </h3>
+                        </div>
+                        <div class="size-8 rounded-xl bg-emerald-50 border border-emerald-100/60 text-emerald-600 flex items-center justify-center">
+                            <UserCheck class="size-4" />
+                        </div>
                     </div>
-                    <div class="size-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <UserCheck class="size-3.5" />
-                    </div>
-                </div>
-            </Card>
+                </Card>
+            </motion.div>
         </div>
 
-        <!-- Middle Grid: Table Antrean + Info Panel (Clean Table instead of bloated cards) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Middle Grid: Table Antrean + Info Panel (Slide-Up Staggered Animation) -->
+        <motion.div
+            class="grid grid-cols-1 lg:grid-cols-12 gap-4"
+            :initial="{ opacity: 0, y: 24 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ type: 'spring', stiffness: 300, damping: 25, delay: 0.32 }"
+        >
             <!-- Left 8 Cols: Pasien Antrean Hari Ini (Tabel Rapi Shadcn) -->
-            <Card class="lg:col-span-8 p-0 overflow-hidden">
+            <Card class="lg:col-span-8 p-0 overflow-hidden rounded-xl border-slate-200/90 shadow-2xs">
                 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                     <div>
                         <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Antrean Pasien Hari Ini</h2>
@@ -304,6 +335,6 @@ const getStatusBadge = (status: string) => {
                     </Button>
                 </Card>
             </div>
-        </div>
+        </motion.div>
     </div>
 </template>

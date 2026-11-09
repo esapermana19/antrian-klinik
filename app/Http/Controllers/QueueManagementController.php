@@ -12,12 +12,15 @@ use Inertia\Response;
 
 class QueueManagementController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $selectedDate = $request->query('date', Carbon::today()->toDateString());
+
         $todayQueues = Queue::with(['patient', 'practiceSchedule'])
-            ->whereDate('queue_date', Carbon::today())
+            ->whereDate('queue_date', $selectedDate)
             ->orderBy('estimate_time', 'asc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $medications = Medication::where('stock', '>', 0)
             ->orderBy('medication_name', 'asc')
@@ -26,6 +29,9 @@ class QueueManagementController extends Controller
         return Inertia::render('Queues/Manage', [
             'todayQueues' => $todayQueues,
             'medications' => $medications,
+            'filters' => [
+                'date' => $selectedDate,
+            ],
         ]);
     }
 
