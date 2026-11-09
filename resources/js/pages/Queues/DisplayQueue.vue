@@ -1,19 +1,17 @@
 <script setup>
-import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import { router, Head, Link } from '@inertiajs/vue3';
 import {
     Clock,
-    Users,
     Maximize,
     Minimize,
     ArrowLeft,
     CheckCircle2,
-    Calendar,
-    Sparkles,
+    Hourglass,
 } from 'lucide-vue-next';
 
 defineOptions({
-    layout: null, // Standalone Kiosk Mode
+    layout: null, // Fullscreen Standalone Kiosk Mode
 });
 
 const props = defineProps({
@@ -21,10 +19,22 @@ const props = defineProps({
     nextQueues: Array,
 });
 
+const activeQueue = ref(props.currentQueue);
+const upcomingList = ref(props.nextQueues || []);
+
+// Sinkronkan bila props dari server berubah
+watch(() => props.currentQueue, (newVal) => {
+    activeQueue.value = newVal;
+});
+watch(() => props.nextQueues, (newVal) => {
+    upcomingList.value = newVal || [];
+});
+
 const currentTime = ref('');
 const currentDate = ref('');
 const isFullscreen = ref(false);
 
+// Format jam real-time
 const updateClock = () => {
     const now = new Date();
     currentTime.value = now.toLocaleTimeString('id-ID', {
@@ -56,305 +66,319 @@ const handleFullscreenChange = () => {
     isFullscreen.value = !!document.fullscreenElement;
 };
 
-// Ambil maksimal 3 orang antrean berikutnya
-const threeNextQueues = computed(() => {
-    return (props.nextQueues || []).slice(0, 3);
+// Hitung mundur durasi pemeriksaan (Estimasi 15 menit = 900 detik)
+const DURATION_SECONDS = 15 * 60; // 900 detik (15 menit)
+const remainingSeconds = ref(DURATION_SECONDS);
+let countdownInterval = null;
+
+// Fungsi inisialisasi hitung mundur berdasarkan kapan pasien dipanggil/diperiksa (updated_at)
+const initCountdown = () => {
+    clearInterval(countdownInterval);
+
+    if (!activeQueue.value) {
+        remainingSeconds.value = DURATION_SECONDS;
+        return;
+    }
+
+    const calculateRemaining = () => {
+        if (!activeQueue.value?.updated_at) {
+            remainingSeconds.value = DURATION_SECONDS;
+            return;
+        }
+
+        const callTime = new Date(activeQueue.value.updated_at).getTime();
+        const now = new Date().getTime();
+        const elapsedSeconds = Math.max(0, Math.floor((now - callTime) / 1000));
+        const left = DURATION_SECONDS - elapsedSeconds;
+
+        remainingSeconds.value = left > 0 ? left : 0;
+    };
+
+    calculateRemaining();
+    countdownInterval = setInterval(() => {
+        if (remainingSeconds.value > 0) {
+            remainingSeconds.value--;
+        }
+    }, 1000);
+};
+
+// Pantau perubahan pasien aktif untuk reset/sync timer
+watch(() => activeQueue.value?.queue_id, () => {
+    initCountdown();
 });
 
-let clockInterval;
-let reloadInterval;
+// Format menit & detik (mm:ss)
+const formattedCountdown = computed(() => {
+    const minutes = Math.floor(remainingSeconds.value / 60);
+    const seconds = remainingSeconds.value % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+});
+
+// Ambil maksimal 4 antrean berikutnya
+const upcomingQueues = computed(() => {
+    return (upcomingList.value || []).slice(0, 4);
+});
+
+let clockInterval = null;
+let pollInterval = null;
+let isFetching = false;
+
+// Polling data cepat (tiap 1.5 detik) langsung via Fetch API agar instant tanpa lag router
+const fetchLatestData = async () => {
+    if (isFetching) return;
+    isFetching = true;
+    try {
+        const response = await fetch('/display-queue/data', {
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store',
+        });
+        if (response.ok) {
+            const data = await response.json();
+            activeQueue.value = data.currentQueue;
+            upcomingList.value = data.nextQueues || [];
+        }
+    } catch {
+        // Abaikan error koneksi sementara saat polling
+    } finally {
+        isFetching = false;
+    }
+};
+
+const startPolling = () => {
+    pollInterval = setInterval(fetchLatestData, 1500);
+};
 
 onMounted(() => {
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
-    reloadInterval = setInterval(() => {
-        router.reload({ only: ['currentQueue', 'nextQueues'] });
-    }, 3000);
+    initCountdown();
+    startPolling();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 });
 
 onUnmounted(() => {
     clearInterval(clockInterval);
-    clearInterval(reloadInterval);
+    clearInterval(pollInterval);
+    clearInterval(countdownInterval);
     document.removeEventListener('fullscreenchange', handleFullscreenChange);
 });
 </script>
 
 <template>
-    <Head title="Display Papan Antrean Pasien" />
+    <Head title="Display Antrean Layar TV" />
 
-    <div class="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-4 md:p-6 overflow-hidden font-sans select-none relative">
-        <!-- Subtle Background Glow (Sesuai Halaman Lain) -->
-        <div class="fixed inset-0 pointer-events-none -z-10">
-            <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-10 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- 1. Header Display: Bersih & Terang (Sama seperti Halaman Utama) -->
-        <header class="flex items-center justify-between pb-4 border-b border-slate-200/80 shrink-0">
-            <div class="flex items-center gap-3.5">
+    <!-- Container Fullscreen Background Putih Bersih (bg-slate-50 / white) -->
+    <div class="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-4 md:p-5 overflow-hidden font-sans select-none box-border">
+        <!-- 1. Header Display TV Putih Bersih -->
+        <header class="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
+            <div class="flex items-center gap-3">
                 <Link
                     href="/dashboard"
-                    class="size-10 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
+                    class="h-9 w-9 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
                     title="Kembali ke Dashboard"
                 >
                     <ArrowLeft class="size-4" />
                 </Link>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2">
-                        Papan Antrean Poliklinik
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            <span class="size-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                            LIVE
-                        </span>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+                        ANTRIAN KLINIK
                     </h1>
-                    <p class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
-                        <span class="font-medium text-slate-600">Poliklinik Rawat Jalan</span>
-                        <span>•</span>
-                        <span>{{ currentDate }}</span>
+                    <p class="text-xs text-slate-500 font-medium">
+                        Papan Antrean Poliklinik • {{ currentDate }}
                     </p>
                 </div>
             </div>
 
-            <!-- Jam Digital & Tombol Fullscreen TV -->
+            <!-- Jam Digital & Fullscreen Button -->
             <div class="flex items-center gap-2.5">
                 <button
                     type="button"
                     @click="toggleFullscreen"
-                    class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-2xs text-xs font-semibold"
-                    title="Mode Layar Penuh (TV Kiosk)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-2xs text-xs font-medium cursor-pointer"
+                    title="Toggle Fullscreen"
                 >
                     <component :is="isFullscreen ? Minimize : Maximize" class="size-3.5 text-indigo-600" />
-                    <span class="hidden sm:inline">{{ isFullscreen ? 'Keluar Fullscreen' : 'Layar Penuh TV' }}</span>
+                    <span>{{ isFullscreen ? 'Keluar Fullscreen' : 'Layar Penuh TV' }}</span>
                 </button>
 
-                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
                     <Clock class="size-4 text-indigo-600" />
-                    <span class="text-base md:text-lg font-bold font-mono text-slate-900 tracking-tight">
+                    <span class="text-base font-bold font-mono text-slate-900 tracking-tight">
                         {{ currentTime }}
                     </span>
                 </div>
             </div>
         </header>
 
-        <!-- 2. Main Content Grid: Proporsional & Rapi di Segala Ukuran Layar -->
-        <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch pt-4 min-h-0">
-            <!-- Left 7 Cols: Banner Antrean yang Sedang Diperiksa + Ilustrasi Kartun Sederhana -->
-            <div class="lg:col-span-7 flex flex-col min-h-0">
-                <div class="flex-1 bg-white border border-slate-200/90 rounded-2xl shadow-xs p-6 md:p-8 flex flex-col justify-between overflow-hidden relative">
-                    <!-- Top Subtitle -->
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-2">
-                            <span class="size-2 rounded-full bg-indigo-600 animate-pulse"></span>
-                            Ruang Konsultasi Dokter
-                        </span>
-                        <span class="text-xs font-medium text-slate-400">
-                            Pemeriksaan Aktif
-                        </span>
+        <!-- 2. Konten Utama Fullscreen Pas Layar (Background Putih) -->
+        <main class="flex-1 grid grid-cols-12 gap-4 items-stretch pt-3 min-h-0 overflow-hidden">
+            <!-- Sisi Kiri (7 Kolom): Card Ruang Pemeriksaan (Banner Full + Glassmorphism Foreground) -->
+            <div class="col-span-12 lg:col-span-7 flex flex-col min-h-0 h-full">
+                <div class="flex-1 rounded-2xl overflow-hidden border border-slate-200/90 relative flex flex-col justify-between shadow-xs bg-white">
+                    <!-- Banner Full Memenuhi Seluruh Card (Ilustrasi Vector Tajam) -->
+                    <div class="absolute inset-0 z-0 overflow-hidden">
+                        <img
+                            src="/images/clinic-banner.svg"
+                            alt="Ruang Pemeriksaan Dokter"
+                            class="w-full h-full object-cover clinic-banner-breathing"
+                        />
+                        <!-- Soft Gradient Halus di atas Banner -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/50 to-white/70"></div>
                     </div>
 
-                    <!-- Banner Hero: Kartun Dokter & Keterangan Pasien (Tampil Harmonis & Bersih) -->
-                    <div v-if="props.currentQueue" class="my-auto py-4 flex flex-col items-center text-center">
-                        <!-- Kartun Sederhana Ilustrasi Dokter (Gaya Vector Flat Bersih seperti Referensi) -->
-                        <div class="relative w-full max-w-[420px] h-48 md:h-56 mb-4 flex items-center justify-center">
-                            <!-- Background Circle Soft (Sesuai Style Kartun di Contoh Gambar) -->
-                            <div class="absolute inset-0 m-auto size-44 md:size-52 rounded-full bg-indigo-50 border border-indigo-100/60 -z-0"></div>
+                    <!-- Label Status Atas (Di depan banner) -->
+                    <div class="relative z-10 flex items-center justify-between p-5 pb-0 shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-2">
+                            <span class="size-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                            Ruang Pemeriksaan Dokter
+                        </span>
 
-                            <svg
-                                viewBox="0 0 400 240"
-                                class="w-full h-full relative z-10 drop-shadow-sm select-none"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                        <!-- Badge Status & Waktu Hitung Mundur 15 Menit -->
+                        <div class="flex items-center gap-2">
+                            <div
+                                v-if="activeQueue"
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold border backdrop-blur-md transition-colors"
+                                :class="remainingSeconds <= 180
+                                    ? 'bg-rose-50 text-rose-700 border-rose-300'
+                                    : 'bg-indigo-50 text-indigo-700 border-indigo-200'"
                             >
-                                <!-- Lantai Minimalis -->
-                                <ellipse cx="200" cy="220" rx="160" ry="12" fill="#e2e8f0" opacity="0.7" />
+                                <Hourglass class="size-3.5 animate-spin" style="animation-duration: 4s;" />
+                                <span>Sisa Estimasi: {{ formattedCountdown }}</span>
+                            </div>
 
-                                <!-- Ranjang Periksa Pasien Sederhana -->
-                                <g transform="translate(210, 110)">
-                                    <rect x="0" y="55" width="130" height="14" rx="4" fill="#6366f1" />
-                                    <rect x="10" y="69" width="6" height="42" rx="2" fill="#64748b" />
-                                    <rect x="114" y="69" width="6" height="42" rx="2" fill="#64748b" />
-                                    <rect x="90" y="32" width="35" height="14" rx="6" transform="rotate(-25 90 32)" fill="#ffffff" stroke="#cbd5e1" />
-                                </g>
-
-                                <!-- Karakter Pasien (Duduk santai di ranjang periksa) -->
-                                <g transform="translate(230, 75)">
-                                    <!-- Badan Pasien (Baju Ungu Proyek) -->
-                                    <path d="M 20,48 L 45,48 L 48,92 L 18,92 Z" fill="#8b5cf6" rx="4" />
-                                    <!-- Celana Pasien -->
-                                    <path d="M 18,92 L 20,128 L 32,128 L 30,92 Z" fill="#334155" />
-                                    <path d="M 33,92 L 35,128 L 47,128 L 45,92 Z" fill="#1e293b" />
-                                    <!-- Kepala Pasien -->
-                                    <circle cx="33" cy="28" r="16" fill="#fed7aa" />
-                                    <!-- Rambut -->
-                                    <path d="M 18,28 C 18,14 26,12 35,12 C 45,12 48,18 48,28 C 42,22 36,22 30,24 Z" fill="#451a03" />
-                                    <!-- Senyum & Mata Pasien -->
-                                    <circle cx="27" cy="28" r="2" fill="#451a03" />
-                                    <path d="M 24,34 Q 28,37 32,34" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" fill="none" />
-                                </g>
-
-                                <!-- Karakter Dokter (Memeriksa dengan Stetoskop) -->
-                                <g transform="translate(100, 50)">
-                                    <!-- Badan & Jas Putih Dokter -->
-                                    <path d="M 35,68 L 65,68 L 72,165 L 28,165 Z" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
-                                    <path d="M 42,68 L 58,68 L 56,105 L 44,105 Z" fill="#4f46e5" /> <!-- Kemeja dalam -->
-                                    <!-- Celana Dokter -->
-                                    <rect x="33" y="165" width="12" height="48" rx="3" fill="#1e293b" />
-                                    <rect x="55" y="165" width="12" height="48" rx="3" fill="#0f172a" />
-                                    <!-- Sepatu -->
-                                    <ellipse cx="38" cy="214" rx="10" ry="5" fill="#0f172a" />
-                                    <ellipse cx="62" cy="214" rx="10" ry="5" fill="#0f172a" />
-                                    <!-- Kepala Dokter -->
-                                    <circle cx="50" cy="42" r="18" fill="#fcd34d" />
-                                    <!-- Rambut Dokter -->
-                                    <path d="M 32,38 C 32,22 42,20 52,20 C 64,20 68,28 68,38 C 60,30 52,30 45,32 Z" fill="#1e293b" />
-                                    <!-- Kacamata & Senyum -->
-                                    <circle cx="56" cy="40" r="5" stroke="#4f46e5" stroke-width="1.5" fill="#ffffff" fill-opacity="0.3" />
-                                    <circle cx="57" cy="40" r="1.5" fill="#1e293b" />
-                                    <path d="M 52,50 Q 56,53 60,50" stroke="#b45309" stroke-width="1.5" stroke-linecap="round" fill="none" />
-                                    <!-- ID Card Dokter -->
-                                    <rect x="35" y="85" width="10" height="14" rx="2" fill="#7c3aed" />
-
-                                    <!-- Animasi Tangan Dokter Memeriksa dengan Stetoskop (Gerakan Halus) -->
-                                    <g class="doctor-arm-simple">
-                                        <!-- Lengan Jas Putih -->
-                                        <path d="M 64,75 Q 85,85 105,92 L 132,95" stroke="#ffffff" stroke-width="12" stroke-linecap="round" fill="none" />
-                                        <!-- Tangan Dokter -->
-                                        <circle cx="134" cy="95" r="6" fill="#fcd34d" />
-                                        <!-- Ujung Stetoskop menyentuh dada pasien -->
-                                        <circle cx="140" cy="95" r="5" fill="#64748b" stroke="#334155" stroke-width="1.5" />
-                                        <!-- Efek Denyut Periksa (Gelombang Halus) -->
-                                        <circle cx="140" cy="95" r="10" fill="#8b5cf6" opacity="0.3" class="animate-ping" />
-                                    </g>
-                                    <!-- Selang Stetoskop -->
-                                    <path d="M 50,56 C 52,80 88,115 133,98" stroke="#475569" stroke-width="2" fill="none" stroke-linecap="round" />
-                                </g>
-
-                                <!-- Elemen Dekoratif Aksen Minimalis -->
-                                <circle cx="340" cy="65" r="12" fill="#ede9fe" />
-                                <path d="M 336,65 L 344,65 M 340,61 L 340,69" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" />
-                            </svg>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 backdrop-blur-md">
+                                Sedang Diperiksa
+                            </span>
                         </div>
+                    </div>
 
-                        <!-- Keterangan Nomor Antrean & Nama Pasien yang Sedang Diperiksa -->
-                        <div class="w-full max-w-lg bg-slate-50 border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                                Nomor Antrean Aktif
+                    <!-- Foreground: Card Nomor Antrean Glassmorphism Murni di Depan Banner -->
+                    <div v-if="activeQueue" class="relative z-10 my-auto px-6 py-4 flex flex-col items-center text-center">
+                        <div class="w-full max-w-lg bg-white/45 backdrop-blur-2xl border border-white/80 rounded-3xl p-7 shadow-[0_20px_50px_rgba(79,70,229,0.12)] ring-1 ring-white/60">
+                            <p class="text-xs font-bold uppercase tracking-widest text-indigo-700/80 mb-1">
+                                Nomor Antrean Sedang Dilayani
                             </p>
-                            <!-- Nomor Antrean Bersih & Besar -->
-                            <div class="text-6xl md:text-7xl font-black font-mono tracking-tight text-indigo-600 my-1">
-                                {{ props.currentQueue.queue_number }}
+                            <!-- Nomor Antrean Font Monospace Besar -->
+                            <div class="text-6xl md:text-7xl font-black font-mono tracking-tight text-indigo-600 my-1 drop-shadow-sm">
+                                {{ activeQueue.queue_number }}
                             </div>
                             <!-- Nama Pasien -->
-                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-                                {{ props.currentQueue.patient?.patient_name }}
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1 truncate drop-shadow-xs">
+                                {{ activeQueue.patient?.patient_name }}
                             </h2>
-                            <p class="text-xs text-slate-500 mt-1 font-mono">
-                                NIK: {{ props.currentQueue.patient?.nik || '-' }} • Gender: {{ props.currentQueue.patient?.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                            <div class="mt-2 flex items-center justify-center gap-3 text-xs text-slate-600 font-mono">
+                                <span>Sesi: <strong class="text-slate-900">{{ activeQueue.session === 'morning' ? 'Pagi' : 'Sore' }}</strong></span>
+                                <span>•</span>
+                                <span>Estimasi Panggilan: <strong class="text-slate-900">{{ activeQueue.estimate_time || '-' }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- State Kosong jika belum ada panggilan aktif -->
+                    <div v-else class="relative z-10 my-auto p-6 text-center">
+                        <div class="inline-block bg-white/70 backdrop-blur-xl border border-white/80 rounded-3xl p-7 max-w-sm shadow-md">
+                            <h3 class="text-lg font-bold text-slate-800">Belum Ada Panggilan Aktif</h3>
+                            <p class="text-xs text-slate-500 mt-1">
+                                Silakan bersiap di ruang tunggu, dokter akan segera memanggil nomor antrean Anda.
                             </p>
                         </div>
                     </div>
 
-                    <!-- Empty State jika belum ada antrean dipanggil -->
-                    <div v-else class="my-auto py-16 text-center text-slate-400">
-                        <div class="size-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
-                            <Sparkles class="size-8" />
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800">Belum Ada Panggilan Aktif</h3>
-                        <p class="text-xs text-slate-400 max-w-xs mx-auto mt-1">
-                            Silakan menunggu, nomor antrean pertama akan segera dipanggil oleh dokter ke ruang periksa.
-                        </p>
-                    </div>
-
-                    <!-- Bottom Clinic Note -->
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                        <span>Poli Rawat Jalan Klinik</span>
-                        <span>Harap bersiap di dekat pintu periksa saat nomor Anda tertera</span>
+                    <!-- Bottom Bar di depan banner -->
+                    <div class="relative z-10 p-5 pt-0 flex items-center justify-between text-xs text-slate-500 shrink-0">
+                        <span>Poli Rawat Jalan</span>
+                        <span>Harap bersiap saat nomor antrean Anda tertera di layar</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Right 5 Cols: List 3 Orang Selanjutnya (Bersih & Sederhana) -->
-            <div class="lg:col-span-5 flex flex-col min-h-0 space-y-3">
-                <div class="flex items-center justify-between pb-1">
-                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <Users class="size-4.5 text-indigo-600" />
-                        3 Antrean Selanjutnya
-                    </h3>
-                    <span class="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-2xs">
-                        Ruang Tunggu
-                    </span>
-                </div>
+            <!-- Sisi Kanan (5 Kolom): Antrean Selanjutnya (Card Ungu Solid & Paduan Hitam-Putih Rapi) -->
+            <div class="col-span-12 lg:col-span-5 flex flex-col min-h-0 h-full">
+                <div class="flex-1 bg-white border border-slate-200/90 rounded-2xl p-5 md:p-6 flex flex-col justify-between overflow-hidden shadow-xs">
+                    <!-- Sub-Header Kanan -->
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-900">
+                                Antrean Selanjutnya
+                            </h3>
+                            <p class="text-xs text-slate-500">Ruang Tunggu Pasien</p>
+                        </div>
+                        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                            {{ (props.nextQueues || []).length }} Menunggu
+                        </span>
+                    </div>
 
-                <!-- List 3 Card Antrean Selanjutnya -->
-                <div v-if="threeNextQueues.length > 0" class="flex-1 flex flex-col space-y-3 overflow-y-auto pr-0.5">
-                    <div
-                        v-for="(queue, index) in threeNextQueues"
-                        :key="queue.queue_id"
-                        class="p-4 rounded-xl border bg-white flex items-center justify-between transition-all duration-200 shadow-2xs"
-                        :class="index === 0
-                            ? 'border-indigo-300 ring-2 ring-indigo-500/10'
-                            : 'border-slate-200'"
-                    >
-                        <div class="flex items-center gap-3.5">
-                            <!-- Nomor Antrean Box -->
-                            <div
-                                class="size-12 rounded-xl flex items-center justify-center font-mono font-bold text-lg"
-                                :class="index === 0
-                                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
-                                    : 'bg-slate-100 text-slate-700'"
-                            >
-                                {{ queue.queue_number }}
+                    <!-- List Card Antrean Selanjutnya (Ungu Solid & Kombinasi Hitam Putih) -->
+                    <div v-if="upcomingQueues.length > 0" class="flex-1 flex flex-col justify-center gap-3 py-3 min-h-0">
+                        <div
+                            v-for="(queue, index) in upcomingQueues"
+                            :key="queue.queue_id"
+                            class="p-3.5 rounded-xl border flex items-center justify-between transition-all"
+                            :class="index === 0
+                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                                : 'bg-slate-950 border-slate-900 text-white'"
+                        >
+                            <!-- Kiri: Nomor Antrean Box Solid & Info Pasien Rapi -->
+                            <div class="flex items-center gap-3 min-w-0">
+                                <!-- Box Nomor Antrean: Kontras Ungu Solid / Hitam-Putih -->
+                                <div
+                                    class="shrink-0 px-3 py-2 rounded-lg font-mono font-bold text-sm tracking-tight flex items-center justify-center"
+                                    :class="index === 0
+                                        ? 'bg-white text-indigo-950 shadow-xs'
+                                        : 'bg-indigo-600 text-white'"
+                                >
+                                    {{ queue.queue_number }}
+                                </div>
+
+                                <!-- Detail Pasien Terstruktur -->
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-sm leading-snug truncate" :class="index === 0 ? 'text-white' : 'text-slate-100'">
+                                        {{ queue.patient?.patient_name }}
+                                    </h4>
+                                    <p class="text-[11px] font-mono mt-0.5" :class="index === 0 ? 'text-indigo-100' : 'text-slate-400'">
+                                        Estimasi: <span class="font-medium" :class="index === 0 ? 'text-white' : 'text-slate-200'">{{ queue.estimate_time }}</span> • Sesi {{ queue.session === 'morning' ? 'Pagi' : 'Sore' }}
+                                    </p>
+                                </div>
                             </div>
 
-                            <!-- Detail Pasien -->
-                            <div>
-                                <h4 class="font-bold text-slate-900 text-sm md:text-base leading-snug">
-                                    {{ queue.patient?.patient_name }}
-                                </h4>
-                                <p class="text-xs text-slate-400 font-mono mt-0.5">
-                                    Estimasi: <strong class="text-slate-600">{{ queue.estimate_time }}</strong> • Sesi {{ queue.session === 'morning' ? 'Pagi' : 'Sore' }}
-                                </p>
+                            <!-- Kanan: Status Bersiap / Urutan -->
+                            <div class="shrink-0 pl-3">
+                                <span
+                                    v-if="index === 0"
+                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-indigo-900 shadow-xs"
+                                >
+                                    Bersiap
+                                </span>
+                                <span
+                                    v-else
+                                    class="text-xs font-medium text-slate-400"
+                                >
+                                    Antrean ke-{{ index + 1 }}
+                                </span>
                             </div>
                         </div>
 
-                        <!-- Urutan / Indikator Bersiap -->
-                        <div class="text-right">
-                            <span
-                                v-if="index === 0"
-                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"
-                            >
-                                Urutan #1 Bersiap
-                            </span>
-                            <span
-                                v-else
-                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200"
-                            >
-                                Urutan #{{ index + 1 }}
-                            </span>
+                        <!-- Slot Placeholder bila antrean kurang dari 4 -->
+                        <div
+                            v-for="emptySlot in (4 - upcomingQueues.length)"
+                            :key="'slot-' + emptySlot"
+                            class="p-3.5 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400 text-xs"
+                        >
+                            Slot antrean berikutnya belum terisi
                         </div>
                     </div>
 
-                    <!-- Slot Kosong jika antrean belum genap 3 -->
-                    <div
-                        v-for="emptySlot in (3 - threeNextQueues.length)"
-                        :key="'slot-' + emptySlot"
-                        class="p-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 flex items-center justify-center text-slate-400 text-xs py-6"
-                    >
-                        Slot Antrean Belum Ada Pendaftar
+                    <!-- Jika Tidak Ada Antrean Menunggu -->
+                    <div v-else class="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                        <CheckCircle2 class="size-8 text-emerald-500 mb-2" />
+                        <p class="font-semibold text-sm text-slate-800">Tidak Ada Antrean Menunggu</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Semua pasien pada sesi ini telah selesai dipanggil.</p>
                     </div>
-                </div>
 
-                <!-- State jika tidak ada antrean menunggu -->
-                <div v-else class="flex-1 p-6 border border-slate-200 bg-white rounded-xl flex flex-col items-center justify-center text-center text-slate-400 shadow-2xs">
-                    <CheckCircle2 class="size-10 text-emerald-500 mb-2" />
-                    <p class="font-bold text-sm text-slate-800">Tidak Ada Antrean Menunggu</p>
-                    <p class="text-xs text-slate-400 mt-1 max-w-xs">Semua pasien pada sesi ini telah dipanggil atau belum ada pasien baru.</p>
-                </div>
-
-                <!-- Info Banner Sederhana di Bagian Bawah -->
-                <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-800 leading-relaxed">
-                    Pasien nomor berikutnya dimohon tetap berada di ruang tunggu agar tidak terlewat saat nomor Anda dipanggil ke ruang dokter.
+                    <!-- Footer Note Kanan -->
+                    <div class="pt-3 border-t border-slate-100 text-center text-xs text-slate-400 shrink-0">
+                        Harap memperhatikan nomor panggilan pada layar ini
+                    </div>
                 </div>
             </div>
         </main>
@@ -362,17 +386,18 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@keyframes doctorArmSubtle {
+/* Animasi halus napas pada latar belakang banner */
+@keyframes bannerBreathing {
     0%, 100% {
-        transform: rotate(0deg);
+        transform: scale(1);
     }
     50% {
-        transform: rotate(-3deg);
+        transform: scale(1.03);
     }
 }
 
-.doctor-arm-simple {
-    animation: doctorArmSubtle 3.5s ease-in-out infinite;
-    transform-origin: 64px 75px;
+.clinic-banner-breathing {
+    animation: bannerBreathing 10s ease-in-out infinite;
+    transform-origin: center center;
 }
 </style>

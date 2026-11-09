@@ -69,10 +69,13 @@ class MedicalRecordController extends Controller
                             throw new \Exception("Stok obat {$medication->medication_name} tidak mencukupi! Sisa stok: {$medication->stock}");
                         }
 
-                        // Simpan MedicationPrescription
+                        // Simpan MedicationPrescription (prescription_code max 13 karakter di skema DB)
+                        // 'RSP-' (4 char) + 8 char hex = 12 char (aman <= 13)
+                        $prescriptionCode = 'RSP-'.strtoupper(substr(dechex(microtime(true) * 1000), -8));
+
                         $medrec->medicationPrescriptions()->create([
                             'medication_id' => $medication->medication_id,
-                            'prescription_code' => 'RSP-'.uniqid(),
+                            'prescription_code' => $prescriptionCode,
                             'qty' => $item['qty'],
                             'unit_price' => $medication->unit_price,
                             'total_price' => $medication->unit_price * $item['qty'],
@@ -86,6 +89,26 @@ class MedicalRecordController extends Controller
 
                 // 4. Ubah status antrean menjadi 'completed'
                 $queue->update(['queue_status' => 'completed']);
+
+                // 5. Generate Tagihan / Invoice Otomatis
+                $examinationFee = 50000; // Biaya jasa konsultasi / klinik standar
+                $medicationFee = $medrec->medicationPrescriptions()->sum('total_price') ?? 0;
+                $totalAmount = $examinationFee + $medicationFee;
+
+                // Format kode invoice: INV-YYYYMMDD-XXXX (max 15 karakter di skema DB)
+                // "INV" (3) + 6 digit date + 5 digit hex = 14 karakter (aman <= 15 karakter)
+                $datePrefix = now()->format('ymd'); // 6 digit
+                $uniqueSuffix = strtoupper(substr(dechex(time()), -5)); // 5 char
+                $invoiceCode = "INV{$datePrefix}{$uniqueSuffix}"; // 14 karakter
+
+                $medrec->invoice()->create([
+                    'invoice_code' => $invoiceCode,
+                    'examination_fee' => $examinationFee,
+                    'medication_fee' => $medicationFee,
+                    'total_amount' => $totalAmount,
+                    'payment_status' => 'unpaid',
+                    'payment_method' => 'cash',
+                ]);
             });
 
             return back()->with('success', 'Pemeriksaan selesai. Rekam medis dan resep berhasil disimpan.');

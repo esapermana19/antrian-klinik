@@ -27,6 +27,7 @@ import {
     Stethoscope,
     Pill,
     Search,
+    ChevronDown,
 } from 'lucide-vue-next';
 import {
     Select,
@@ -73,6 +74,11 @@ const isHistoryOpen = ref(false);
 const selectedPatient = ref(null);
 const medicalRecords = ref([]);
 const isLoadingHistory = ref(false);
+const expandedRecords = ref({}); // Track id rekam medis yang sedang dibuka
+
+const toggleAccordion = (id) => {
+    expandedRecords.value[id] = !expandedRecords.value[id];
+};
 
 const form = useForm({
     user_id: '',
@@ -123,6 +129,7 @@ const submitForm = () => {
 const openHistoryModal = async (patient) => {
     selectedPatient.value = patient;
     medicalRecords.value = [];
+    expandedRecords.value = {};
     isLoadingHistory.value = true;
     isHistoryOpen.value = true;
 
@@ -452,42 +459,67 @@ const formatDate = (dateStr) => {
                     <div v-else-if="medicalRecords.length === 0" class="text-center py-8 text-slate-400">
                         Belum ada riwayat rekam medis.
                     </div>
-                    <div v-else class="space-y-3">
+                    <div v-else class="space-y-2">
+                        <!-- Accordion Style List -->
                         <div
                             v-for="record in medicalRecords"
                             :key="record.medrec_id"
-                            class="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2"
+                            class="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs transition"
                         >
-                            <div class="flex items-center justify-between pb-1.5 border-b border-slate-200/80">
-                                <span class="font-mono font-bold text-slate-800">
-                                    {{ record.medrec_code }}
-                                </span>
-                                <span class="text-[11px] text-slate-400 font-mono">
+                            <!-- Accordion Header (Baris Ringkas: Kode, Tanggal, Diagnosa Singkat) -->
+                            <button
+                                type="button"
+                                @click="toggleAccordion(record.medrec_id)"
+                                class="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="size-6 rounded-md flex items-center justify-center transition-transform text-slate-400"
+                                        :class="expandedRecords[record.medrec_id] ? 'rotate-180 text-indigo-600' : ''"
+                                    >
+                                        <ChevronDown class="size-4" />
+                                    </div>
+                                    <div>
+                                        <span class="font-mono font-bold text-xs text-slate-800">
+                                            {{ record.medrec_code }}
+                                        </span>
+                                        <span class="ml-2 text-[11px] text-slate-500 font-medium">
+                                            Diagnosa: <strong class="text-slate-800">{{ record.diagnosis || '-' }}</strong>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="text-[11px] text-slate-400 font-mono">
                                     {{ formatDate(record.created_at) }}
-                                </span>
-                            </div>
+                                </div>
+                            </button>
 
-                            <div class="grid grid-cols-3 gap-2 text-[11px] text-slate-600">
-                                <div>Tensi: <strong class="text-slate-800 font-mono">{{ record.blood_pressure || '-' }}</strong></div>
-                                <div>Suhu: <strong class="text-slate-800 font-mono">{{ record.temperature || '-' }}°C</strong></div>
-                                <div>Berat: <strong class="text-slate-800 font-mono">{{ record.weight || '-' }}kg</strong></div>
-                            </div>
+                            <!-- Accordion Detail (Hanya tampil saat dibuka) -->
+                            <div
+                                v-show="expandedRecords[record.medrec_id]"
+                                class="px-3 pb-3 pt-2 border-t border-slate-100 bg-slate-50/60 space-y-2.5 text-xs text-slate-700"
+                            >
+                                <div class="grid grid-cols-3 gap-2 text-[11px] p-2 bg-white rounded-md border border-slate-100">
+                                    <div>Tensi: <strong class="text-slate-900 font-mono">{{ record.blood_pressure || '-' }}</strong></div>
+                                    <div>Suhu: <strong class="text-slate-900 font-mono">{{ record.temperature || '-' }}°C</strong></div>
+                                    <div>Berat: <strong class="text-slate-900 font-mono">{{ record.weight || '-' }}kg</strong></div>
+                                </div>
 
-                            <div class="space-y-1">
-                                <div><span class="text-slate-500">Keluhan:</span> {{ record.main_complaint || '-' }}</div>
-                                <div><span class="text-slate-500">Diagnosa:</span> <strong class="text-slate-900">{{ record.diagnosis || '-' }}</strong></div>
-                                <div v-if="record.notes_on_treatment"><span class="text-slate-500">Tindakan:</span> {{ record.notes_on_treatment }}</div>
-                            </div>
+                                <div class="space-y-1">
+                                    <div><span class="text-slate-500">Keluhan:</span> {{ record.main_complaint || '-' }}</div>
+                                    <div v-if="record.notes_on_treatment"><span class="text-slate-500">Tindakan:</span> {{ record.notes_on_treatment }}</div>
+                                </div>
 
-                            <div v-if="record.prescriptions && record.prescriptions.length > 0" class="pt-1.5 border-t border-slate-200/80 text-[11px]">
-                                <span class="text-slate-500 font-medium">Resep: </span>
-                                <span
-                                    v-for="rx in record.prescriptions"
-                                    :key="rx.prescription_id"
-                                    class="inline-block mr-2 text-slate-700"
-                                >
-                                    {{ rx.medication?.medication_name }} ({{ rx.qty }} unit, {{ rx.dosage }})
-                                </span>
+                                <div v-if="record.prescriptions && record.prescriptions.length > 0" class="pt-2 border-t border-slate-200/80 text-[11px]">
+                                    <span class="text-slate-500 font-medium">Resep Obat: </span>
+                                    <span
+                                        v-for="rx in record.prescriptions"
+                                        :key="rx.prescription_id"
+                                        class="inline-block mr-2 text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200"
+                                    >
+                                        {{ rx.medication?.medication_name }} ({{ rx.qty }} unit, {{ rx.dosage }})
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

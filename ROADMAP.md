@@ -203,18 +203,21 @@ Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan o
 
 Tujuan: Mengkalkulasi total biaya pengobatan pasien dan memproses pembayaran.
 
-- [ ] **6.1 Logika Pembuatan Invoice Otomatis**
-    - Dapat di-trigger otomatis setelah rekam medis disimpan, atau dibuat via kasir:
-        - `examination_fee`: Biaya jasa dokter/klinik tetap (misal: Rp50.000).
-        - `medication_fee`: Jumlahkan `total_price` dari seluruh `medicationPrescriptions` pada rekam medis tersebut.
+- [x] **6.1 Logika Pembuatan Invoice Otomatis**
+    - Otomatis dibuat saat `MedicalRecordController@store` sukses menyimpan rekam medis & resep:
+        - `examination_fee`: Biaya konsultasi/pemeriksaan standar (Rp50.000).
+        - `medication_fee`: Jumlah akumulasi dari seluruh item obat `medicationPrescriptions`.
         - `total_amount`: `examination_fee + medication_fee`.
         - `payment_status`: `unpaid`.
-- [ ] **6.2 Lengkapi `InvoiceController.php`**
-    - `index()`: Daftar tagihan kasir (filter `unpaid` / `paid`).
-    - `show(Invoice $invoice)`: Cetak struk/nota pembayaran dengan relasi obat dan pasien.
-    - `pay(Request $request, Invoice $invoice)`: Update `payment_status = 'paid'`, catat `payment_method` (`cash`/`transfer`).
-- [ ] **6.3 Frontend Halaman Kasir**
-    - Tampilan kasir & rincian nota tagihan.
+        - `invoice_code`: Format unik `INV-ymd-XXXXX`.
+- [x] **6.2 Lengkapi `InvoiceController.php`**
+    - `index()`: Daftar antrean tagihan kasir dengan filter `unpaid` / `paid` / `canceled`, pencarian, dan kartu statistik pendapatan hari ini.
+    - `show(Invoice $invoice)`: Halaman cetak struk/nota pembayaran dengan rincian biaya dokter dan daftar obat.
+    - `pay(PayInvoiceRequest $request, Invoice $invoice)`: Update `payment_status = 'paid'` serta mencatat `payment_method` (`cash`/`transfer`).
+- [x] **6.3 Frontend Halaman Kasir**
+    - `resources/js/pages/Invoices/Index.vue`: Antarmuka kasir, stat cards, filter status, tabel interaktif, dan modal pelunasan pembayaran.
+    - `resources/js/pages/Invoices/Show.vue`: Tampilan cetak nota/struk kasir dengan layout formal & print styling.
+    - Menu navigasi Kasir & Tagihan ditambahkan pada sidebar layout administrator.
 
 ---
 

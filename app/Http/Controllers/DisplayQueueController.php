@@ -12,6 +12,24 @@ class DisplayQueueController extends Controller
 {
     public function index(): Response
     {
+        $data = $this->getQueueData();
+
+        return Inertia::render('Queues/DisplayQueue', [
+            'currentQueue' => $data['currentQueue'],
+            'nextQueues' => $data['nextQueues'],
+        ]);
+    }
+
+    /**
+     * Endpoint API JSON ringan untuk polling realtime tanpa overhead
+     */
+    public function data()
+    {
+        return response()->json($this->getQueueData());
+    }
+
+    private function getQueueData(): array
+    {
         $today = Carbon::today();
 
         $currentQueue = Queue::with('patient')
@@ -27,14 +45,14 @@ class DisplayQueueController extends Controller
 
         if ($currentQueue) {
             $nextQueuesQuery->where('estimate_time', '>=', $currentQueue->estimate_time)
-                            ->where('queue_id', '!=', $currentQueue->queue_id);
+                ->where('queue_id', '!=', $currentQueue->queue_id);
         }
 
-        $nextQueues = $nextQueuesQuery->take(3)->get();
+        $nextQueues = $nextQueuesQuery->take(5)->get();
 
-        return Inertia::render('Queues/DisplayQueue', [
+        return [
             'currentQueue' => $currentQueue,
             'nextQueues' => $nextQueues,
-        ]);
+        ];
     }
 }

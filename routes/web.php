@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisplayQueueController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MedicationCategoryController;
 use App\Http\Controllers\MedicationController;
@@ -25,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/my-queue', [MyQueueController::class, 'index'])->name('my-queue.index');
     Route::get('/display-queue', [DisplayQueueController::class, 'index'])->name('display.index');
+    Route::get('/display-queue/data', [DisplayQueueController::class, 'data'])->name('display.data');
 
     Route::middleware(['role:administrator'])->group(function () {
         Route::resource('practice-schedule', PracticeScheduleController::class)->except(['create', 'edit', 'show']);
@@ -37,6 +39,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/medical-records/{queue}/create', [MedicalRecordController::class, 'create'])->name('medical-records.create');
         Route::post('/medical-records/{queue}', [MedicalRecordController::class, 'store'])->name('medical-records.store');
+
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::patch('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
     });
 });
 

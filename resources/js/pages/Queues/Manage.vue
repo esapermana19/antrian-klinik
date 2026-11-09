@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { router, Link, useForm, Head } from '@inertiajs/vue3';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,19 @@ import {
 } from 'lucide-vue-next';
 import MotionModal from '@/components/MotionModal.vue';
 import SpringModal from '@/components/SpringModal.vue';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const props = defineProps({
     todayQueues: Object,
@@ -83,24 +96,75 @@ const form = useForm({
 const openMedrecModal = (queue) => {
     activeQueue.value = queue;
     form.clearErrors();
-    form.reset();
     form.patient_id = queue.patient_id ?? queue.patient?.patient_id;
     form.queue_id = queue.queue_id;
-    form.main_complaint = '';
-    form.blood_pressure = '';
-    form.temperature = '';
-    form.weight = '';
-    form.diagnosis = '';
-    form.notes_on_treatment = '';
-    form.prescriptions = [];
+
+    // Cek apakah ada draft yang tersimpan di localStorage untuk antrean ini
+    const draftKey = `medrec_draft_${queue.queue_id}`;
+    const savedDraft = localStorage.getItem(draftKey);
+
+    if (savedDraft) {
+        try {
+            const parsed = JSON.parse(savedDraft);
+            form.main_complaint = parsed.main_complaint || '';
+            form.blood_pressure = parsed.blood_pressure || '';
+            form.temperature = parsed.temperature || '';
+            form.weight = parsed.weight || '';
+            form.diagnosis = parsed.diagnosis || '';
+            form.notes_on_treatment = parsed.notes_on_treatment || '';
+            form.prescriptions = parsed.prescriptions || [];
+        } catch {
+            form.reset();
+        }
+    } else {
+        form.main_complaint = '';
+        form.blood_pressure = '';
+        form.temperature = '';
+        form.weight = '';
+        form.diagnosis = '';
+        form.notes_on_treatment = '';
+        form.prescriptions = [];
+    }
+
     isModalOpen.value = true;
 };
+
+// Simpan draft otomatis ke localStorage saat dokter mengetik form
+watch(
+    () => [
+        form.main_complaint,
+        form.blood_pressure,
+        form.temperature,
+        form.weight,
+        form.diagnosis,
+        form.notes_on_treatment,
+        form.prescriptions,
+    ],
+    () => {
+        if (activeQueue.value?.queue_id && isModalOpen.value) {
+            const draftKey = `medrec_draft_${activeQueue.value.queue_id}`;
+            localStorage.setItem(
+                draftKey,
+                JSON.stringify({
+                    main_complaint: form.main_complaint,
+                    blood_pressure: form.blood_pressure,
+                    temperature: form.temperature,
+                    weight: form.weight,
+                    diagnosis: form.diagnosis,
+                    notes_on_treatment: form.notes_on_treatment,
+                    prescriptions: form.prescriptions,
+                })
+            );
+        }
+    },
+    { deep: true }
+);
 
 const closeModal = () => {
     isModalOpen.value = false;
     activeQueue.value = null;
-    form.reset();
     form.clearErrors();
+    // Catatan: Tidak memanggil form.reset() di sini agar jika tidak sengaja tertutup, draft tetap aman
 };
 
 const addPrescription = () => {
@@ -121,7 +185,13 @@ const submitMedicalRecord = () => {
     form.post(`/medical-records/${activeQueue.value.queue_id}`, {
         preserveScroll: true,
         onSuccess: () => {
-            closeModal();
+            // Bersihkan draft setelah sukses tersimpan ke database
+            if (activeQueue.value?.queue_id) {
+                localStorage.removeItem(`medrec_draft_${activeQueue.value.queue_id}`);
+            }
+            isModalOpen.value = false;
+            activeQueue.value = null;
+            form.reset();
         },
     });
 };
@@ -339,17 +409,27 @@ const formatSession = (session) => {
                                     Input Rekam Medis
                                 </Button>
 
-                                <!-- Batal Antrean -->
-                                <Button
-                                    v-if="['waiting', 'called'].includes(q.queue_status)"
-                                    size="icon-sm"
-                                    variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200"
-                                    title="Batalkan Antrean"
-                                    @click="promptUpdateStatus(q, 'cancel')"
-                                >
-                                    <Ban class="size-3.5" />
-                                </Button>
+                                <!-- Batal Antrean dengan Shadcn Tooltip -->
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <Button
+                                            v-if="['waiting', 'called'].includes(q.queue_status)"
+                                            size="icon-sm"
+                                            variant="outline"
+                                            class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 cursor-pointer"
+                                            @click="promptUpdateStatus(q, 'cancel')"
+                                        >
+                                            <Ban class="size-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        side="top"
+                                        :side-offset="6"
+                                        class="bg-slate-900 text-white border border-slate-800 text-[11px] font-medium py-1 px-2 rounded-md shadow-lg pointer-events-none select-none"
+                                    >
+                                        Batalkan Antrean
+                                    </TooltipContent>
+                                </Tooltip>
 
                                 <span v-if="q.queue_status === 'completed'" class="inline-flex items-center gap-1 text-[11px] text-slate-400 font-normal">
                                     <CheckCircle2 class="size-3.5 text-emerald-600" /> Selesai
@@ -426,6 +506,15 @@ const formatSession = (session) => {
 
                 <!-- Modal Body -->
                 <div class="p-4 overflow-y-auto space-y-4 text-xs">
+                    <!-- Alert Error Transaksi / Validasi Umum -->
+                    <div
+                        v-if="form.errors.error_transaction || $page.props.errors?.error_transaction"
+                        class="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2"
+                    >
+                        <AlertCircle class="size-4 shrink-0 text-rose-600" />
+                        <span>{{ form.errors.error_transaction || $page.props.errors?.error_transaction }}</span>
+                    </div>
+
                     <form @submit.prevent="submitMedicalRecord" id="medrecForm" class="space-y-3.5">
                         <div class="space-y-1">
                             <label class="font-semibold text-slate-700">Keluhan Utama <span class="text-rose-500">*</span></label>
@@ -449,6 +538,7 @@ const formatSession = (session) => {
                                     placeholder="120/80"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
+                                <span v-if="form.errors.blood_pressure" class="text-rose-500 text-[10px]">{{ form.errors.blood_pressure }}</span>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-slate-600">Suhu (°C)</label>
@@ -459,6 +549,7 @@ const formatSession = (session) => {
                                     placeholder="36.5"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
+                                <span v-if="form.errors.temperature" class="text-rose-500 text-[10px]">{{ form.errors.temperature }}</span>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-slate-600">Berat (Kg)</label>
@@ -469,6 +560,7 @@ const formatSession = (session) => {
                                     placeholder="60"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
+                                <span v-if="form.errors.weight" class="text-rose-500 text-[10px]">{{ form.errors.weight }}</span>
                             </div>
                         </div>
 
@@ -516,20 +608,24 @@ const formatSession = (session) => {
                                     class="p-2 rounded-lg bg-slate-50 border border-slate-200 grid grid-cols-12 gap-2 items-center"
                                 >
                                     <div class="col-span-6">
-                                        <select
-                                            v-model="item.medication_id"
-                                            required
-                                            class="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800"
+                                        <Select
+                                            :model-value="item.medication_id ? String(item.medication_id) : ''"
+                                            @update:model-value="(val) => item.medication_id = Number(val)"
                                         >
-                                            <option value="" disabled>Pilih Obat</option>
-                                            <option
-                                                v-for="med in props.medications"
-                                                :key="med.medication_id"
-                                                :value="med.medication_id"
-                                            >
-                                                {{ med.medication_name }} (Stok: {{ med.stock }})
-                                            </option>
-                                        </select>
+                                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                                                <SelectValue placeholder="Pilih Obat" />
+                                            </SelectTrigger>
+                                            <SelectContent class="bg-white border-slate-200 max-h-56 z-[60]">
+                                                <SelectItem
+                                                    v-for="med in props.medications"
+                                                    :key="med.medication_id"
+                                                    :value="String(med.medication_id)"
+                                                    class="text-xs"
+                                                >
+                                                    {{ med.medication_name }} (Stok: {{ med.stock }})
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div class="col-span-4">
                                         <input
@@ -537,7 +633,7 @@ const formatSession = (session) => {
                                             v-model="item.dosage"
                                             placeholder="Dosis (e.g. 3x1)"
                                             required
-                                            class="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-800"
+                                            class="w-full h-8 rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
                                         />
                                     </div>
                                     <div class="col-span-1">
@@ -546,17 +642,20 @@ const formatSession = (session) => {
                                             v-model="item.qty"
                                             min="1"
                                             required
-                                            class="w-full rounded border border-slate-200 bg-white px-1 py-1 text-xs text-slate-800 text-center"
+                                            class="w-full h-8 rounded border border-slate-200 bg-white px-1 text-xs text-slate-800 text-center focus:outline-none focus:border-indigo-500"
                                         />
                                     </div>
                                     <div class="col-span-1 text-center">
                                         <button
                                             type="button"
-                                            class="text-slate-400 hover:text-rose-600"
+                                            class="text-slate-400 hover:text-rose-600 transition"
                                             @click="removePrescription(index)"
                                         >
                                             <Trash2 class="size-3.5" />
                                         </button>
+                                    </div>
+                                    <div v-if="form.errors[`prescriptions.${index}.medication_id`] || form.errors[`prescriptions.${index}.dosage`] || form.errors[`prescriptions.${index}.qty`]" class="col-span-12 text-[10px] text-rose-500">
+                                        {{ form.errors[`prescriptions.${index}.medication_id`] || form.errors[`prescriptions.${index}.dosage`] || form.errors[`prescriptions.${index}.qty`] }}
                                     </div>
                                 </div>
                             </div>

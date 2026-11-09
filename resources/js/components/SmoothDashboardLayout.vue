@@ -9,6 +9,7 @@ import {
     Ticket,
     TicketCheck,
     Pill,
+    Receipt,
     Layers,
     Calendar,
     LogOut,
@@ -16,9 +17,12 @@ import {
     Tv,
     Settings,
     ChevronDown,
+    ChevronRight,
+    Database,
     User,
     Shield,
     Bell,
+    Wallet,
 } from 'lucide-vue-next';
 import { dashboard, logout } from '@/routes';
 import medicationRoute from '@/routes/medication';
@@ -48,10 +52,16 @@ import { toUrl } from '@/lib/utils';
 
 interface MenuItem {
     name: string;
-    href: string;
+    href?: string;
     icon: any;
     adminOnly?: boolean;
     openInNewTab?: boolean;
+    isGroup?: boolean;
+    children?: {
+        name: string;
+        href: string;
+        icon: any;
+    }[];
 }
 
 const page = usePage();
@@ -74,46 +84,68 @@ const rawMenus: MenuItem[] = [
         icon: LayoutDashboard,
     },
     {
+        name: 'Master Data',
+        icon: Database,
+        adminOnly: true,
+        isGroup: true,
+        children: [
+            {
+                name: 'Data Pasien',
+                href: toUrl(patientRoute.index()),
+                icon: Users,
+            },
+            {
+                name: 'Data Obat',
+                href: toUrl(medicationRoute.index()),
+                icon: Pill,
+            },
+            {
+                name: 'Kategori Obat',
+                href: toUrl(medicationCategoryRoute.index()),
+                icon: Layers,
+            },
+            {
+                name: 'Jadwal Praktik',
+                href: toUrl(scheduleRoute.index()),
+                icon: Calendar,
+            },
+        ],
+    },
+    {
         name: 'Kelola Antrian',
         href: toUrl(queueManagement.index()),
         icon: ListChecks,
         adminOnly: true,
     },
     {
+        name: 'Layanan Antrean',
+        icon: Ticket,
+        adminOnly: false,
+        isGroup: true,
+        children: [
+            {
+                name: 'Ambil Antrian',
+                href: toUrl(queueRoute.index()),
+                icon: Ticket,
+            },
+            {
+                name: 'Antrian Saya',
+                href: toUrl(myQueue.index()),
+                icon: TicketCheck,
+            },
+        ],
+    },
+    {
+        name: 'Kasir & Tagihan',
+        href: '/invoices',
+        icon: Wallet,
+        adminOnly: true,
+    },
+    {
         name: 'Data Pasien',
         href: toUrl(patientRoute.index()),
         icon: Users,
-        adminOnly: false,
-    },
-    {
-        name: 'Ambil Antrian',
-        href: toUrl(queueRoute.index()),
-        icon: Ticket,
-        adminOnly: false,
-    },
-    {
-        name: 'Antrian Saya',
-        href: toUrl(myQueue.index()),
-        icon: TicketCheck,
-        adminOnly: false,
-    },
-    {
-        name: 'Data Obat',
-        href: toUrl(medicationRoute.index()),
-        icon: Pill,
-        adminOnly: true,
-    },
-    {
-        name: 'Kategori Obat',
-        href: toUrl(medicationCategoryRoute.index()),
-        icon: Layers,
-        adminOnly: true,
-    },
-    {
-        name: 'Jadwal Praktik',
-        href: toUrl(scheduleRoute.index()),
-        icon: Calendar,
-        adminOnly: true,
+        adminOnly: false, // Ditampilkan hanya untuk non-admin
     },
     {
         name: 'Layar TV Antrean',
@@ -132,13 +164,16 @@ const rawMenus: MenuItem[] = [
 
 const menus = computed(() => {
     if (userRole.value === 'administrator') {
-        return rawMenus;
+        // Untuk admin: sembunyikan item pasien non-admin tunggal
+        return rawMenus.filter((item) => !(item.name === 'Data Pasien' && !item.isGroup));
     }
+    // Untuk non-admin: sembunyikan adminOnly (tetap sertakan Layanan Antrean isGroup)
     return rawMenus.filter((item) => !item.adminOnly);
 });
 
 // Helper URL match (menangani exact match maupun sub-path)
-const isUrlActive = (href: string) => {
+const isUrlActive = (href?: string) => {
+    if (!href) return false;
     const currentPath = page.url.split('?')[0].replace(/\/+$/, '');
     const targetPath = href.split('?')[0].replace(/\/+$/, '');
 
@@ -155,9 +190,20 @@ const isUrlActive = (href: string) => {
     return currentPath.startsWith(`${targetPath}/`);
 };
 
+// Cek apakah salah satu anak dari sub-menu group sedang aktif
+const isGroupActive = (item: MenuItem) => {
+    if (!item.children) return false;
+    return item.children.some((child) => isUrlActive(child.href));
+};
+
 // Computed activeIndex untuk mengarahkan floating indicator
 const activeIndex = computed(() => {
-    return menus.value.findIndex((menu) => isUrlActive(menu.href));
+    return menus.value.findIndex((menu) => {
+        if (menu.isGroup) {
+            return isGroupActive(menu);
+        }
+        return isUrlActive(menu.href);
+    });
 });
 
 // Dimensi matematika layout menu:
@@ -214,8 +260,8 @@ const handleLogout = () => {
 
             <!-- 1. Minimalist Sidebar: Lebar Ramping w-16, Hitam Pekat bg-slate-950, Compact & Kelengkungan Sesuai rounded-xl -->
             <aside class="fixed inset-y-0 left-0 z-40 flex flex-col justify-between w-16 bg-slate-950 border-r border-slate-900 py-5 select-none shadow-xl">
-                <!-- Center: Daftar Menu dengan Floating Active Indicator Kotak Rounded Halus -->
-                <div class="relative my-auto flex flex-col items-center w-full px-2.5">
+                <!-- Top: Daftar Menu dengan Floating Active Indicator Kotak Rounded Halus (Mentok Atas) -->
+                <div class="relative flex flex-col items-center w-full px-2.5">
                     <!-- Floating Indicator Solid Purple/Indigo yang meluncur naik/turun saat menu berpindah -->
                     <motion.div
                         v-if="activeIndex !== -1"
@@ -226,55 +272,111 @@ const handleLogout = () => {
 
                     <!-- Daftar Ikon Navigasi (Z-10 di atas floating indicator) dengan Tooltip Shadcn UI Tunggal -->
                     <nav class="relative z-10 flex flex-col items-center gap-2 w-full">
-                        <Tooltip v-for="menu in menus" :key="menu.name">
-                            <TooltipTrigger as-child>
-                                <a
-                                    v-if="menu.openInNewTab"
-                                    :href="menu.href"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    tabindex="-1"
-                                    class="group relative flex items-center justify-center size-10 rounded-xl transition-all duration-200 cursor-pointer outline-none select-none focus:outline-none focus-visible:outline-none ring-0 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60"
-                                >
-                                    <component
-                                        :is="menu.icon"
-                                        class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none stroke-2"
-                                    />
-                                </a>
-                                <Link
-                                    v-else
-                                    :href="menu.href"
-                                    tabindex="-1"
-                                    class="group relative flex items-center justify-center size-10 rounded-xl transition-all duration-200 cursor-pointer outline-none select-none focus:outline-none focus-visible:outline-none ring-0"
-                                    :class="
-                                        isUrlActive(menu.href)
-                                            ? 'text-white font-semibold'
-                                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/60'
-                                    "
-                                >
-                                    <component
-                                        :is="menu.icon"
-                                        class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none"
-                                        :class="isUrlActive(menu.href) ? 'stroke-[2.25]' : 'stroke-2'"
-                                    />
-
-                                    <!-- Red Badge Notifikasi Antrean Belum Diproses -->
-                                    <span
-                                        v-if="menu.name === 'Kelola Antrian' && pendingQueuesCount > 0"
-                                        class="absolute -top-1 -right-1 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full bg-rose-600 text-white text-[9px] font-bold font-mono shadow-md border-2 border-slate-950 animate-pulse pointer-events-none z-20"
+                        <template v-for="menu in menus" :key="menu.name">
+                            <!-- Menu Dropdown Group: Master Data -->
+                            <DropdownMenu v-if="menu.isGroup">
+                                <DropdownMenuTrigger as-child>
+                                    <button
+                                        type="button"
+                                        class="group relative flex items-center justify-center size-10 rounded-xl transition-all duration-200 cursor-pointer outline-none select-none focus:outline-none focus-visible:outline-none ring-0"
+                                        :class="
+                                            isGroupActive(menu)
+                                                ? 'text-white font-semibold'
+                                                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/60'
+                                        "
                                     >
-                                        {{ pendingQueuesCount > 99 ? '99+' : pendingQueuesCount }}
-                                    </span>
-                                </Link>
-                            </TooltipTrigger>
-                            <TooltipContent
-                                side="right"
-                                :side-offset="12"
-                                class="bg-slate-900 text-white border border-slate-800 text-xs font-medium py-1 px-2.5 shadow-xl rounded-lg pointer-events-none select-none"
-                            >
-                                {{ menu.name }}
-                            </TooltipContent>
-                        </Tooltip>
+                                        <component
+                                            :is="menu.icon"
+                                            class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none"
+                                            :class="isGroupActive(menu) ? 'stroke-[2.25]' : 'stroke-2'"
+                                        />
+                                        <!-- Titik kecil penanda bahwa ini menu kelompok / sub-menu -->
+                                        <span class="absolute bottom-1 right-1 size-1 rounded-full bg-slate-400 group-hover:bg-white" />
+                                    </button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent
+                                    side="right"
+                                    :side-offset="14"
+                                    align="start"
+                                    class="w-48 bg-slate-950/95 backdrop-blur-xl border-slate-800 shadow-2xl p-1 rounded-xl text-slate-200 z-50"
+                                >
+                                    <DropdownMenuLabel class="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        {{ menu.name }}
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator class="my-1 bg-slate-800" />
+                                    <DropdownMenuItem
+                                        v-for="sub in menu.children"
+                                        :key="sub.name"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="sub.href"
+                                            class="flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg transition cursor-pointer"
+                                            :class="
+                                                isUrlActive(sub.href)
+                                                    ? 'bg-indigo-600 text-white font-medium'
+                                                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                                            "
+                                        >
+                                            <component :is="sub.icon" class="size-3.5 stroke-2" />
+                                            <span>{{ sub.name }}</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <!-- Single Menu Link Biasa -->
+                            <Tooltip v-else>
+                                <TooltipTrigger as-child>
+                                    <a
+                                        v-if="menu.openInNewTab"
+                                        :href="menu.href"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        tabindex="-1"
+                                        class="group relative flex items-center justify-center size-10 rounded-xl transition-all duration-200 cursor-pointer outline-none select-none focus:outline-none focus-visible:outline-none ring-0 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60"
+                                    >
+                                        <component
+                                            :is="menu.icon"
+                                            class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none stroke-2"
+                                        />
+                                    </a>
+                                    <Link
+                                        v-else
+                                        :href="menu.href!"
+                                        tabindex="-1"
+                                        class="group relative flex items-center justify-center size-10 rounded-xl transition-all duration-200 cursor-pointer outline-none select-none focus:outline-none focus-visible:outline-none ring-0"
+                                        :class="
+                                            isUrlActive(menu.href)
+                                                ? 'text-white font-semibold'
+                                                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900/60'
+                                        "
+                                    >
+                                        <component
+                                            :is="menu.icon"
+                                            class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none"
+                                            :class="isUrlActive(menu.href) ? 'stroke-[2.25]' : 'stroke-2'"
+                                        />
+
+                                        <!-- Red Badge Notifikasi Antrean Belum Diproses -->
+                                        <span
+                                            v-if="menu.name === 'Kelola Antrian' && pendingQueuesCount > 0"
+                                            class="absolute -top-1 -right-1 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full bg-rose-600 text-white text-[9px] font-bold font-mono shadow-md border-2 border-slate-950 animate-pulse pointer-events-none z-20"
+                                        >
+                                            {{ pendingQueuesCount > 99 ? '99+' : pendingQueuesCount }}
+                                        </span>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                    side="right"
+                                    :side-offset="12"
+                                    class="bg-slate-900 text-white border border-slate-800 text-xs font-medium py-1 px-2.5 shadow-xl rounded-lg pointer-events-none select-none"
+                                >
+                                    {{ menu.name }}
+                                </TooltipContent>
+                            </Tooltip>
+                        </template>
                     </nav>
                 </div>
 

@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="50%" stop-color="#eff6ff" />
+      <stop offset="100%" stop-color="#e0e7ff" />
+    </linearGradient>
+    
+    <linearGradient id="wallLight" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#f1f5f9" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Clinic Lamp Light Cone -->
+    <linearGradient id="lampCone" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#e0e7ff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Soft Shadows -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <linearGradient id="primaryPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Background Canvas -->
+  <rect width="1200" height="800" fill="url(#bgGrad)" />
+
+  <!-- Abstract Aesthetic Medical Ambient Orbs -->
+  <circle cx="200" cy="180" r="140" fill="#c7d2fe" opacity="0.4" filter="url(#softGlow)" />
+  <circle cx="1020" cy="320" r="180" fill="#bae6fd" opacity="0.4" filter="url(#softGlow)" />
+  <circle cx="600" cy="720" r="220" fill="#ddd6fe" opacity="0.3" filter="url(#softGlow)" />
+
+  <!-- 2. Clinic Room Elements -->
+  <!-- Floor line & Shadow -->
+  <ellipse cx="600" cy="720" rx="480" ry="45" fill="#cbd5e1" opacity="0.4" />
+
+  <!-- Medical Lamp from Ceiling -->
+  <line x1="600" y1="0" x2="600" y2="110" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+  <rect x="520" y="110" width="160" height="18" rx="9" fill="#64748b" />
+  <polygon points="530,128 670,128 780,680 420,680" fill="url(#lampCone)" />
+
+  <!-- Background Medical Wall Clipboard -->
+  <g transform="translate(180, 220)">
+    <rect x="0" y="0" width="110" height="150" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="3" filter="drop-shadow(0 8px 16px rgba(0,0,0,0.04))" />
+    <rect x="35" y="-10" width="40" height="18" rx="6" fill="#94a3b8" />
+    <!-- Clipboard check rows -->
+    <circle cx="25" cy="35" r="8" fill="#38bdf8" />
+    <rect x="42" y="31" width="50" height="8" rx="4" fill="#e2e8f0" />
+    <circle cx="25" cy="65" r="8" fill="#6366f1" />
+    <rect x="42" y="61" width="45" height="8" rx="4" fill="#e2e8f0" />
+    <circle cx="25" cy="95" r="8" fill="#a855f7" />
+    <rect x="42" y="91" width="55" height="8" rx="4" fill="#e2e8f0" />
+    <rect x="20" y="120" width="70" height="6" rx="3" fill="#f1f5f9" />
+  </g>
+
+  <!-- ECG Heart Monitor Console (Right side) -->
+  <g transform="translate(860, 260)">
+    <!-- Monitor Stand -->
+    <rect x="70" y="170" width="14" height="260" rx="4" fill="#94a3b8" />
+    <ellipse cx="77" cy="430" rx="55" ry="14" fill="#64748b" />
+    <!-- Console Body -->
+    <rect x="0" y="0" width="160" height="170" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="3" filter="drop-shadow(0 12px 24px rgba(0,0,0,0.06))" />
+    <!-- Screen -->
+    <rect x="12" y="14" width="136" height="100" rx="10" fill="#0f172a" />
+    <!-- Pulse Waves in Screen -->
+    <path d="M 18,64 L 40,64 L 48,45 L 56,80 L 66,35 L 76,75 L 82,64 L 140,64" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Keyboard/Control Buttons -->
+    <rect x="16" y="126" width="30" height="8" rx="3" fill="#6366f1" />
+    <rect x="52" y="126" width="18" height="8" rx="3" fill="#e2e8f0" />
+    <rect x="76" y="126" width="18" height="8" rx="3" fill="#e2e8f0" />
+    <circle cx="125" cy="130" r="7" fill="#10b981" />
+  </g>
+
+  <!-- Medical Bed / Bench -->
+  <g transform="translate(260, 480)">
+    <!-- Bed Cushion -->
+    <rect x="0" y="30" width="420" height="38" rx="12" fill="url(#primaryPurple)" filter="drop-shadow(0 8px 16px rgba(79,70,229,0.2))" />
+    <!-- Bed Pillow -->
+    <path d="M 30,30 C 30,5 75,5 90,30 Z" fill="#e0e7ff" />
+    <!-- Bed Legs -->
+    <rect x="40" y="68" width="14" height="140" rx="5" fill="#64748b" />
+    <rect x="360" y="68" width="14" height="140" rx="5" fill="#64748b" />
+    <rect x="30" y="195" width="360" height="10" rx="5" fill="#94a3b8" />
+  </g>
+
+  <!-- 3. Characters: Doctor & Patient Sitting -->
+  <!-- Patient Sitting on Bed -->
+  <g transform="translate(520, 310)">
+    <!-- Body / Clothes -->
+    <path d="M 35,90 L 95,90 L 105,190 L 25,190 Z" fill="#e0e7ff" rx="10" />
+    <!-- Legs -->
+    <rect x="30" y="190" width="28" height="120" rx="10" fill="#334155" />
+    <rect x="70" y="190" width="28" height="120" rx="10" fill="#1e293b" />
+    <!-- Shoes -->
+    <ellipse cx="44" cy="310" rx="20" ry="10" fill="#64748b" />
+    <ellipse cx="84" cy="310" rx="20" ry="10" fill="#475569" />
+    <!-- Neck & Head -->
+    <rect x="55" y="70" width="20" height="24" rx="6" fill="#fbcfe8" />
+    <circle cx="65" cy="46" r="32" fill="#fbcfe8" />
+    <!-- Hair -->
+    <path d="M 35,46 C 35,16 55,10 75,10 C 95,10 102,22 100,44 C 90,26 78,26 65,30 Z" fill="#475569" />
+  </g>
+
+  <!-- Doctor Character (Checking with Stethoscope) -->
+  <g transform="translate(330, 240)">
+    <!-- Doctor Coat & Body -->
+    <path d="M 60,150 L 130,150 L 150,380 L 40,380 Z" fill="#ffffff" stroke="#e2e8f0" stroke-width="3" filter="drop-shadow(0 10px 20px rgba(0,0,0,0.06))" />
+    <path d="M 80,150 L 110,150 L 105,240 L 85,240 Z" fill="#6366f1" /> <!-- Inner shirt -->
+    <!-- Doctor Trousers -->
+    <rect x="55" y="375" width="32" height="120" rx="8" fill="#1e293b" />
+    <rect x="105" y="375" width="32" height="120" rx="8" fill="#0f172a" />
+    <!-- Shoes -->
+    <ellipse cx="71" cy="495" rx="24" ry="11" fill="#0f172a" />
+    <ellipse cx="121" cy="495" rx="24" ry="11" fill="#0f172a" />
+    <!-- Neck & Head -->
+    <rect x="85" y="125" width="22" height="28" rx="8" fill="#fde047" opacity="0.6" />
+    <circle cx="96" cy="95" r="38" fill="#fed7aa" />
+    <!-- Hair -->
+    <path d="M 60,95 C 60,50 85,45 110,45 C 135,45 142,60 140,95 C 125,70 105,70 90,75 Z" fill="#1e293b" />
+    <!-- Doctor Arm extending Stethoscope -->
+    <path d="M 125,185 Q 185,200 230,220 L 285,230" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" />
+    <!-- Hand -->
+    <circle cx="290" cy="232" r="14" fill="#fed7aa" />
+    <!-- Stethoscope Head at patient chest -->
+    <circle cx="305" cy="232" r="12" fill="#0284c7" stroke="#ffffff" stroke-width="4" filter="drop-shadow(0 0 10px rgba(56,189,248,0.5))" />
+    <circle cx="305" cy="232" r="22" fill="#38bdf8" opacity="0.3">
+      <animate attributeName="r" values="12;26;12" dur="2.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" repeatCount="indefinite" />
+    </circle>
+    <!-- Stethoscope Tube -->
+    <path d="M 96,120 C 110,180 180,270 300,235" fill="none" stroke="#334155" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <!-- Ambient Floating Medical Crosses -->
+  <g fill="#a5b4fc" opacity="0.4">
+    <rect x="140" y="480" width="14" height="4" rx="2" />
+    <rect x="145" y="475" width="4" height="14" rx="2" />
+    <rect x="780" y="160" width="18" height="5" rx="2.5" />
+    <rect x="786.5" y="153.5" width="5" height="18" rx="2.5" />
+  </g>
+</svg>
