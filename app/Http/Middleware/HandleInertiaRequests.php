@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Queue;
+use App\Models\Setting;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -46,11 +49,13 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'pendingQueuesCount' => fn () => $request->user()
-                ? \App\Models\Queue::whereDate('queue_date', \Carbon\Carbon::today()->toDateString())
+                ? Queue::whereDate('queue_date', Carbon::today()->toDateString())
                     ->whereIn('queue_status', ['waiting', 'called', 'checking'])
                     ->count()
                 : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'clinic' => fn () => Setting::getClinicSettings(),
+            'clinic' => fn () => Setting::getClinicSettings(),
         ];
     }
 }

@@ -6,13 +6,20 @@ use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\Queue;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response|RedirectResponse
     {
+        // Jika akun ber-role 'user' (pasien), arahkan langsung ke halaman Ambil Antrean
+        if ($request->user() && $request->user()->role === 'user') {
+            return redirect()->route('queue.index');
+        }
+
         $today = Carbon::today()->toDateString();
 
         $totalPatients = Patient::count();

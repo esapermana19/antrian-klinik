@@ -43,7 +43,7 @@ const passwordInput = useTemplateRef('passwordInput');
                         >Delete account</Button
                     >
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent class="bg-white dark:bg-slate-900 border border-slate-200/90 shadow-2xl rounded-2xl z-50">
                     <Form
                         v-bind="ProfileController.destroy.form()"
                         reset-on-success
@@ -51,40 +51,39 @@ const passwordInput = useTemplateRef('passwordInput');
                         :options="{
                             preserveScroll: true,
                         }"
-                        class="space-y-6"
+                        class="space-y-4"
                         v-slot="{ errors, processing, reset, clearErrors }"
                     >
-                        <DialogHeader class="space-y-3">
-                            <DialogTitle
-                                >Are you sure you want to delete your
-                                account?</DialogTitle
+                        <DialogHeader class="space-y-2 text-left">
+                            <DialogTitle class="text-base font-bold text-slate-900 dark:text-white"
+                                >Hapus Akun Anda?</DialogTitle
                             >
-                            <DialogDescription>
-                                Once your account is deleted, all of its
-                                resources and data will also be permanently
-                                deleted. Please enter your password to confirm
-                                you would like to permanently delete your
-                                account.
+                            <DialogDescription class="text-xs text-slate-500 leading-relaxed">
+                                Setelah akun dihapus, seluruh data dan hak akses Anda akan dihapus secara permanen.
+                                Masukkan kata sandi untuk mengonfirmasi penghapusan akun.
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div class="grid gap-2">
-                            <Label for="password" class="sr-only"
-                                >Password</Label
+                        <div class="grid gap-1.5 pt-1">
+                            <Label for="password" class="text-xs font-medium text-slate-700 dark:text-slate-300"
+                                >Kata Sandi Konfirmasi</Label
                             >
                             <PasswordInput
                                 id="password"
                                 name="password"
                                 ref="passwordInput"
-                                placeholder="Password"
+                                placeholder="Masukkan kata sandi akun Anda"
+                                class="h-9.5 text-xs bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
                             />
                             <InputError :message="errors.password" />
                         </div>
 
-                        <DialogFooter class="gap-2">
+                        <DialogFooter class="flex flex-col-reverse sm:flex-row gap-2 pt-2">
                             <DialogClose as-child>
                                 <Button
-                                    variant="secondary"
+                                    type="button"
+                                    variant="outline"
+                                    class="h-9 text-xs border-slate-200 cursor-pointer"
                                     @click="
                                         () => {
                                             clearErrors();
@@ -92,17 +91,18 @@ const passwordInput = useTemplateRef('passwordInput');
                                         }
                                     "
                                 >
-                                    Cancel
+                                    Batal
                                 </Button>
                             </DialogClose>
 
                             <Button
                                 type="submit"
                                 variant="destructive"
+                                class="h-9 text-xs bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
                                 :disabled="processing"
                                 data-test="confirm-delete-user-button"
                             >
-                                Delete account
+                                Ya, Hapus Akun
                             </Button>
                         </DialogFooter>
                     </Form>

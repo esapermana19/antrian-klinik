@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\ClinicSettingController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
@@ -24,6 +25,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/Appearance')->name('appearance.edit');
+
+    Route::middleware(['role:administrator'])->group(function () {
+        Route::get('settings/clinic', [ClinicSettingController::class, 'edit'])->name('clinic.edit');
+        Route::patch('settings/clinic', [ClinicSettingController::class, 'update'])->name('clinic.update');
+    });
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

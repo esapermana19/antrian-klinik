@@ -22,7 +22,7 @@ test('new users can register', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('queue.index', absolute: false));
 
     $user = User::where('email', 'test@example.com')->first();
     expect($user->user_code)->toMatch('/^\d{8}\d{3}$/');

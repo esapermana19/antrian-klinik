@@ -167,8 +167,8 @@ const menus = computed(() => {
         // Untuk admin: sembunyikan item pasien non-admin tunggal
         return rawMenus.filter((item) => !(item.name === 'Data Pasien' && !item.isGroup));
     }
-    // Untuk non-admin: sembunyikan adminOnly (tetap sertakan Layanan Antrean isGroup)
-    return rawMenus.filter((item) => !item.adminOnly);
+    // Untuk role user: sembunyikan Dashboard admin & adminOnly
+    return rawMenus.filter((item) => !item.adminOnly && item.name !== 'Dashboard');
 });
 
 // Helper URL match (menangani exact match maupun sub-path)
@@ -258,8 +258,8 @@ const handleLogout = () => {
             <div class="fixed top-0 right-0 -z-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl pointer-events-none" />
             <div class="fixed bottom-0 left-20 -z-10 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl pointer-events-none" />
 
-            <!-- 1. Minimalist Sidebar: Lebar Ramping w-16, Hitam Pekat bg-slate-950, Compact & Kelengkungan Sesuai rounded-xl -->
-            <aside class="fixed inset-y-0 left-0 z-40 flex flex-col justify-between w-16 bg-slate-950 border-r border-slate-900 py-5 select-none shadow-xl">
+            <!-- 1. Minimalist Sidebar: Desktop (Hidden di layar < lg) -->
+            <aside class="hidden lg:flex fixed inset-y-0 left-0 z-40 flex-col justify-between w-16 bg-slate-950 border-r border-slate-900 py-5 select-none shadow-xl print:hidden">
                 <!-- Top: Daftar Menu dengan Floating Active Indicator Kotak Rounded Halus (Mentok Atas) -->
                 <div class="relative flex flex-col items-center w-full px-2.5">
                     <!-- Floating Indicator Solid Purple/Indigo yang meluncur naik/turun saat menu berpindah -->
@@ -403,10 +403,10 @@ const handleLogout = () => {
                 </div>
             </aside>
 
-            <!-- Main Content Canvas: Offset pl-16 agar proporsional dengan sidebar w-16 -->
-            <div class="flex-1 flex flex-col min-w-0 pl-16 transition-all duration-200 relative z-10">
+            <!-- Main Content Canvas: Offset pl-0 di Mobile, pl-16 di Desktop (lg:pl-16) -->
+            <div class="flex-1 flex flex-col min-w-0 pl-0 lg:pl-16 transition-all duration-200 relative z-10 print:pl-0 print:m-0 print:p-0">
                 <!-- Topbar Header Fixed Glassmorphism macOS Ala Apple -->
-                <header class="fixed top-0 right-0 left-16 z-30 flex h-16 items-center justify-between border-b border-white/60 bg-white/70 backdrop-blur-xl px-8 shadow-2xs">
+                <header class="fixed top-0 right-0 left-0 lg:left-16 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-slate-200/60 bg-white/80 backdrop-blur-xl px-4 sm:px-8 shadow-2xs print:hidden">
                     <!-- Sisi Kiri: Branding Judul Sistem -->
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
@@ -458,6 +458,15 @@ const handleLogout = () => {
                                         <span>Keamanan & Password</span>
                                     </Link>
                                 </DropdownMenuItem>
+                                <DropdownMenuItem v-if="userRole === 'administrator'" as-child>
+                                    <Link
+                                        href="/settings/clinic"
+                                        class="flex items-center gap-2 px-2.5 py-2 text-xs text-slate-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer"
+                                    >
+                                        <Settings class="size-3.5" />
+                                        <span>Pengaturan Klinik</span>
+                                    </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuSeparator class="my-1 bg-slate-100" />
                                 <DropdownMenuItem
                                     @click="showLogoutModal = true"
@@ -471,9 +480,9 @@ const handleLogout = () => {
                     </div>
                 </header>
 
-                <!-- Main Page Slot: Motion Slide-Up Animation untuk Semua Halaman (Offset pt-16 agar tidak tertutup header fixed) -->
+                <!-- Main Page Slot: Motion Slide-Up Animation untuk Semua Halaman (Offset pt-14/pt-16 agar tidak tertutup header, pb-24 di mobile agar tidak tertutup floating nav) -->
                 <!-- Key diikat ke pathname saja agar filter/search/pagination (query string) tidak mentrigger ulang animasi slide-up -->
-                <main class="flex-1 pt-16 pb-10">
+                <main class="flex-1 pt-14 sm:pt-16 pb-24 lg:pb-10 print:p-0 print:m-0">
                     <motion.div
                         :key="page.url.split(/[?#]/)[0]"
                         :initial="{ opacity: 0, y: 16 }"
@@ -483,6 +492,80 @@ const handleLogout = () => {
                         <slot />
                     </motion.div>
                 </main>
+            </div>
+
+            <!-- 3. Modern Floating Navigation Bar (Khusus Layar Mobile / Tablet < lg) -->
+            <div class="lg:hidden fixed bottom-4 inset-x-0 z-40 flex justify-center px-4 pointer-events-none print:hidden">
+                <nav class="pointer-events-auto flex items-center gap-1.5 px-3 py-2 bg-slate-950/90 backdrop-blur-xl border border-slate-800/80 rounded-full shadow-2xl ring-1 ring-white/10 text-slate-400">
+                    <template v-for="menu in menus" :key="menu.name">
+                        <!-- Group Menu Dropdown di Mobile Floating Nav -->
+                        <DropdownMenu v-if="menu.isGroup">
+                            <DropdownMenuTrigger as-child>
+                                <button
+                                    type="button"
+                                    class="relative flex items-center justify-center size-9 rounded-full transition cursor-pointer outline-none"
+                                    :class="isGroupActive(menu) ? 'bg-indigo-600 text-white font-semibold shadow-xs' : 'hover:text-white hover:bg-slate-900/60'"
+                                    :title="menu.name"
+                                >
+                                    <component :is="menu.icon" class="size-4 stroke-2" />
+                                    <span class="absolute bottom-1 right-1 size-1 rounded-full bg-slate-400" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="top"
+                                :side-offset="12"
+                                align="center"
+                                class="w-48 bg-slate-950/95 backdrop-blur-xl border-slate-800 shadow-2xl p-1 rounded-xl text-slate-200 z-50 mb-2"
+                            >
+                                <DropdownMenuLabel class="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    {{ menu.name }}
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator class="my-1 bg-slate-800" />
+                                <DropdownMenuItem
+                                    v-for="sub in menu.children"
+                                    :key="sub.name"
+                                    as-child
+                                >
+                                    <Link
+                                        :href="sub.href"
+                                        class="flex items-center gap-2.5 px-2.5 py-2 text-xs rounded-lg transition cursor-pointer"
+                                        :class="isUrlActive(sub.href) ? 'bg-indigo-600 text-white font-medium' : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
+                                    >
+                                        <component :is="sub.icon" class="size-3.5 stroke-2" />
+                                        <span>{{ sub.name }}</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <!-- Single Menu Link di Mobile Floating Nav -->
+                        <a
+                            v-else-if="menu.openInNewTab"
+                            :href="menu.href"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="relative flex items-center justify-center size-9 rounded-full transition cursor-pointer hover:text-white hover:bg-slate-900/60"
+                            :title="menu.name"
+                        >
+                            <component :is="menu.icon" class="size-4 stroke-2" />
+                        </a>
+                        <Link
+                            v-else
+                            :href="menu.href!"
+                            class="relative flex items-center justify-center size-9 rounded-full transition cursor-pointer"
+                            :class="isUrlActive(menu.href) ? 'bg-indigo-600 text-white font-semibold shadow-xs' : 'hover:text-white hover:bg-slate-900/60'"
+                            :title="menu.name"
+                        >
+                            <component :is="menu.icon" class="size-4 stroke-2" />
+                            <span
+                                v-if="menu.name === 'Kelola Antrian' && pendingQueuesCount > 0"
+                                class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[15px] h-[15px] px-1 rounded-full bg-rose-600 text-white text-[8px] font-bold font-mono shadow-md border border-slate-950"
+                            >
+                                {{ pendingQueuesCount > 99 ? '99+' : pendingQueuesCount }}
+                            </span>
+                        </Link>
+                    </template>
+                </nav>
             </div>
 
             <!-- Spring / Bounce Modal Konfirmasi Logout -->

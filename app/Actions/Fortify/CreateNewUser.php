@@ -19,6 +19,11 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        // Support both 'name' and 'username' from registration forms
+        if (empty($input['username']) && ! empty($input['name'])) {
+            $input['username'] = $input['name'];
+        }
+
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
