@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisplayQueueController;
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MedicationCategoryController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PracticeScheduleController;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\QueueManagementController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -29,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/display-queue/data', [DisplayQueueController::class, 'data'])->name('display.data');
 
     Route::middleware(['role:administrator'])->group(function () {
+        Route::resource('users', UserController::class)->except(['create', 'edit', 'show']);
+        Route::patch('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+        Route::resource('doctor', DoctorController::class)->except(['create', 'edit', 'show']);
         Route::resource('practice-schedule', PracticeScheduleController::class)->except(['create', 'edit', 'show']);
         Route::resource('medication-category', MedicationCategoryController::class)->except('create', 'edit', 'show');
         Route::resource('medication', MedicationController::class)->except('create', 'edit', 'show');
@@ -43,6 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::patch('/invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
+
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+        Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+        Route::get('/reports/export-csv', [ReportController::class, 'exportExcel'])->name('reports.export-csv');
     });
 });
 

@@ -53,6 +53,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    doctors: {
+        type: Array,
+        default: () => [],
+    },
     errors: {
         type: Object,
         default: () => ({}),
@@ -64,11 +68,15 @@ const props = defineProps({
 });
 
 const selectedDate = ref(props.filters?.date || new Date().toISOString().split('T')[0]);
+const selectedDoctor = ref(props.filters?.doctor_id || '');
 
-const handleDateChange = () => {
+const handleFilterChange = () => {
     router.get(
         '/queue-management',
-        { date: selectedDate.value },
+        {
+            date: selectedDate.value,
+            doctor_id: selectedDoctor.value || undefined,
+        },
         { preserveState: true, preserveScroll: true, replace: true }
     );
 };
@@ -272,7 +280,22 @@ const formatSession = (session) => {
                 <h1 class="text-xl font-bold tracking-tight text-slate-900">Kelola Antrean Pasien</h1>
                 <p class="text-xs text-slate-500">Panggilan antrean, periksa rekam medis, dan input resep obat klinik.</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Filter Dokter -->
+                <div v-if="doctors && doctors.length > 0" class="flex items-center gap-1.5 bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
+                    <label class="text-[11px] text-slate-500 font-medium">Dokter:</label>
+                    <select
+                        v-model="selectedDoctor"
+                        @change="handleFilterChange"
+                        class="text-xs text-slate-800 bg-transparent outline-none cursor-pointer"
+                    >
+                        <option value="">Semua Dokter</option>
+                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                            {{ doc.doctor_name }}
+                        </option>
+                    </select>
+                </div>
+
                 <!-- Filter Tanggal Antrean -->
                 <div class="flex items-center gap-1.5 bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
                     <Clock class="size-3.5 text-slate-400" />
@@ -280,7 +303,7 @@ const formatSession = (session) => {
                     <input
                         type="date"
                         v-model="selectedDate"
-                        @change="handleDateChange"
+                        @change="handleFilterChange"
                         class="text-xs font-mono text-slate-800 bg-transparent outline-none cursor-pointer"
                     />
                 </div>
@@ -301,6 +324,7 @@ const formatSession = (session) => {
                     <TableRow>
                         <TableHead class="w-36 whitespace-nowrap">No. Antrean</TableHead>
                         <TableHead class="min-w-[180px]">Nama Pasien</TableHead>
+                        <TableHead class="w-40 whitespace-nowrap">Dokter / Poli</TableHead>
                         <TableHead class="w-24">Sesi</TableHead>
                         <TableHead class="w-32 whitespace-nowrap">Estimasi Jam</TableHead>
                         <TableHead class="w-32 whitespace-nowrap">Status</TableHead>
@@ -324,6 +348,16 @@ const formatSession = (session) => {
                             </div>
                             <div class="text-[11px] text-slate-400 font-mono">
                                 NIK: {{ q.patient?.nik || '-' }}
+                            </div>
+                        </TableCell>
+
+                        <!-- Dokter / Poli -->
+                        <TableCell>
+                            <div class="font-medium text-xs text-slate-900">
+                                {{ q.doctor?.doctor_name || 'Dokter Umum' }}
+                            </div>
+                            <div v-if="q.doctor?.specialization" class="text-[11px] text-slate-500">
+                                {{ q.doctor.specialization }}
                             </div>
                         </TableCell>
 

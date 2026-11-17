@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Medication;
 use App\Models\Patient;
-use App\Models\PracticeSchedule;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,51 +18,52 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::factory()->create([
-            'username' => 'administrator',
-            'email' => 'admin@klinik.test',
-            'password' => Hash::make('password'),
-            'role' => 'administrator',
-        ]);
+        // 1. Inisialisasi Pengaturan Default Klinik
+        Setting::set('clinic_name', 'KLINIK SEHAT MEDIKA');
+        Setting::set('clinic_address', 'Jl. Merdeka Sejahtera No. 88, Bandung');
+        Setting::set('clinic_phone', '(022) 765-4321');
 
-        $user = User::factory()->create([
-            'username' => 'Samsul Maulana',
-            'email' => 'samsul@klinik.test',
-            'password' => Hash::make('password'),
-            'role' => 'user',
-        ]);
-
-        Patient::firstOrCreate(
-            ['user_id' => $user->user_id],
+        // 2. Akun Administrator Default
+        User::firstOrCreate(
+            ['email' => 'admin@klinik.test'],
             [
-                'nik' => '3201234567890001',
-                'patient_name' => $user->username,
-                'date_of_birth' => '1998-08-20',
-                'gender' => 'male',
+                'user_code' => User::generateUserCode(),
+                'username' => 'administrator',
+                'password' => Hash::make('password'),
+                'role' => 'administrator',
+                'email_verified_at' => now(),
             ]
         );
 
-        // jadwal praktek
-        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        PracticeSchedule::factory()
-            ->count(count($days))
-            ->sequence(fn (Sequence $sequence) => [
-                'schedule_code' => sprintf('P%02d', $sequence->index + 1),
-                'day' => $days[$sequence->index],
-                'session' => 'morning',
-                'opening_hours' => '08:00:00',
-                'closing_hours' => '12:00:00',
-                'max_quota' => 25,
-                'status' => 'open',
-            ])
-            ->create();
-        Medication::factory()->count(12)->create();
+        // 3. Akun Pasien Default (Demo User)
+        $demoUser = User::firstOrCreate(
+            ['email' => 'user@klinik.test'],
+            [
+                'user_code' => User::generateUserCode(),
+                'username' => 'Samsul Maulana',
+                'password' => Hash::make('password'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        // // User::factory(10)->create();
+        Patient::firstOrCreate(
+            ['nik' => '3201234567890001'],
+            [
+                'user_id' => $demoUser->user_id,
+                'patient_name' => 'Samsul Maulana',
+                'date_of_birth' => '1998-08-20',
+                'gender' => 'male',
+                'address' => 'Jl. Sukajadi No. 12, Bandung',
+            ]
+        );
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // 4. Jalankan seeder modul terkait
+        $this->call([
+            DoctorSeeder::class,
+            MedicationCategorySeeder::class,
+            PracticeScheduleSeeder::class,
+            QueueAndMedicalRecordSeeder::class,
+        ]);
     }
 }

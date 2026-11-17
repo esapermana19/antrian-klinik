@@ -1,27 +1,51 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Image, Upload } from 'lucide-vue-next';
 
 const props = defineProps<{
     settings: {
         clinic_name: string;
         clinic_address: string;
         clinic_phone: string;
+        clinic_logo?: string | null;
+        clinic_logo_url?: string | null;
+        default_examination_fee?: number;
+        queue_prefix?: string;
     };
 }>();
+
+const previewUrl = ref<string | null>(props.settings?.clinic_logo_url || null);
 
 const form = useForm({
     clinic_name: props.settings?.clinic_name || '',
     clinic_address: props.settings?.clinic_address || '',
     clinic_phone: props.settings?.clinic_phone || '',
+    default_examination_fee: props.settings?.default_examination_fee ?? 50000,
+    queue_prefix: props.settings?.queue_prefix || 'A',
+    clinic_logo: null as File | null,
 });
 
+const onFileChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        const file = target.files[0];
+        form.clinic_logo = file;
+        previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
 const submit = () => {
-    form.patch('/settings/clinic', {
+    // Gunakan POST dengan header / _method spoofing untuk file upload di Inertia
+    form.post('/settings/clinic', {
+        headers: {
+            'X-HTTP-Method-Override': 'PATCH',
+        },
         preserveScroll: true,
     });
 };
@@ -36,10 +60,43 @@ const submit = () => {
         <Heading
             variant="small"
             title="Informasi & Profil Klinik"
-            description="Atur nama klinik, alamat, dan nomor kontak yang akan ditampilkan pada Nota/Invoice dan Layar Antrean."
+            description="Atur identitas klinik, logo resmi, alamat, dan kontak untuk kop surat invoice serta layar display antrean."
         />
 
         <form @submit.prevent="submit" class="space-y-5">
+            <!-- Upload Logo Klinik -->
+            <div class="space-y-2">
+                <Label>Logo Klinik</Label>
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                        <img
+                            v-if="previewUrl"
+                            :src="previewUrl"
+                            alt="Logo Klinik"
+                            class="w-full h-full object-contain p-1"
+                        />
+                        <Image v-else class="w-7 h-7 text-slate-400" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer shadow-2xs text-slate-700 dark:text-slate-200 transition">
+                            <Upload class="w-3.5 h-3.5" />
+                            Pilih Logo Baru
+                            <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                @change="onFileChange"
+                                class="hidden"
+                            />
+                        </label>
+                        <p class="text-[11px] text-muted-foreground">
+                            Format JPG, PNG, atau WebP (Maks. 2MB). Ditampilkan di header sidebar, invoice, & display TV.
+                        </p>
+                    </div>
+                </div>
+                <InputError :message="form.errors.clinic_logo" />
+            </div>
+
             <div class="space-y-2">
                 <Label for="clinic_name">Nama Klinik</Label>
                 <Input
@@ -85,6 +142,41 @@ const submit = () => {
                     Nomor telepon atau kontak resmi klinik pada kuitansi/invoice.
                 </p>
                 <InputError :message="form.errors.clinic_phone" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <Label for="default_examination_fee">Tarif Pemeriksaan Dokter Bawaan (Rp)</Label>
+                    <Input
+                        id="default_examination_fee"
+                        v-model="form.default_examination_fee"
+                        type="number"
+                        min="0"
+                        placeholder="50000"
+                        :class="{ 'border-destructive': form.errors.default_examination_fee }"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        Biaya jasa standar rekam medis & invoice baru.
+                    </p>
+                    <InputError :message="form.errors.default_examination_fee" />
+                </div>
+
+                <div class="space-y-2">
+                    <Label for="queue_prefix">Format Prefix Nomor Antrean Default</Label>
+                    <Input
+                        id="queue_prefix"
+                        v-model="form.queue_prefix"
+                        type="text"
+                        maxlength="10"
+                        placeholder="Contoh: A, ANT, KLN"
+                        class="uppercase font-mono"
+                        :class="{ 'border-destructive': form.errors.queue_prefix }"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        Awalan nomor tiket antrean (misal: <strong>A</strong>-001). Bisa di-override per dokter di Data Dokter.
+                    </p>
+                    <InputError :message="form.errors.queue_prefix" />
+                </div>
             </div>
 
             <div class="flex items-center gap-4 pt-2">

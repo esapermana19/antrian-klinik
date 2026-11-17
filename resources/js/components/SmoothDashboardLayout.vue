@@ -23,6 +23,8 @@ import {
     Shield,
     Bell,
     Wallet,
+    Stethoscope,
+    FileSpreadsheet,
 } from 'lucide-vue-next';
 import { dashboard, logout } from '@/routes';
 import medicationRoute from '@/routes/medication';
@@ -70,10 +72,16 @@ const showLogoutModal = ref(false);
 const userRole = computed(() => (page.props.auth as any)?.user?.role);
 const userName = computed(() => (page.props.auth as any)?.user?.name || 'Pengguna');
 const userEmail = computed(() => (page.props.auth as any)?.user?.email || '');
+const clinicSettings = computed(() => (page.props as any)?.clinic || {});
 
 // Jumlah antrian yang belum diproses (waiting, called, checking)
 const pendingQueuesCount = computed(() => {
     return Number((page.props as any)?.pendingQueuesCount ?? 0);
+});
+
+// Jumlah obat yang stoknya menipis di bawah batas minimum
+const lowStockCount = computed(() => {
+    return Number((page.props as any)?.lowStockCount ?? 0);
 });
 
 // Raw menus utama (Termasuk Pengaturan & Display TV agar menjadi satu kesatuan navigasi utuh)
@@ -82,6 +90,7 @@ const rawMenus: MenuItem[] = [
         name: 'Dashboard',
         href: toUrl(dashboard()),
         icon: LayoutDashboard,
+        adminOnly: true,
     },
     {
         name: 'Master Data',
@@ -93,6 +102,16 @@ const rawMenus: MenuItem[] = [
                 name: 'Data Pasien',
                 href: toUrl(patientRoute.index()),
                 icon: Users,
+            },
+            {
+                name: 'Data Dokter',
+                href: '/doctor',
+                icon: Stethoscope,
+            },
+            {
+                name: 'Manajemen User',
+                href: '/users',
+                icon: User,
             },
             {
                 name: 'Data Obat',
@@ -139,6 +158,12 @@ const rawMenus: MenuItem[] = [
         name: 'Kasir & Tagihan',
         href: '/invoices',
         icon: Wallet,
+        adminOnly: true,
+    },
+    {
+        name: 'Laporan',
+        href: '/reports',
+        icon: FileSpreadsheet,
         adminOnly: true,
     },
     {
@@ -290,6 +315,13 @@ const handleLogout = () => {
                                             class="size-4.5 transition-transform duration-200 group-hover:scale-110 pointer-events-none"
                                             :class="isGroupActive(menu) ? 'stroke-[2.25]' : 'stroke-2'"
                                         />
+                                        <!-- Red Dot / Badge Notifikasi Stok Obat Menipis di Group Master Data -->
+                                        <span
+                                            v-if="menu.name === 'Master Data' && lowStockCount > 0"
+                                            class="absolute -top-1 -right-1 flex items-center justify-center min-w-[17px] h-[17px] px-1 rounded-full bg-rose-600 text-white text-[9px] font-bold font-mono shadow-md border-2 border-slate-950 pointer-events-none z-20"
+                                        >
+                                            {{ lowStockCount > 99 ? '99+' : lowStockCount }}
+                                        </span>
                                         <!-- Titik kecil penanda bahwa ini menu kelompok / sub-menu -->
                                         <span class="absolute bottom-1 right-1 size-1 rounded-full bg-slate-400 group-hover:bg-white" />
                                     </button>
@@ -312,15 +344,23 @@ const handleLogout = () => {
                                     >
                                         <Link
                                             :href="sub.href"
-                                            class="flex items-center gap-2.5 px-2.5 py-1.5 text-xs rounded-lg transition cursor-pointer"
+                                            class="flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg transition cursor-pointer"
                                             :class="
                                                 isUrlActive(sub.href)
                                                     ? 'bg-indigo-600 text-white font-medium'
                                                     : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                                             "
                                         >
-                                            <component :is="sub.icon" class="size-3.5 stroke-2" />
-                                            <span>{{ sub.name }}</span>
+                                            <div class="flex items-center gap-2.5">
+                                                <component :is="sub.icon" class="size-3.5 stroke-2" />
+                                                <span>{{ sub.name }}</span>
+                                            </div>
+                                            <span
+                                                v-if="sub.name === 'Data Obat' && lowStockCount > 0"
+                                                class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono"
+                                            >
+                                                {{ lowStockCount }}
+                                            </span>
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -407,10 +447,16 @@ const handleLogout = () => {
             <div class="flex-1 flex flex-col min-w-0 pl-0 lg:pl-16 transition-all duration-200 relative z-10 print:pl-0 print:m-0 print:p-0">
                 <!-- Topbar Header Fixed Glassmorphism macOS Ala Apple -->
                 <header class="fixed top-0 right-0 left-0 lg:left-16 z-30 flex h-14 sm:h-16 items-center justify-between border-b border-slate-200/60 bg-white/80 backdrop-blur-xl px-4 sm:px-8 shadow-2xs print:hidden">
-                    <!-- Sisi Kiri: Branding Judul Sistem -->
+                    <!-- Sisi Kiri: Branding Judul Sistem & Logo Klinik -->
                     <div class="flex items-center gap-3">
+                        <img
+                            v-if="clinicSettings.clinic_logo_url"
+                            :src="clinicSettings.clinic_logo_url"
+                            alt="Logo Klinik"
+                            class="h-7 w-auto max-w-[120px] object-contain shrink-0"
+                        />
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-900">
-                            Sistem Antrean Klinik
+                            {{ clinicSettings.clinic_name || 'Sistem Antrean Klinik' }}
                         </span>
                     </div>
 
@@ -508,6 +554,13 @@ const handleLogout = () => {
                                     :title="menu.name"
                                 >
                                     <component :is="menu.icon" class="size-4 stroke-2" />
+                                    <!-- Badge mobile jika ada stok obat menipis -->
+                                    <span
+                                        v-if="menu.name === 'Master Data' && lowStockCount > 0"
+                                        class="absolute -top-1 -right-1 flex items-center justify-center min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-600 text-white text-[8px] font-bold font-mono border border-slate-950 pointer-events-none"
+                                    >
+                                        {{ lowStockCount }}
+                                    </span>
                                     <span class="absolute bottom-1 right-1 size-1 rounded-full bg-slate-400" />
                                 </button>
                             </DropdownMenuTrigger>
@@ -528,11 +581,19 @@ const handleLogout = () => {
                                 >
                                     <Link
                                         :href="sub.href"
-                                        class="flex items-center gap-2.5 px-2.5 py-2 text-xs rounded-lg transition cursor-pointer"
+                                        class="flex items-center justify-between px-2.5 py-2 text-xs rounded-lg transition cursor-pointer"
                                         :class="isUrlActive(sub.href) ? 'bg-indigo-600 text-white font-medium' : 'text-slate-300 hover:bg-slate-900 hover:text-white'"
                                     >
-                                        <component :is="sub.icon" class="size-3.5 stroke-2" />
-                                        <span>{{ sub.name }}</span>
+                                        <div class="flex items-center gap-2.5">
+                                            <component :is="sub.icon" class="size-3.5 stroke-2" />
+                                            <span>{{ sub.name }}</span>
+                                        </div>
+                                        <span
+                                            v-if="sub.name === 'Data Obat' && lowStockCount > 0"
+                                            class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono"
+                                        >
+                                            {{ lowStockCount }}
+                                        </span>
                                     </Link>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -8,7 +8,10 @@ import {
     ArrowLeft,
     CheckCircle2,
     Hourglass,
+    Volume2,
+    VolumeX,
 } from 'lucide-vue-next';
+import { useQueueAnnouncer } from '@/composables/useQueueAnnouncer';
 
 defineOptions({
     layout: null, // Fullscreen Standalone Kiosk Mode
@@ -17,17 +20,42 @@ defineOptions({
 const props = defineProps({
     currentQueue: Object,
     nextQueues: Array,
+    doctors: Array,
+    selectedDoctorId: [String, Number],
 });
 
 const page = usePage();
 const clinicName = computed(() => page.props.clinic?.clinic_name || 'ANTRIAN KLINIK');
+const clinicLogoUrl = computed(() => page.props.clinic?.clinic_logo_url);
 
+const selectedDoctor = ref(props.selectedDoctorId || '');
 const activeQueue = ref(props.currentQueue);
 const upcomingList = ref(props.nextQueues || []);
+
+const { isMuted, toggleMute, announceQueue } = useQueueAnnouncer();
+const lastAnnouncedQueueKey = ref('');
+
+// Fungsi memanggil suara jika ada antrean baru yang aktif dipanggil
+const checkAndAnnounce = (queue) => {
+    if (!queue || !queue.queue_number) return;
+    const currentKey = `${queue.queue_id}_${queue.queue_number}_${queue.queue_status}_${queue.updated_at}`;
+    if (lastAnnouncedQueueKey.value !== currentKey) {
+        lastAnnouncedQueueKey.value = currentKey;
+        // Panggil suara
+        announceQueue(
+            queue.queue_number,
+            queue.patient?.patient_name,
+            queue.doctor?.doctor_name
+        );
+    }
+};
 
 // Sinkronkan bila props dari server berubah
 watch(() => props.currentQueue, (newVal) => {
     activeQueue.value = newVal;
+    if (newVal) {
+        checkAndAnnounce(newVal);
+    }
 });
 watch(() => props.nextQueues, (newVal) => {
     upcomingList.value = newVal || [];
@@ -131,7 +159,10 @@ const fetchLatestData = async () => {
     if (isFetching) return;
     isFetching = true;
     try {
-        const response = await fetch('/display-queue/data', {
+        const url = selectedDoctor.value
+            ? `/display-queue/data?doctor_id=${selectedDoctor.value}`
+            : '/display-queue/data';
+        const response = await fetch(url, {
             headers: { 'Accept': 'application/json' },
             cache: 'no-store',
         });
@@ -139,12 +170,20 @@ const fetchLatestData = async () => {
             const data = await response.json();
             activeQueue.value = data.currentQueue;
             upcomingList.value = data.nextQueues || [];
+            if (data.currentQueue) {
+                checkAndAnnounce(data.currentQueue);
+            }
         }
     } catch {
         // Abaikan error koneksi sementara saat polling
     } finally {
         isFetching = false;
     }
+};
+
+const changeDoctor = (docId) => {
+    selectedDoctor.value = docId;
+    fetchLatestData();
 };
 
 const startPolling = () => {
@@ -184,6 +223,12 @@ onUnmounted(() => {
                 >
                     <ArrowLeft class="size-4" />
                 </Link>
+                <img
+                    v-if="clinicLogoUrl"
+                    :src="clinicLogoUrl"
+                    alt="Logo Klinik"
+                    class="h-8 sm:h-9 w-auto max-w-[100px] object-contain shrink-0"
+                />
                 <div class="min-w-0">
                     <h1 class="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 leading-tight uppercase truncate">
                         {{ clinicName }}
@@ -194,8 +239,36 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <!-- Sisi Kanan: Jam Digital & Fullscreen Button -->
+            <!-- Sisi Kanan: Filter Dokter/Poli, Kontrol Suara, Jam Digital & Fullscreen Button -->
             <div class="flex items-center gap-2 shrink-0">
+                <!-- Tombol Suara TTS (Mute / Unmute) -->
+                <button
+                    type="button"
+                    @click="toggleMute"
+                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border transition shadow-2xs text-[11px] sm:text-xs font-medium cursor-pointer"
+                    :class="isMuted
+                        ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'"
+                    :title="isMuted ? 'Suara Panggilan Dinonaktifkan (Klik untuk Aktifkan)' : 'Suara Panggilan Aktif (Klik untuk Mute)'"
+                >
+                    <component :is="isMuted ? VolumeX : Volume2" class="size-3.5" :class="isMuted ? 'text-rose-600' : 'text-indigo-600'" />
+                    <span class="hidden sm:inline">{{ isMuted ? 'Mute' : 'Suara Aktif' }}</span>
+                </button>
+
+                <!-- Dropdown Poli / Dokter -->
+                <div v-if="doctors && doctors.length > 0" class="flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
+                    <select
+                        v-model="selectedDoctor"
+                        @change="changeDoctor(selectedDoctor)"
+                        class="text-[11px] sm:text-xs font-medium text-slate-800 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
+                    >
+                        <option value="">Semua Poli / Dokter</option>
+                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                            {{ doc.doctor_name }} ({{ doc.specialization }})
+                        </option>
+                    </select>
+                </div>
+
                 <button
                     type="button"
                     @click="toggleFullscreen"
@@ -249,8 +322,8 @@ onUnmounted(() => {
                                 <span>Sisa: {{ formattedCountdown }}</span>
                             </div>
                         </div>
-                        <span class="text-[10px] sm:text-xs text-slate-500 font-medium bg-white/70 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-white/60">
-                            Poli Rawat Jalan
+                        <span class="text-[10px] sm:text-xs text-slate-700 font-medium bg-white/70 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-white/60">
+                            {{ activeQueue?.doctor?.doctor_name ? `${activeQueue.doctor.doctor_name} (${activeQueue.doctor.specialization})` : 'Poli Rawat Jalan' }}
                         </span>
                     </div>
 

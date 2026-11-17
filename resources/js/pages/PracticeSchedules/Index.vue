@@ -28,14 +28,31 @@ import {
     ChevronRight,
     X,
     Clock,
+    Search,
 } from 'lucide-vue-next';
 import MotionModal from '@/components/MotionModal.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 
 const props = defineProps({
     schedules: Object,
+    doctors: Array,
+    filters: Object,
     errors: Object,
 });
+
+const searchQuery = ref(props.filters?.search || '');
+let searchTimeout = null;
+
+const handleSearch = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        router.get(
+            scheduleRoute.index.url(),
+            { search: searchQuery.value || undefined },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
+    }, 300);
+};
 
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
@@ -47,6 +64,7 @@ const scheduleToDelete = ref(null);
 const isDeleting = ref(false);
 
 const form = useForm({
+    doctor_id: '',
     day: 'monday',
     session: 'morning',
     opening_hours: '08:00',
@@ -108,6 +126,7 @@ const openEditModal = (schedule) => {
     selectedScheduleId.value = schedule.schedule_id ?? schedule.id;
     form.clearErrors();
 
+    form.doctor_id = schedule.doctor_id || '';
     form.day = schedule.day?.toLowerCase() || 'monday';
     form.session = schedule.session?.toLowerCase() || 'morning';
     form.opening_hours = schedule.opening_hours?.substring(0, 5) || '08:00';
@@ -169,10 +188,23 @@ const formatTime = (timeStr) => {
                 <h1 class="text-xl font-bold tracking-tight text-slate-900">Jadwal Praktik Dokter</h1>
                 <p class="text-xs text-slate-500">Atur hari, sesi, jam buka/tutup pelayanan, kuota pasien, dan status operasional.</p>
             </div>
-            <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white" @click="openAddModal">
-                <Plus class="size-3.5" />
-                Tambah Jadwal
-            </Button>
+            <div class="flex items-center gap-2">
+                <!-- Search Input Nama Dokter / Spesialis -->
+                <div class="relative w-64">
+                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        @input="handleSearch"
+                        placeholder="Cari dokter atau spesialis..."
+                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                    />
+                </div>
+                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                    <Plus class="size-3.5" />
+                    Tambah Jadwal
+                </Button>
+            </div>
         </div>
 
         <!-- Proporsional Clean Table -->
@@ -181,11 +213,12 @@ const formatTime = (timeStr) => {
                 <TableHeader>
                     <TableRow>
                         <TableHead class="w-14 text-center">No</TableHead>
-                        <TableHead class="w-32">Hari</TableHead>
-                        <TableHead class="w-40">Sesi Pelayanan</TableHead>
-                        <TableHead class="w-48">Jam Operasional</TableHead>
-                        <TableHead class="w-32 text-center">Kuota Maks</TableHead>
-                        <TableHead class="w-28 text-center">Status</TableHead>
+                        <TableHead class="w-48">Dokter / Spesialis</TableHead>
+                        <TableHead class="w-28">Hari</TableHead>
+                        <TableHead class="w-36">Sesi Pelayanan</TableHead>
+                        <TableHead class="w-44">Jam Operasional</TableHead>
+                        <TableHead class="w-28 text-center">Kuota Maks</TableHead>
+                        <TableHead class="w-24 text-center">Status</TableHead>
                         <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -196,6 +229,14 @@ const formatTime = (timeStr) => {
                     >
                         <TableCell class="text-center text-slate-400 font-mono text-[11px]">
                             {{ (schedules.current_page - 1) * schedules.per_page + (index + 1) }}
+                        </TableCell>
+                        <TableCell>
+                            <div class="font-medium text-xs text-slate-900">
+                                {{ item.doctor?.doctor_name || 'Dokter Umum / Seluruh Dokter' }}
+                            </div>
+                            <div v-if="item.doctor?.specialization" class="text-[11px] text-slate-500">
+                                {{ item.doctor.specialization }}
+                            </div>
                         </TableCell>
                         <TableCell class="font-semibold text-xs text-slate-900">
                             {{ formatDay(item.day) }}
@@ -303,6 +344,20 @@ const formatTime = (timeStr) => {
             </div>
 
             <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                <!-- Pilihan Dokter -->
+                <div class="space-y-1">
+                    <label class="font-semibold text-slate-700">Dokter Praktik</label>
+                    <select
+                        v-model="form.doctor_id"
+                        class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900"
+                    >
+                        <option value="">Semua Dokter / Dokter Umum</option>
+                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                            {{ doc.doctor_name }} ({{ doc.specialization }})
+                        </option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <!-- Shadcn Select Hari -->
                     <div class="space-y-1">

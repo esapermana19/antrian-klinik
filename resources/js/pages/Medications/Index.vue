@@ -22,6 +22,7 @@ import {
     X,
     Search,
     Filter,
+    AlertTriangle,
 } from 'lucide-vue-next';
 import {
     Select,
@@ -42,6 +43,7 @@ const props = defineProps({
 
 const searchQuery = ref(props.filters?.search || '');
 const selectedCategoryFilter = ref(props.filters?.category_id ? String(props.filters.category_id) : 'all');
+const lowStockFilter = ref(Boolean(props.filters?.low_stock));
 let searchTimeout = null;
 
 const applyFilters = () => {
@@ -52,11 +54,19 @@ const applyFilters = () => {
     if (selectedCategoryFilter.value && selectedCategoryFilter.value !== 'all') {
         params.category_id = selectedCategoryFilter.value;
     }
+    if (lowStockFilter.value) {
+        params.low_stock = 1;
+    }
     router.get(
         '/medication',
         params,
         { preserveState: true, preserveScroll: true, replace: true }
     );
+};
+
+const toggleLowStockFilter = () => {
+    lowStockFilter.value = !lowStockFilter.value;
+    applyFilters();
 };
 
 const handleSearch = () => {
@@ -84,6 +94,7 @@ const form = useForm({
     medication_category_id: '',
     medication_name: '',
     stock: '',
+    min_stock: 10,
     unit_price: '',
 });
 
@@ -104,6 +115,7 @@ const openEditModal = (medication) => {
         '';
     form.medication_name = medication.medication_name;
     form.stock = medication.stock;
+    form.min_stock = medication.min_stock ?? 10;
     form.unit_price = medication.unit_price;
 
     isModalOpen.value = true;
@@ -197,6 +209,20 @@ const formatCurrency = (val) => {
                     />
                 </div>
 
+                <!-- Tombol Filter Stok Menipis -->
+                <button
+                    type="button"
+                    @click="toggleLowStockFilter"
+                    class="h-8 px-2.5 inline-flex items-center gap-1.5 rounded-lg text-xs font-medium border transition cursor-pointer"
+                    :class="lowStockFilter
+                        ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-2xs'
+                        : 'bg-white/80 border-slate-200/80 text-slate-600 hover:bg-slate-50 shadow-2xs'"
+                    title="Filter obat yang stoknya di bawah batas minimum"
+                >
+                    <AlertTriangle class="size-3.5" :class="lowStockFilter ? 'text-rose-600' : 'text-slate-400'" />
+                    <span>Stok Menipis</span>
+                </button>
+
                 <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs" @click="openAddModal">
                     <Plus class="size-3.5" />
                     Tambah Obat
@@ -212,7 +238,7 @@ const formatCurrency = (val) => {
                         <TableHead class="w-12 text-center">No</TableHead>
                         <TableHead>Nama Obat</TableHead>
                         <TableHead class="w-48">Kategori</TableHead>
-                        <TableHead class="w-32 text-right">Stok</TableHead>
+                        <TableHead class="w-36 text-right">Stok / Min</TableHead>
                         <TableHead class="w-40 text-right">Harga Satuan</TableHead>
                         <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
                     </TableRow>
@@ -221,18 +247,37 @@ const formatCurrency = (val) => {
                     <TableRow
                         v-for="(item, index) in medications.data"
                         :key="item.medication_id ?? item.id"
+                        :class="item.stock <= (item.min_stock ?? 10) ? 'bg-rose-50/40 hover:bg-rose-50/60' : ''"
                     >
                         <TableCell class="text-center text-slate-400 font-mono text-[11px]">
                             {{ (medications.current_page - 1) * medications.per_page + (index + 1) }}
                         </TableCell>
                         <TableCell class="font-medium text-xs text-slate-900">
-                            {{ item.medication_name }}
+                            <div class="flex items-center gap-2">
+                                <span>{{ item.medication_name }}</span>
+                                <span
+                                    v-if="item.stock <= (item.min_stock ?? 10)"
+                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700"
+                                    title="Stok menipis, segera restock"
+                                >
+                                    <span class="size-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    Restock
+                                </span>
+                            </div>
                         </TableCell>
                         <TableCell class="text-xs text-slate-600">
                             {{ item.medication_category?.medication_category_name || '-' }}
                         </TableCell>
-                        <TableCell class="text-right text-xs font-mono font-medium" :class="item.stock <= 5 ? 'text-rose-600' : 'text-slate-800'">
-                            {{ item.stock }} Unit
+                        <TableCell class="text-right text-xs font-mono">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <span
+                                    class="font-semibold"
+                                    :class="item.stock <= (item.min_stock ?? 10) ? 'text-rose-600' : 'text-slate-800'"
+                                >
+                                    {{ item.stock }}
+                                </span>
+                                <span class="text-slate-400 text-[11px]">/ min {{ item.min_stock ?? 10 }}</span>
+                            </div>
                         </TableCell>
                         <TableCell class="text-right text-xs font-mono text-slate-700">
                             {{ formatCurrency(item.unit_price) }}
@@ -351,9 +396,9 @@ const formatCurrency = (val) => {
                     />
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-3 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Stok</label>
+                        <label class="font-semibold text-slate-700">Stok Saat Ini</label>
                         <input
                             type="number"
                             v-model="form.stock"
@@ -364,7 +409,18 @@ const formatCurrency = (val) => {
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Harga Satuan (Rp)</label>
+                        <label class="font-semibold text-slate-700">Batas Min. Stok</label>
+                        <input
+                            type="number"
+                            v-model="form.min_stock"
+                            min="0"
+                            placeholder="10"
+                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                        />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-semibold text-slate-700">Harga Satuan</label>
                         <input
                             type="number"
                             v-model="form.unit_price"

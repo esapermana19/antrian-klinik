@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PracticeSchedules\StorePracticeScheduleRequest;
 use App\Http\Requests\PracticeSchedules\UpdatePracticeScheduleRequest;
+use App\Models\Doctor;
 use App\Models\PracticeSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,15 +17,30 @@ class PracticeScheduleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $schedules = PracticeSchedule::query()
+        $search = $request->query('search');
+
+        $schedules = PracticeSchedule::with('doctor')
+            ->when($search, function ($query, $search) {
+                $query->whereHas('doctor', function ($q) use ($search) {
+                    $q->where('doctor_name', 'like', "%{$search}%")
+                        ->orWhere('specialization', 'like', "%{$search}%");
+                });
+            })
             ->orderByRaw("FIELD(day, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')")
             ->orderBy('session')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
+
+        $doctors = Doctor::where('is_active', true)->get();
 
         return Inertia::render('PracticeSchedules/Index', [
             'schedules' => $schedules,
+            'doctors' => $doctors,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -60,7 +77,7 @@ class PracticeScheduleController extends Controller
         $opening = Carbon::parse($request->opening_hours);
         $closing = Carbon::parse($request->closing_hours);
         $totalMinutes = $opening->diffInMinutes($closing);
-        $maxKuota = floor($totalMinutes/15);
+        $maxKuota = floor($totalMinutes / 15);
         // gabungan
         $data['schedule_code'] = $prefix.str_pad((string) $nextNumber, 2, '0', STR_PAD_LEFT);
         $data['max_quota'] = $maxKuota;

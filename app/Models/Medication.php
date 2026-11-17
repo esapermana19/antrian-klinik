@@ -36,7 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['medication_category_id', 'medication_code', 'medication_name', 'stock', 'unit_price'])]
+#[Fillable(['medication_category_id', 'medication_code', 'medication_name', 'stock', 'min_stock', 'unit_price'])]
 #[Table(key: 'medication_id')]
 class Medication extends Model
 {
@@ -46,8 +46,17 @@ class Medication extends Model
     {
         return [
             'stock' => 'integer',
+            'min_stock' => 'integer',
             'unit_price' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Scope untuk obat dengan stok menipis (di bawah atau sama dengan batas minimum)
+     */
+    public function scopeLowStock($query)
+    {
+        return $query->whereColumn('stock', '<=', 'min_stock');
     }
 
     public function medicationPrescriptions(): HasMany

@@ -46,8 +46,9 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        // Low stock medications alert
-        $lowStockMedications = Medication::where('stock', '<=', 10)
+        // Low stock medications alert (menggunakan scope lowStock dinamis berbasis min_stock)
+        $lowStockMedications = Medication::query()
+            ->lowStock()
             ->orderBy('stock', 'asc')
             ->take(5)
             ->get();

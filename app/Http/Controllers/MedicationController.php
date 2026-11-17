@@ -7,6 +7,7 @@ use App\Http\Requests\Medications\UpdateMedicationRequest;
 use App\Models\Medication;
 use App\Models\MedicationCategory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,10 +16,11 @@ class MedicationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(\Illuminate\Http\Request $request): Response
+    public function index(Request $request): Response
     {
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
+        $lowStockOnly = $request->boolean('low_stock');
 
         $medication = Medication::query()
             ->with('medicationCategory')
@@ -27,6 +29,9 @@ class MedicationController extends Controller
             })
             ->when($categoryId, function ($query, $categoryId) {
                 $query->where('medication_category_id', $categoryId);
+            })
+            ->when($lowStockOnly, function ($query) {
+                $query->lowStock();
             })
             ->orderBy(MedicationCategory::select('medication_category_name')
                 ->where('medication_categories.medication_category_id', 'medications.medication_category_id'), 'asc')
@@ -43,6 +48,7 @@ class MedicationController extends Controller
             'filters' => [
                 'search' => $search ?? '',
                 'category_id' => $categoryId ?? '',
+                'low_stock' => $lowStockOnly,
             ],
         ]);
     }
@@ -71,7 +77,7 @@ class MedicationController extends Controller
             $lastNumber = (int) substr($lastCode->medication_code, -4);
             $nextNumber = $lastNumber + 1;
         }
-        $data['medication_code'] = $prefix . str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
+        $data['medication_code'] = $prefix.str_pad((string) $nextNumber, 4, '0', STR_PAD_LEFT);
         Medication::create($data);
 
         return back()->with('success', 'Data obat berhasil ditambahkan');

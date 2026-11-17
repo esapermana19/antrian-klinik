@@ -78,16 +78,30 @@ const formatDate = (dateStr) => {
             class="standard-invoice bg-white border border-black p-6 md:p-8 text-black shadow-xs rounded-none print:border-none print:shadow-none print:p-0 print:m-0"
         >
             <!-- Header Nota Klinik -->
-            <div class="border-b-2 border-black pb-3 text-center">
-                <h1 class="text-lg font-black tracking-wider uppercase text-black">
-                    {{ clinicInfo.clinic_name }}
-                </h1>
-                <p class="text-xs text-black mt-0.5">
-                    {{ clinicInfo.clinic_address }}<span v-if="clinicInfo.clinic_phone"> • Telp: {{ clinicInfo.clinic_phone }}</span>
-                </p>
-                <p class="text-xs font-bold uppercase tracking-widest text-black mt-2">
-                    {{ invoice.payment_status === 'paid' ? 'BUKTI PEMBAYARAN (LUNAS)' : 'TAGIHAN BIAYA PEMERIKSAAN' }}
-                </p>
+            <div class="border-b-2 border-black pb-3">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <img
+                            v-if="clinicInfo.clinic_logo_url"
+                            :src="clinicInfo.clinic_logo_url"
+                            alt="Logo Klinik"
+                            class="h-12 w-auto max-w-[120px] object-contain shrink-0"
+                        />
+                        <div>
+                            <h1 class="text-base font-black tracking-wider uppercase text-black">
+                                {{ clinicInfo.clinic_name }}
+                            </h1>
+                            <p class="text-xs text-black mt-0.5">
+                                {{ clinicInfo.clinic_address }}<span v-if="clinicInfo.clinic_phone"> • Telp: {{ clinicInfo.clinic_phone }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs font-bold uppercase tracking-widest text-black">
+                            {{ invoice.payment_status === 'paid' ? 'BUKTI PEMBAYARAN (LUNAS)' : 'TAGIHAN PEMERIKSAAN' }}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Metadata Pasien & Tagihan -->

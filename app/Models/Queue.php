@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['patient_id', 'schedule_id', 'queue_number', 'queue_date', 'session', 'estimate_time', 'queue_status', 'time_register'])]
+#[Fillable(['doctor_id', 'patient_id', 'schedule_id', 'queue_number', 'queue_date', 'session', 'estimate_time', 'queue_status', 'time_register'])]
 #[Table(key: 'queue_id')]
 class Queue extends Model
 {
@@ -17,6 +17,11 @@ class Queue extends Model
         return [
             'queue_date' => 'date',
         ];
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'doctor_id');
     }
 
     // mengambil relasi patients

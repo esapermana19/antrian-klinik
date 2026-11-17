@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['schedule_code', 'day', 'session', 'opening_hours', 'closing_hours', 'max_quota', 'status'])]
+#[Fillable(['doctor_id', 'schedule_code', 'day', 'session', 'opening_hours', 'closing_hours', 'max_quota', 'status'])]
 #[Table(name: 'practice_schedules', key: 'schedule_id')]
 class PracticeSchedule extends Model
 {
@@ -19,6 +20,11 @@ class PracticeSchedule extends Model
         return [
             'max_quota' => 'integer',
         ];
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'doctor_id');
     }
 
     // relasi ke queue

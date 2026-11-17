@@ -7,6 +7,7 @@ use App\Models\MedicalRecord;
 use App\Models\Medication;
 use App\Models\Patient;
 use App\Models\Queue;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -17,8 +18,8 @@ class MedicalRecordController extends Controller
      */
     public function create(Queue $queue)
     {
-        // Pastikan relasi pasien dimuat
-        $queue->load('patient');
+        // Pastikan relasi pasien dan dokter dimuat
+        $queue->load(['patient', 'doctor']);
 
         // Ambil daftar obat yang stoknya masih ada
         $medications = Medication::where('stock', '>', 0)
@@ -28,6 +29,7 @@ class MedicalRecordController extends Controller
         return Inertia::render('MedicalRecords/Create', [
             'queue' => $queue,
             'patient' => $queue->patient,
+            'doctor' => $queue->doctor,
             'medications' => $medications,
         ]);
     }
@@ -48,6 +50,7 @@ class MedicalRecordController extends Controller
 
                 // 2. Simpan Data MedicalRecord
                 $medrec = MedicalRecord::create([
+                    'doctor_id' => $queue->doctor_id,
                     'medrec_code' => $medrecCode,
                     'patient_id' => $validated['patient_id'],
                     'queue_id' => $queue->queue_id,
@@ -91,7 +94,8 @@ class MedicalRecordController extends Controller
                 $queue->update(['queue_status' => 'completed']);
 
                 // 5. Generate Tagihan / Invoice Otomatis
-                $examinationFee = 50000; // Biaya jasa konsultasi / klinik standar
+                $defaultFee = Setting::get('default_examination_fee', '50000');
+                $examinationFee = is_numeric($defaultFee) ? (float) $defaultFee : 50000;
                 $medicationFee = $medrec->medicationPrescriptions()->sum('total_price') ?? 0;
                 $totalAmount = $examinationFee + $medicationFee;
 

@@ -22,15 +22,21 @@ const props = defineProps({
     patients: Array,
     schedulesData: Array,
     date: String,
+    doctors: Array,
+    selectedDoctorId: [String, Number],
     errors: Object,
 });
 
 const filterDate = ref(props.date);
+const filterDoctor = ref(props.selectedDoctorId || '');
 
-const changeDate = () => {
+const changeFilter = () => {
     router.get(
         queueRoute.index.url(),
-        { date: filterDate.value },
+        {
+            date: filterDate.value,
+            doctor_id: filterDoctor.value || undefined,
+        },
         { preserveState: true },
     );
 };
@@ -191,15 +197,29 @@ const getStatusLabel = (status) => {
                 <p class="text-xs text-slate-500">Pilih tanggal periksa dan slot antrean dokter yang masih tersedia.</p>
             </div>
 
-            <!-- Shadcn Date Picker Style -->
-            <div class="relative flex items-center">
+            <!-- Filter Date & Doctor -->
+            <div class="flex flex-wrap items-center gap-2">
+                <div v-if="doctors && doctors.length > 0" class="flex items-center gap-2 h-9 px-3 rounded-md border border-slate-200 bg-white text-xs shadow-2xs">
+                    <span class="text-slate-500 font-medium">Dokter/Poli:</span>
+                    <select
+                        v-model="filterDoctor"
+                        @change="changeFilter"
+                        class="text-xs font-medium text-slate-900 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
+                    >
+                        <option value="">Semua Dokter</option>
+                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                            {{ doc.doctor_name }} ({{ doc.specialization }})
+                        </option>
+                    </select>
+                </div>
+
                 <div class="flex items-center gap-2 h-9 px-3 rounded-md border border-slate-200 bg-white text-xs shadow-2xs">
                     <CalendarIcon class="size-3.5 text-slate-500" />
-                    <span class="text-slate-500 font-medium">Tanggal Booking:</span>
+                    <span class="text-slate-500 font-medium">Tanggal:</span>
                     <input
                         type="date"
                         v-model="filterDate"
-                        @change="changeDate"
+                        @change="changeFilter"
                         :min="minDate"
                         class="text-xs font-mono font-medium text-slate-900 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
                     />
@@ -233,9 +253,14 @@ const getStatusLabel = (status) => {
                 <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div class="flex items-center gap-2">
                         <Clock class="size-3.5 text-indigo-600" />
-                        <h3 class="text-xs font-bold text-slate-900">
-                            Dokter Sesi {{ formatSession(data.schedules.session) }}
-                        </h3>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900">
+                                {{ data.schedules.doctor?.doctor_name || 'Dokter Umum' }} • Sesi {{ formatSession(data.schedules.session) }}
+                            </h3>
+                            <p v-if="data.schedules.doctor?.specialization" class="text-[11px] text-slate-500">
+                                {{ data.schedules.doctor.specialization }}
+                            </p>
+                        </div>
                     </div>
                     <span class="text-xs font-mono text-slate-500">
                         {{ data.schedules.opening_hours?.substring(0, 5) }} - {{ data.schedules.closing_hours?.substring(0, 5) }}

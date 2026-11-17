@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Medication;
 use App\Models\Queue;
 use App\Models\Setting;
 use Carbon\Carbon;
@@ -53,8 +54,10 @@ class HandleInertiaRequests extends Middleware
                     ->whereIn('queue_status', ['waiting', 'called', 'checking'])
                     ->count()
                 : 0,
+            'lowStockCount' => fn () => $request->user() && $request->user()->role === 'administrator'
+                ? Medication::lowStock()->count()
+                : 0,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'clinic' => fn () => Setting::getClinicSettings(),
             'clinic' => fn () => Setting::getClinicSettings(),
         ];
     }

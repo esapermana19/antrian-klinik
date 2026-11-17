@@ -24,6 +24,7 @@ class StorePracticeScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'doctor_id' => ['nullable', 'exists:doctors,doctor_id'],
             'day' => [
                 'required',
                 Rule::in(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
@@ -32,7 +33,8 @@ class StorePracticeScheduleRequest extends FormRequest
                 'required',
                 Rule::in(['morning', 'afternoon']),
                 Rule::unique('practice_schedules')->where(function ($query) {
-                    return $query->where('day', $this->day);
+                    return $query->where('day', $this->day)
+                        ->where('doctor_id', $this->doctor_id);
                 }),
             ],
             'opening_hours' => ['required', 'date_format:H:i'],

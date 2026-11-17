@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['queue_id', 'patient_id', 'medrec_code', 'main_complaint', 'blood_pressure', 'temperature', 'weight', 'diagnosis', 'notes_on_treatment'])]
+#[Fillable(['doctor_id', 'queue_id', 'patient_id', 'medrec_code', 'main_complaint', 'blood_pressure', 'temperature', 'weight', 'diagnosis', 'notes_on_treatment'])]
 #[Table(key: 'medrec_id')]
 class MedicalRecord extends Model
 {
@@ -18,6 +18,11 @@ class MedicalRecord extends Model
         return [
             'weight' => 'integer',
         ];
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'doctor_id');
     }
 
     // mengambil relasi queues

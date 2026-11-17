@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Doctor;
 use App\Models\Medication;
 use App\Models\Queue;
 use Carbon\Carbon;
@@ -15,12 +16,18 @@ class QueueManagementController extends Controller
     public function index(Request $request): Response
     {
         $selectedDate = $request->query('date', Carbon::today()->toDateString());
+        $doctorId = $request->query('doctor_id');
 
-        $todayQueues = Queue::with(['patient', 'practiceSchedule'])
+        $todayQueues = Queue::with(['patient', 'practiceSchedule', 'doctor'])
             ->whereDate('queue_date', $selectedDate)
+            ->when($doctorId, function ($query, $doctorId) {
+                $query->where('doctor_id', $doctorId);
+            })
             ->orderBy('estimate_time', 'asc')
             ->paginate(10)
             ->withQueryString();
+
+        $doctors = Doctor::where('is_active', true)->get();
 
         $medications = Medication::where('stock', '>', 0)
             ->orderBy('medication_name', 'asc')
@@ -29,8 +36,10 @@ class QueueManagementController extends Controller
         return Inertia::render('Queues/Manage', [
             'todayQueues' => $todayQueues,
             'medications' => $medications,
+            'doctors' => $doctors,
             'filters' => [
                 'date' => $selectedDate,
+                'doctor_id' => $doctorId,
             ],
         ]);
     }

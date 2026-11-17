@@ -293,8 +293,8 @@ const getStatusBadge = (status: string) => {
                             <AlertCircle class="size-3.5 text-rose-500" />
                             <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Perlu Restock Obat</h3>
                         </div>
-                        <Link href="/medication" class="text-xs font-medium text-indigo-600 hover:underline">
-                            Kelola
+                        <Link href="/medication?low_stock=1" class="text-xs font-medium text-indigo-600 hover:underline">
+                            Lihat Semua
                         </Link>
                     </div>
 
@@ -308,9 +308,12 @@ const getStatusBadge = (status: string) => {
                                 <Pill class="size-3.5 text-slate-400 shrink-0" />
                                 <span class="text-slate-700 font-medium truncate">{{ med.medication_name }}</span>
                             </div>
-                            <Badge variant="destructive" class="text-[10px] px-1.5 py-0 font-mono">
-                                {{ med.stock }}
-                            </Badge>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] text-slate-400 font-mono">min {{ med.min_stock ?? 10 }}</span>
+                                <Badge variant="destructive" class="text-[10px] px-1.5 py-0 font-mono">
+                                    {{ med.stock }}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
                     <div v-else class="p-4 text-center text-[11px] text-slate-400">

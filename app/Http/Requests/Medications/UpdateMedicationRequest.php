@@ -30,6 +30,7 @@ class UpdateMedicationRequest extends FormRequest
             'medication_category_id' => ['required', 'exists:medication_categories,medication_category_id'],
             'medication_name' => ['required', 'string', 'max:50'],
             'stock' => ['required', 'numeric', 'min:0'],
+            'min_stock' => ['nullable', 'numeric', 'min:0'],
             'unit_price' => ['required', 'numeric', 'min:0'],
         ];
     }

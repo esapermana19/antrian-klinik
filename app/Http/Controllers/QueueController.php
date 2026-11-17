@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Queues\StoreQueueRequest;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PracticeSchedule;
 use App\Models\Queue;
+use App\Models\Setting;
 use Cache;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -29,11 +31,21 @@ class QueueController extends Controller
         $dayName = strtolower(Carbon::parse($selectedDate)->englishDayOfWeek);
 
         // 2. Ambil jadwal dokter untuk hari yang di pilih
-        $schedules = PracticeSchedule::where('day', $dayName)->where('status', 'open')->get();
+        $doctorId = $request->input('doctor_id');
+
+        $schedules = PracticeSchedule::with('doctor')
+            ->where('day', $dayName)
+            ->where('status', 'open')
+            ->when($doctorId, function ($query, $doctorId) {
+                $query->where('doctor_id', $doctorId);
+            })
+            ->get();
+
+        $doctors = Doctor::where('is_active', true)->get();
 
         // 3. Ambil data antrean yang sudah booked pada tanggal tersebut
         $bookedQueues = Queue::whereDate('queue_date', $selectedDate)->get()->keyBy(function ($queue) {
-            return $queue->schedule_id . '_' . Carbon::parse($queue->estimate_time)->format('H:i:s');
+            return $queue->schedule_id.'_'.Carbon::parse($queue->estimate_time)->format('H:i:s');
         });
 
         // 4. data pasien dalam modal
@@ -42,23 +54,27 @@ class QueueController extends Controller
             ->get();
 
         // 5. Generate kartu antrian
+        $clinicPrefix = Setting::get('queue_prefix', 'A');
+
         $generateSchedules = [];
         foreach ($schedules as $schedule) {
             $openingTime = Carbon::parse($schedule->opening_hours);
             $slots = [];
 
+            // Gunakan prefix dokter jika tersedia, atau prefix default klinik
+            $doctorPrefix = $schedule->doctor?->queue_prefix;
+            $prefix = ! empty($doctorPrefix) ? $doctorPrefix : $clinicPrefix;
+
             // looping sebanyak kuota
             for ($i = 0; $i < $schedule->max_quota; $i++) {
                 $time = $openingTime->copy()->addMinute($i * 15)->format('H:i:s');
-                $datePrefix = Carbon::parse($selectedDate)->format('dmy');
-                $sessionPrefix = $schedule->session === 'morning' ? 'P' : 'S';
-                $queueNumber = $datePrefix . '-' . $sessionPrefix . str_pad($i + 1, 2, 0, STR_PAD_LEFT);
+                $queueNumber = $prefix.'-'.str_pad($i + 1, 3, '0', STR_PAD_LEFT);
 
                 // cache locking
                 $lockKey = "lock_slot_{$schedule->schedule_id}_{$selectedDate}_{$time}";
 
                 // filter jam sudah lewat
-                $slotDateTime = Carbon::parse($selectedDate . ' ' . $time);
+                $slotDateTime = Carbon::parse($selectedDate.' '.$time);
 
                 // penentuan status kartu
                 $status = 'available';
@@ -93,6 +109,8 @@ class QueueController extends Controller
             'date' => $selectedDate,
             'schedulesData' => $generateSchedules,
             'patients' => $myPatients,
+            'doctors' => $doctors,
+            'selectedDoctorId' => $doctorId,
         ]);
     }
 
@@ -198,9 +216,9 @@ class QueueController extends Controller
                 );
             }
 
-
             // 3. Simpan Antrean
             Queue::create([
+                'doctor_id' => $schedule->doctor_id,
                 'patient_id' => $patient->patient_id,
                 'schedule_id' => $schedule->schedule_id,
                 'queue_number' => $request->queue_number,

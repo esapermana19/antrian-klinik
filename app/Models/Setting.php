@@ -39,10 +39,16 @@ class Setting extends Model
      */
     public static function getClinicSettings(): array
     {
+        $logoPath = static::get('clinic_logo');
+
         return [
             'clinic_name' => static::get('clinic_name', 'KLINIK PRATAMA SEHAT'),
             'clinic_address' => static::get('clinic_address', 'Jl. Kesehatan No. 123, Kota Sejahtera'),
             'clinic_phone' => static::get('clinic_phone', '(021) 555-0123'),
+            'clinic_logo' => $logoPath,
+            'clinic_logo_url' => $logoPath ? asset('storage/'.$logoPath) : null,
+            'default_examination_fee' => (float) static::get('default_examination_fee', '50000'),
+            'queue_prefix' => static::get('queue_prefix', 'A'),
         ];
     }
 }
