@@ -14,6 +14,13 @@ class Doctor extends Model
 {
     use HasFactory;
 
+    protected $appends = ['photo_url'];
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->photo_path ? asset('storage/'.$this->photo_path) : null;
+    }
+
     protected function casts(): array
     {
         return [

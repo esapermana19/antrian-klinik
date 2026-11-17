@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisplayQueueController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\MedicationCategoryController;
 use App\Http\Controllers\MedicationController;
@@ -16,7 +17,7 @@ use App\Http\Controllers\QueueManagementController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Welcome')->name('home');
+Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

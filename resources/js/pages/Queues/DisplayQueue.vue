@@ -22,11 +22,13 @@ const props = defineProps({
     nextQueues: Array,
     doctors: Array,
     selectedDoctorId: [String, Number],
+    clinic: Object,
 });
 
 const page = usePage();
-const clinicName = computed(() => page.props.clinic?.clinic_name || 'ANTRIAN KLINIK');
-const clinicLogoUrl = computed(() => page.props.clinic?.clinic_logo_url);
+const clinicName = computed(() => props.clinic?.clinic_name || page.props.clinic?.clinic_name || 'ANTRIAN KLINIK');
+const clinicLogoUrl = computed(() => props.clinic?.clinic_logo_url || page.props.clinic?.clinic_logo_url);
+const clinicBannerUrl = computed(() => props.clinic?.clinic_banner_url || page.props.clinic?.clinic_banner_url || '/images/backround_display.jpg');
 
 const selectedDoctor = ref(props.selectedDoctorId || '');
 const activeQueue = ref(props.currentQueue);
@@ -297,7 +299,7 @@ onUnmounted(() => {
                     <!-- Banner Full Memenuhi Seluruh Card -->
                     <div class="absolute inset-0 z-0 overflow-hidden">
                         <img
-                            src="/images/backround_display.jpg"
+                            :src="clinicBannerUrl"
                             alt="Ruang Pemeriksaan Dokter"
                             class="w-full h-full object-cover clinic-banner-breathing"
                         />

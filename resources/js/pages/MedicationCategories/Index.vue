@@ -255,23 +255,35 @@ const handleDeleteCategory = () => {
 
             <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Kode Kategori</label>
+                    <label class="font-semibold text-slate-700">Kode Kategori <span class="text-rose-500">*</span></label>
                     <input
                         type="text"
                         v-model="form.medication_category_code"
                         placeholder="Contoh: ABX, ANAL"
+                        maxlength="10"
                         class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
+                        :class="{ 'border-rose-500 focus:border-rose-500': form.errors.medication_category_code }"
+                        required
                     />
+                    <p v-if="form.errors.medication_category_code" class="text-[11px] text-rose-500 mt-0.5">
+                        {{ form.errors.medication_category_code }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Nama Kategori</label>
+                    <label class="font-semibold text-slate-700">Nama Kategori <span class="text-rose-500">*</span></label>
                     <input
                         type="text"
                         v-model="form.medication_category_name"
                         placeholder="Contoh: Antibiotik, Analgesik"
+                        maxlength="30"
                         class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        :class="{ 'border-rose-500 focus:border-rose-500': form.errors.medication_category_name }"
+                        required
                     />
+                    <p v-if="form.errors.medication_category_name" class="text-[11px] text-rose-500 mt-0.5">
+                        {{ form.errors.medication_category_name }}
+                    </p>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">

@@ -31,10 +31,16 @@ const sidebarNavItems = computed<NavItem[]>(() => {
     ];
 
     if (userRole.value === 'administrator') {
-        items.push({
-            title: 'Klinik',
-            href: '/settings/clinic',
-        });
+        items.push(
+            {
+                title: 'Klinik',
+                href: '/settings/clinic',
+            },
+            {
+                title: 'Landing Page (CMS)',
+                href: '/settings/landing',
+            },
+        );
     }
 
     return items;

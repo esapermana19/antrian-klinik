@@ -23,7 +23,7 @@ class StoreMedicationCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'medication_category_code' => ['required', 'string', 'size:1', 'unique:medication_categories,medication_category_code'],
+            'medication_category_code' => ['required', 'string', 'max:10', 'unique:medication_categories,medication_category_code'],
             'medication_category_name' => ['required', 'string', 'max:30'],
         ];
     }
@@ -31,7 +31,7 @@ class StoreMedicationCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'medication_category_code.size' => 'Kode harus 1 karakter',
+            'medication_category_code.max' => 'Kode kategori maksimal 10 karakter',
             'medication_category_code.unique' => 'Kode kategori obat sudah terdaftar',
         ];
     }

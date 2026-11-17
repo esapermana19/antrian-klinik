@@ -32,6 +32,7 @@ class ClinicSettingController extends Controller
             'clinic_address' => ['required', 'string', 'max:500'],
             'clinic_phone' => ['nullable', 'string', 'max:50'],
             'clinic_logo' => ['nullable', 'image', 'max:2048'],
+            'clinic_banner' => ['nullable', 'image', 'max:5120'],
             'default_examination_fee' => ['nullable', 'numeric', 'min:0'],
             'queue_prefix' => ['nullable', 'string', 'max:10'],
         ]);
@@ -49,6 +50,15 @@ class ClinicSettingController extends Controller
             }
             $path = $request->file('clinic_logo')->store('clinic', 'public');
             Setting::set('clinic_logo', $path);
+        }
+
+        if ($request->hasFile('clinic_banner')) {
+            $oldBanner = Setting::get('clinic_banner');
+            if ($oldBanner) {
+                Storage::disk('public')->delete($oldBanner);
+            }
+            $bannerPath = $request->file('clinic_banner')->store('clinic', 'public');
+            Setting::set('clinic_banner', $bannerPath);
         }
 
         return back()->with('success', 'Pengaturan informasi klinik berhasil disimpan.');

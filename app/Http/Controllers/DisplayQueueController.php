@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctor;
 use App\Models\Queue;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,6 +23,7 @@ class DisplayQueueController extends Controller
             'nextQueues' => $data['nextQueues'],
             'doctors' => $doctors,
             'selectedDoctorId' => $doctorId,
+            'clinic' => Setting::getClinicSettings(),
         ]);
     }
 

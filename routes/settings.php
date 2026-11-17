@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\ClinicSettingController;
+use App\Http\Controllers\Settings\LandingSettingController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:administrator'])->group(function () {
         Route::get('settings/clinic', [ClinicSettingController::class, 'edit'])->name('clinic.edit');
         Route::patch('settings/clinic', [ClinicSettingController::class, 'update'])->name('clinic.update');
+
+        Route::get('settings/landing', [LandingSettingController::class, 'edit'])->name('landing.edit');
+        Route::patch('settings/landing', [LandingSettingController::class, 'update'])->name('landing.update');
     });
 });
 

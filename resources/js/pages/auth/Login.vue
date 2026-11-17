@@ -64,8 +64,8 @@ const agreeTerms = ref(true);
             <Link href="/" class="flex items-center gap-2.5 group">
                 <!-- Simbol Ikon Neovos Style -->
                 <div class="relative size-8 flex items-center justify-center">
-                    <span class="absolute text-blue-500 font-bold text-lg select-none top-0 -left-1">✦</span>
-                    <div class="size-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xs">
+                    <span class="absolute text-indigo-500 font-bold text-lg select-none top-0 -left-1">✦</span>
+                    <div class="size-6 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-xs">
                         <div class="size-2 rounded-full bg-white"></div>
                     </div>
                 </div>
@@ -164,23 +164,23 @@ const agreeTerms = ref(true);
                                 <InputError :message="errors.password" class="mt-1" />
                             </div>
 
-                            <!-- Checkbox Persetujuan Syarat & Ketentuan Sesuai Gambar Referensi -->
+                            <!-- Checkbox Persetujuan Syarat & Ketentuan -->
                             <div class="flex items-center gap-2 pt-1">
                                 <Checkbox
                                     id="terms"
                                     v-model="agreeTerms"
-                                    class="size-3.5 rounded-sm border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                                    class="size-3.5 rounded-sm border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                                 />
                                 <label for="terms" class="text-[11px] text-slate-500 select-none cursor-pointer leading-tight">
-                                    Saya telah membaca dan menyetujui <span class="text-blue-600">Syarat Layanan</span> & <span class="text-blue-600">Privasi</span>
+                                    Saya telah membaca dan menyetujui <span class="text-indigo-600">Syarat Layanan</span> & <span class="text-indigo-600">Privasi</span>
                                 </label>
                             </div>
 
-                            <!-- Tombol Masuk Biru Terang Solid Sesuai Referensi (Neovos Vibrant Blue) -->
+                            <!-- Tombol Masuk Ungu / Indigo Khas Project -->
                             <Button
                                 type="submit"
                                 :disabled="processing || !agreeTerms"
-                                class="w-full h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow-md shadow-blue-500/25 transition-all cursor-pointer mt-1"
+                                class="w-full h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs shadow-md shadow-indigo-600/25 transition-all cursor-pointer mt-1"
                                 :tabindex="3"
                                 data-test="login-button"
                             >
@@ -194,7 +194,7 @@ const agreeTerms = ref(true);
                                     Belum punya akun?
                                     <Link
                                         :href="register()"
-                                        class="text-blue-600 hover:underline font-medium ml-1"
+                                        class="text-indigo-600 hover:underline font-medium ml-1"
                                     >
                                         Daftar
                                     </Link>

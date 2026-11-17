@@ -15,12 +15,15 @@ const props = defineProps<{
         clinic_phone: string;
         clinic_logo?: string | null;
         clinic_logo_url?: string | null;
+        clinic_banner?: string | null;
+        clinic_banner_url?: string | null;
         default_examination_fee?: number;
         queue_prefix?: string;
     };
 }>();
 
 const previewUrl = ref<string | null>(props.settings?.clinic_logo_url || null);
+const bannerPreviewUrl = ref<string | null>(props.settings?.clinic_banner_url || '/images/backround_display.jpg');
 
 const form = useForm({
     clinic_name: props.settings?.clinic_name || '',
@@ -29,6 +32,7 @@ const form = useForm({
     default_examination_fee: props.settings?.default_examination_fee ?? 50000,
     queue_prefix: props.settings?.queue_prefix || 'A',
     clinic_logo: null as File | null,
+    clinic_banner: null as File | null,
 });
 
 const onFileChange = (e: Event) => {
@@ -37,6 +41,15 @@ const onFileChange = (e: Event) => {
         const file = target.files[0];
         form.clinic_logo = file;
         previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const onBannerChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        const file = target.files[0];
+        form.clinic_banner = file;
+        bannerPreviewUrl.value = URL.createObjectURL(file);
     }
 };
 
@@ -95,6 +108,42 @@ const submit = () => {
                     </div>
                 </div>
                 <InputError :message="form.errors.clinic_logo" />
+            </div>
+
+            <!-- Banner / Hero Display Background -->
+            <div class="space-y-2">
+                <Label>Gambar Banner Klinik & Background Display TV</Label>
+                <div class="space-y-3">
+                    <div class="w-full max-w-lg h-44 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 overflow-hidden relative shadow-xs">
+                        <img
+                            v-if="bannerPreviewUrl"
+                            :src="bannerPreviewUrl"
+                            alt="Banner Preview"
+                            class="size-full object-cover"
+                        />
+                        <div v-else class="size-full flex flex-col items-center justify-center text-slate-400 gap-1">
+                            <Image class="w-8 h-8 opacity-40" />
+                            <span class="text-xs">Belum ada banner diunggah</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer shadow-2xs text-slate-700 dark:text-slate-200 transition">
+                            <Upload class="w-3.5 h-3.5" />
+                            Pilih Banner Baru
+                            <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                @change="onBannerChange"
+                                class="hidden"
+                            />
+                        </label>
+                        <p class="text-[11px] text-muted-foreground">
+                            Format JPG, PNG, atau WebP (Maks. 5MB). Digunakan untuk banner foto utama Landing Page dan background layar monitor antrean (Display Queue).
+                        </p>
+                    </div>
+                </div>
+                <InputError :message="form.errors.clinic_banner" />
             </div>
 
             <div class="space-y-2">

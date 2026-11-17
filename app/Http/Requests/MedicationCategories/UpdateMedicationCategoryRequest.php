@@ -31,7 +31,7 @@ class UpdateMedicationCategoryRequest extends FormRequest
             'medication_category_code' => [
                 'required',
                 'string',
-                'size:1',
+                'max:10',
                 Rule::unique('medication_categories', 'medication_category_code')
                     ->ignore($categoryId, 'medication_category_id'),
             ],
@@ -42,7 +42,8 @@ class UpdateMedicationCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'medication_category_code.size' => 'Kode harus 1 karakter',
+            'medication_category_code.max' => 'Kode kategori maksimal 10 karakter',
+            'medication_category_code.unique' => 'Kode kategori obat sudah terdaftar',
         ];
     }
 }

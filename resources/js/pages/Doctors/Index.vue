@@ -22,6 +22,8 @@ import {
     X,
     Stethoscope,
     Phone,
+    Upload,
+    User,
 } from 'lucide-vue-next';
 import MotionModal from '@/components/MotionModal.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
@@ -50,6 +52,7 @@ const handleSearch = () => {
 const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const selectedDoctorId = ref(null);
+const previewPhotoUrl = ref(null);
 
 const form = useForm({
     doctor_name: '',
@@ -58,6 +61,7 @@ const form = useForm({
     str_number: '',
     phone_number: '',
     is_active: true,
+    photo: null,
 });
 
 // Modal Delete
@@ -70,6 +74,8 @@ const openAddModal = () => {
     form.reset();
     form.clearErrors();
     form.is_active = true;
+    form.photo = null;
+    previewPhotoUrl.value = null;
     isModalOpen.value = true;
 };
 
@@ -83,17 +89,31 @@ const openEditModal = (doctor) => {
     form.str_number = doctor.str_number || '';
     form.phone_number = doctor.phone_number || '';
     form.is_active = Boolean(doctor.is_active);
+    form.photo = null;
+    previewPhotoUrl.value = doctor.photo_url || (doctor.photo_path ? `/storage/${doctor.photo_path}` : null);
     isModalOpen.value = true;
+};
+
+const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        form.photo = file;
+        previewPhotoUrl.value = URL.createObjectURL(file);
+    }
 };
 
 const closeModal = () => {
     isModalOpen.value = false;
     form.reset();
+    previewPhotoUrl.value = null;
 };
 
 const submitForm = () => {
     if (isEditMode.value && selectedDoctorId.value) {
-        form.put(`/doctor/${selectedDoctorId.value}`, {
+        form.post(`/doctor/${selectedDoctorId.value}`, {
+            headers: {
+                'X-HTTP-Method-Override': 'PUT',
+            },
             onSuccess: () => closeModal(),
         });
     } else {
@@ -177,19 +197,32 @@ const handleDeleteDoctor = () => {
 
                         <!-- Nama Dokter & Spesialis -->
                         <TableCell>
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-medium text-xs text-slate-900">{{ doc.doctor_name }}</span>
-                                <span
-                                    v-if="doc.queue_prefix"
-                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60"
-                                    title="Prefix nomor antrean dokter"
-                                >
-                                    {{ doc.queue_prefix }}
-                                </span>
-                            </div>
-                            <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                                <Stethoscope class="size-3 text-indigo-500" />
-                                {{ doc.specialization }}
+                            <div class="flex items-center gap-2.5">
+                                <div class="size-9 rounded-full overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 flex items-center justify-center">
+                                    <img
+                                        v-if="doc.photo_url || doc.photo_path"
+                                        :src="doc.photo_url || `/storage/${doc.photo_path}`"
+                                        :alt="doc.doctor_name"
+                                        class="size-full object-cover"
+                                    />
+                                    <User v-else class="size-4 text-slate-400" />
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-medium text-xs text-slate-900">{{ doc.doctor_name }}</span>
+                                        <span
+                                            v-if="doc.queue_prefix"
+                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60"
+                                            title="Prefix nomor antrean dokter"
+                                        >
+                                            {{ doc.queue_prefix }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                        <Stethoscope class="size-3 text-indigo-500" />
+                                        {{ doc.specialization }}
+                                    </div>
+                                </div>
                             </div>
                         </TableCell>
 
@@ -305,6 +338,36 @@ const handleDeleteDoctor = () => {
             </div>
 
             <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+                <!-- Foto Profil Dokter -->
+                <div class="space-y-1.5">
+                    <label class="font-semibold text-slate-700">Foto Profil Dokter</label>
+                    <div class="flex items-center gap-3">
+                        <div class="size-14 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
+                            <img
+                                v-if="previewPhotoUrl"
+                                :src="previewPhotoUrl"
+                                alt="Preview"
+                                class="size-full object-cover"
+                            />
+                            <User v-else class="size-6 text-slate-400" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs cursor-pointer transition shadow-2xs">
+                                <Upload class="size-3.5 text-slate-500" />
+                                <span>Pilih Foto</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    class="hidden"
+                                    @change="handlePhotoChange"
+                                />
+                            </label>
+                            <p class="text-[10px] text-slate-400">Format: JPG, PNG, WEBP (Maksimal 2MB).</p>
+                        </div>
+                    </div>
+                    <p v-if="form.errors.photo" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.photo }}</p>
+                </div>
+
                 <div class="space-y-1">
                     <label class="font-semibold text-slate-700">Nama Dokter Lengkap <span class="text-rose-500">*</span></label>
                     <input

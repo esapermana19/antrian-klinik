@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SmoothDashboardLayout from '@/components/SmoothDashboardLayout.vue';
+import { Toaster } from '@/components/ui/sonner';
 import type { BreadcrumbItem } from '@/types';
 
 defineProps<{
@@ -11,4 +12,5 @@ defineProps<{
     <SmoothDashboardLayout>
         <slot />
     </SmoothDashboardLayout>
+    <Toaster />
 </template>
