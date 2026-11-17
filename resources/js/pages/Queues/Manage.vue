@@ -67,7 +67,9 @@ const props = defineProps({
     },
 });
 
-const selectedDate = ref(props.filters?.date || new Date().toISOString().split('T')[0]);
+const selectedDate = ref(
+    props.filters?.date || new Date().toISOString().split('T')[0],
+);
 const selectedDoctor = ref(props.filters?.doctor_id || '');
 
 const handleFilterChange = () => {
@@ -77,7 +79,7 @@ const handleFilterChange = () => {
             date: selectedDate.value,
             doctor_id: selectedDoctor.value || undefined,
         },
-        { preserveState: true, preserveScroll: true, replace: true }
+        { preserveState: true, preserveScroll: true, replace: true },
     );
 };
 
@@ -161,11 +163,11 @@ watch(
                     diagnosis: form.diagnosis,
                     notes_on_treatment: form.notes_on_treatment,
                     prescriptions: form.prescriptions,
-                })
+                }),
             );
         }
     },
-    { deep: true }
+    { deep: true },
 );
 
 const closeModal = () => {
@@ -195,7 +197,9 @@ const submitMedicalRecord = () => {
         onSuccess: () => {
             // Bersihkan draft setelah sukses tersimpan ke database
             if (activeQueue.value?.queue_id) {
-                localStorage.removeItem(`medrec_draft_${activeQueue.value.queue_id}`);
+                localStorage.removeItem(
+                    `medrec_draft_${activeQueue.value.queue_id}`,
+                );
             }
             isModalOpen.value = false;
             activeQueue.value = null;
@@ -223,7 +227,8 @@ const promptUpdateStatus = (queue, newStatus) => {
     statusModalData.value = {
         queue,
         newStatus,
-        title: newStatus === 'cancel' ? 'Batalkan Antrean' : 'Ubah Status Antrean',
+        title:
+            newStatus === 'cancel' ? 'Batalkan Antrean' : 'Ubah Status Antrean',
         label: getStatusLabel(newStatus),
     };
     isStatusModalOpen.value = true;
@@ -245,20 +250,24 @@ const confirmUpdateStatus = () => {
                 isStatusModalOpen.value = false;
                 statusModalData.value = null;
             },
-        }
+        },
     );
 };
 
 const handleEnterExaminationRoom = (queue) => {
-    router.patch(`/queue-management/${queue.queue_id}/status`, {
-        queue_status: 'checking',
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            queue.queue_status = 'checking';
-            openMedrecModal(queue);
+    router.patch(
+        `/queue-management/${queue.queue_id}/status`,
+        {
+            queue_status: 'checking',
         },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                queue.queue_status = 'checking';
+                openMedrecModal(queue);
+            },
+        },
+    );
 };
 
 const formatSession = (session) => {
@@ -273,43 +282,67 @@ const formatSession = (session) => {
 <template>
     <Head title="Kelola Antrean Pasien" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Compact Clean Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Kelola Antrean Pasien</h1>
-                <p class="text-xs text-slate-500">Panggilan antrean, periksa rekam medis, dan input resep obat klinik.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Kelola Antrean Pasien
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Panggilan antrean, periksa rekam medis, dan input resep obat
+                    klinik.
+                </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Filter Dokter -->
-                <div v-if="doctors && doctors.length > 0" class="flex items-center gap-1.5 bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
-                    <label class="text-[11px] text-slate-500 font-medium">Dokter:</label>
+                <div
+                    v-if="doctors && doctors.length > 0"
+                    class="flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1 shadow-2xs"
+                >
+                    <label class="text-[11px] font-medium text-slate-500"
+                        >Dokter:</label
+                    >
                     <select
                         v-model="selectedDoctor"
                         @change="handleFilterChange"
-                        class="text-xs text-slate-800 bg-transparent outline-none cursor-pointer"
+                        class="cursor-pointer bg-transparent text-xs text-slate-800 outline-none"
                     >
                         <option value="">Semua Dokter</option>
-                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                        <option
+                            v-for="doc in doctors"
+                            :key="doc.doctor_id"
+                            :value="doc.doctor_id"
+                        >
                             {{ doc.doctor_name }}
                         </option>
                     </select>
                 </div>
 
                 <!-- Filter Tanggal Antrean -->
-                <div class="flex items-center gap-1.5 bg-white/80 border border-slate-200/80 rounded-lg px-2.5 py-1 shadow-2xs">
+                <div
+                    class="flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1 shadow-2xs"
+                >
                     <Clock class="size-3.5 text-slate-400" />
-                    <label class="text-[11px] text-slate-500 font-medium">Tanggal:</label>
+                    <label class="text-[11px] font-medium text-slate-500"
+                        >Tanggal:</label
+                    >
                     <input
                         type="date"
                         v-model="selectedDate"
                         @change="handleFilterChange"
-                        class="text-xs font-mono text-slate-800 bg-transparent outline-none cursor-pointer"
+                        class="cursor-pointer bg-transparent font-mono text-xs text-slate-800 outline-none"
                     />
                 </div>
 
                 <Button variant="outline" size="sm" as-child>
-                    <Link href="/display-queue" target="_blank" class="gap-1.5 text-xs text-slate-700">
+                    <Link
+                        href="/display-queue"
+                        target="_blank"
+                        class="gap-1.5 text-xs text-slate-700"
+                    >
                         <Tv class="size-3.5 text-indigo-600" />
                         Buka Display TV
                     </Link>
@@ -318,45 +351,60 @@ const formatSession = (session) => {
         </div>
 
         <!-- Table Card Shadcn Clean Design -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-xl">
+        <Card
+            class="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead class="w-36 whitespace-nowrap">No. Antrean</TableHead>
+                        <TableHead class="w-36 whitespace-nowrap"
+                            >No. Antrean</TableHead
+                        >
                         <TableHead class="min-w-[180px]">Nama Pasien</TableHead>
-                        <TableHead class="w-40 whitespace-nowrap">Dokter / Poli</TableHead>
+                        <TableHead class="w-40 whitespace-nowrap"
+                            >Dokter / Poli</TableHead
+                        >
                         <TableHead class="w-24">Sesi</TableHead>
-                        <TableHead class="w-32 whitespace-nowrap">Estimasi Jam</TableHead>
-                        <TableHead class="w-32 whitespace-nowrap">Status</TableHead>
-                        <TableHead class="text-right pr-4 w-44 whitespace-nowrap">Aksi</TableHead>
+                        <TableHead class="w-32 whitespace-nowrap"
+                            >Estimasi Jam</TableHead
+                        >
+                        <TableHead class="w-32 whitespace-nowrap"
+                            >Status</TableHead
+                        >
+                        <TableHead
+                            class="w-44 pr-4 text-right whitespace-nowrap"
+                            >Aksi</TableHead
+                        >
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow
-                        v-for="q in todayQueues.data"
-                        :key="q.queue_id"
-                    >
+                    <TableRow v-for="q in todayQueues.data" :key="q.queue_id">
                         <!-- No Antrean -->
-                        <TableCell class="font-mono text-xs font-semibold text-slate-800 whitespace-nowrap">
+                        <TableCell
+                            class="font-mono text-xs font-semibold whitespace-nowrap text-slate-800"
+                        >
                             {{ q.queue_number }}
                         </TableCell>
 
                         <!-- Nama Pasien & NIK -->
                         <TableCell>
-                            <div class="font-medium text-xs text-slate-900">
+                            <div class="text-xs font-medium text-slate-900">
                                 {{ q.patient?.patient_name }}
                             </div>
-                            <div class="text-[11px] text-slate-400 font-mono">
+                            <div class="font-mono text-[11px] text-slate-400">
                                 NIK: {{ q.patient?.nik || '-' }}
                             </div>
                         </TableCell>
 
                         <!-- Dokter / Poli -->
                         <TableCell>
-                            <div class="font-medium text-xs text-slate-900">
+                            <div class="text-xs font-medium text-slate-900">
                                 {{ q.doctor?.doctor_name || 'Dokter Umum' }}
                             </div>
-                            <div v-if="q.doctor?.specialization" class="text-[11px] text-slate-500">
+                            <div
+                                v-if="q.doctor?.specialization"
+                                class="text-[11px] text-slate-500"
+                            >
                                 {{ q.doctor.specialization }}
                             </div>
                         </TableCell>
@@ -368,7 +416,9 @@ const formatSession = (session) => {
 
                         <!-- Estimasi Jam -->
                         <TableCell>
-                            <span class="inline-flex items-center gap-1 font-mono text-xs text-slate-600">
+                            <span
+                                class="inline-flex items-center gap-1 font-mono text-xs text-slate-600"
+                            >
                                 <Clock class="size-3 text-slate-400" />
                                 {{ q.estimate_time }}
                             </span>
@@ -377,47 +427,72 @@ const formatSession = (session) => {
                         <!-- Status: Simple Dot Indicator (Bukan Badge Besar AI) -->
                         <TableCell>
                             <!-- Status: Selesai -->
-                            <span v-if="q.queue_status === 'completed'" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                <span class="size-1.5 rounded-full bg-emerald-600"></span>
+                            <span
+                                v-if="q.queue_status === 'completed'"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-emerald-600"
+                                ></span>
                                 Selesai
                             </span>
 
                             <!-- Status: Diperiksa -->
-                            <span v-else-if="q.queue_status === 'checking'" class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
-                                <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span
+                                v-else-if="q.queue_status === 'checking'"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700"
+                            >
+                                <span
+                                    class="size-1.5 animate-pulse rounded-full bg-amber-500"
+                                ></span>
                                 Sedang Diperiksa
                             </span>
 
                             <!-- Status: Dipanggil -->
-                            <span v-else-if="q.queue_status === 'called'" class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700">
-                                <span class="size-1.5 rounded-full bg-blue-500"></span>
+                            <span
+                                v-else-if="q.queue_status === 'called'"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-blue-500"
+                                ></span>
                                 Dipanggil
                             </span>
 
                             <!-- Status: Menunggu -->
-                            <span v-else-if="q.queue_status === 'waiting'" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                                <span class="size-1.5 rounded-full bg-slate-400"></span>
+                            <span
+                                v-else-if="q.queue_status === 'waiting'"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-slate-400"
+                                ></span>
                                 Menunggu
                             </span>
 
                             <!-- Status: Batal -->
-                            <span v-else class="inline-flex items-center gap-1.5 text-xs font-medium text-rose-600">
-                                <span class="size-1.5 rounded-full bg-rose-500"></span>
+                            <span
+                                v-else
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-rose-600"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-rose-500"
+                                ></span>
                                 Batal
                             </span>
                         </TableCell>
 
                         <!-- Aksi Operasional -->
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1.5">
                                 <!-- Status: waiting -> Panggil Pasien -->
                                 <Button
                                     v-if="q.queue_status === 'waiting'"
                                     size="sm"
-                                    class="h-7 px-2.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-normal"
+                                    class="h-7 bg-indigo-600 px-2.5 text-xs font-normal text-white hover:bg-indigo-700"
                                     @click="promptUpdateStatus(q, 'called')"
                                 >
-                                    <PhoneCall class="size-3 mr-1" />
+                                    <PhoneCall class="mr-1 size-3" />
                                     Panggil
                                 </Button>
 
@@ -425,10 +500,10 @@ const formatSession = (session) => {
                                 <Button
                                     v-if="q.queue_status === 'called'"
                                     size="sm"
-                                    class="h-7 px-2.5 text-xs bg-amber-600 hover:bg-amber-700 text-white font-normal"
+                                    class="h-7 bg-amber-600 px-2.5 text-xs font-normal text-white hover:bg-amber-700"
                                     @click="handleEnterExaminationRoom(q)"
                                 >
-                                    <Stethoscope class="size-3 mr-1" />
+                                    <Stethoscope class="mr-1 size-3" />
                                     Periksa
                                 </Button>
 
@@ -436,10 +511,10 @@ const formatSession = (session) => {
                                 <Button
                                     v-if="q.queue_status === 'checking'"
                                     size="sm"
-                                    class="h-7 px-2.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-normal"
+                                    class="h-7 bg-emerald-600 px-2.5 text-xs font-normal text-white hover:bg-emerald-700"
                                     @click="openMedrecModal(q)"
                                 >
-                                    <FileEdit class="size-3 mr-1" />
+                                    <FileEdit class="mr-1 size-3" />
                                     Input Rekam Medis
                                 </Button>
 
@@ -447,11 +522,17 @@ const formatSession = (session) => {
                                 <Tooltip>
                                     <TooltipTrigger as-child>
                                         <Button
-                                            v-if="['waiting', 'called'].includes(q.queue_status)"
+                                            v-if="
+                                                ['waiting', 'called'].includes(
+                                                    q.queue_status,
+                                                )
+                                            "
                                             size="icon-sm"
                                             variant="outline"
-                                            class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 cursor-pointer"
-                                            @click="promptUpdateStatus(q, 'cancel')"
+                                            class="size-7 cursor-pointer text-slate-400 hover:border-rose-200 hover:text-rose-600"
+                                            @click="
+                                                promptUpdateStatus(q, 'cancel')
+                                            "
                                         >
                                             <Ban class="size-3.5" />
                                         </Button>
@@ -459,21 +540,32 @@ const formatSession = (session) => {
                                     <TooltipContent
                                         side="top"
                                         :side-offset="6"
-                                        class="bg-slate-900 text-white border border-slate-800 text-[11px] font-medium py-1 px-2 rounded-md shadow-lg pointer-events-none select-none"
+                                        class="pointer-events-none rounded-md border border-slate-800 bg-slate-900 px-2 py-1 text-[11px] font-medium text-white shadow-lg select-none"
                                     >
                                         Batalkan Antrean
                                     </TooltipContent>
                                 </Tooltip>
 
-                                <span v-if="q.queue_status === 'completed'" class="inline-flex items-center gap-1 text-[11px] text-slate-400 font-normal">
-                                    <CheckCircle2 class="size-3.5 text-emerald-600" /> Selesai
+                                <span
+                                    v-if="q.queue_status === 'completed'"
+                                    class="inline-flex items-center gap-1 text-[11px] font-normal text-slate-400"
+                                >
+                                    <CheckCircle2
+                                        class="size-3.5 text-emerald-600"
+                                    />
+                                    Selesai
                                 </span>
                             </div>
                         </TableCell>
                     </TableRow>
 
-                    <TableEmpty v-if="!todayQueues.data || todayQueues.data.length === 0" :colspan="6">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                    <TableEmpty
+                        v-if="
+                            !todayQueues.data || todayQueues.data.length === 0
+                        "
+                        :colspan="6"
+                    >
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Tidak ada antrean terdaftar untuk hari ini.
                         </div>
                     </TableEmpty>
@@ -481,9 +573,15 @@ const formatSession = (session) => {
             </Table>
 
             <!-- Compact Clean Pagination -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ todayQueues.current_page }}</strong> dari {{ todayQueues.last_page }}
+                    Hal
+                    <strong class="text-slate-700">{{
+                        todayQueues.current_page
+                    }}</strong>
+                    dari {{ todayQueues.last_page }}
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -493,11 +591,14 @@ const formatSession = (session) => {
                         :disabled="!todayQueues.prev_page_url"
                         as-child
                     >
-                        <Link v-if="todayQueues.prev_page_url" :href="todayQueues.prev_page_url">
+                        <Link
+                            v-if="todayQueues.prev_page_url"
+                            :href="todayQueues.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" />
                             Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" />
                             Prev
                         </span>
@@ -509,11 +610,14 @@ const formatSession = (session) => {
                         :disabled="!todayQueues.next_page_url"
                         as-child
                     >
-                        <Link v-if="todayQueues.next_page_url" :href="todayQueues.next_page_url">
+                        <Link
+                            v-if="todayQueues.next_page_url"
+                            :href="todayQueues.next_page_url"
+                        >
                             Next
                             <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next
                             <ChevronRight class="size-3" />
                         </span>
@@ -523,35 +627,63 @@ const formatSession = (session) => {
         </Card>
 
         <!-- Modal Rekam Medis (Clean Compact Popup) -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
-            <div class="w-full max-w-2xl max-h-[90vh] bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
+        <div
+            v-if="isModalOpen"
+            class="backdrop-blur-2xs fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+        >
+            <div
+                class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+            >
                 <!-- Modal Header -->
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                <div
+                    class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+                >
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900">Input Rekam Medis Pasien</h2>
+                        <h2 class="text-sm font-bold text-slate-900">
+                            Input Rekam Medis Pasien
+                        </h2>
                         <p class="text-[11px] text-slate-500">
-                            {{ activeQueue?.patient?.patient_name }} (Tiket #{{ activeQueue?.queue_number }})
+                            {{ activeQueue?.patient?.patient_name }} (Tiket #{{
+                                activeQueue?.queue_number
+                            }})
                         </p>
                     </div>
-                    <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <button
+                        type="button"
+                        @click="closeModal"
+                        class="rounded p-1 text-slate-400 hover:text-slate-600"
+                    >
                         <X class="size-4" />
                     </button>
                 </div>
 
                 <!-- Modal Body -->
-                <div class="p-4 overflow-y-auto space-y-4 text-xs">
+                <div class="space-y-4 overflow-y-auto p-4 text-xs">
                     <!-- Alert Error Transaksi / Validasi Umum -->
                     <div
-                        v-if="form.errors.error_transaction || $page.props.errors?.error_transaction"
-                        class="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2"
+                        v-if="
+                            form.errors.error_transaction ||
+                            $page.props.errors?.error_transaction
+                        "
+                        class="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700"
                     >
                         <AlertCircle class="size-4 shrink-0 text-rose-600" />
-                        <span>{{ form.errors.error_transaction || $page.props.errors?.error_transaction }}</span>
+                        <span>{{
+                            form.errors.error_transaction ||
+                            $page.props.errors?.error_transaction
+                        }}</span>
                     </div>
 
-                    <form @submit.prevent="submitMedicalRecord" id="medrecForm" class="space-y-3.5">
+                    <form
+                        @submit.prevent="submitMedicalRecord"
+                        id="medrecForm"
+                        class="space-y-3.5"
+                    >
                         <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Keluhan Utama <span class="text-rose-500">*</span></label>
+                            <label class="font-semibold text-slate-700"
+                                >Keluhan Utama
+                                <span class="text-rose-500">*</span></label
+                            >
                             <textarea
                                 v-model="form.main_complaint"
                                 required
@@ -559,20 +691,30 @@ const formatSession = (session) => {
                                 placeholder="Keluhan sakit yang dirasakan..."
                                 class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                             ></textarea>
-                            <span v-if="form.errors.main_complaint" class="text-rose-500 text-[10px]">{{ form.errors.main_complaint }}</span>
+                            <span
+                                v-if="form.errors.main_complaint"
+                                class="text-[10px] text-rose-500"
+                                >{{ form.errors.main_complaint }}</span
+                            >
                         </div>
 
                         <!-- 3 Kolom Vital Signs -->
                         <div class="grid grid-cols-3 gap-2">
                             <div class="space-y-1">
-                                <label class="text-slate-600">Tensi (mmHg)</label>
+                                <label class="text-slate-600"
+                                    >Tensi (mmHg)</label
+                                >
                                 <input
                                     type="text"
                                     v-model="form.blood_pressure"
                                     placeholder="120/80"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
-                                <span v-if="form.errors.blood_pressure" class="text-rose-500 text-[10px]">{{ form.errors.blood_pressure }}</span>
+                                <span
+                                    v-if="form.errors.blood_pressure"
+                                    class="text-[10px] text-rose-500"
+                                    >{{ form.errors.blood_pressure }}</span
+                                >
                             </div>
                             <div class="space-y-1">
                                 <label class="text-slate-600">Suhu (°C)</label>
@@ -583,7 +725,11 @@ const formatSession = (session) => {
                                     placeholder="36.5"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
-                                <span v-if="form.errors.temperature" class="text-rose-500 text-[10px]">{{ form.errors.temperature }}</span>
+                                <span
+                                    v-if="form.errors.temperature"
+                                    class="text-[10px] text-rose-500"
+                                    >{{ form.errors.temperature }}</span
+                                >
                             </div>
                             <div class="space-y-1">
                                 <label class="text-slate-600">Berat (Kg)</label>
@@ -594,12 +740,19 @@ const formatSession = (session) => {
                                     placeholder="60"
                                     class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                 />
-                                <span v-if="form.errors.weight" class="text-rose-500 text-[10px]">{{ form.errors.weight }}</span>
+                                <span
+                                    v-if="form.errors.weight"
+                                    class="text-[10px] text-rose-500"
+                                    >{{ form.errors.weight }}</span
+                                >
                             </div>
                         </div>
 
                         <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Diagnosa Medis <span class="text-rose-500">*</span></label>
+                            <label class="font-semibold text-slate-700"
+                                >Diagnosa Medis
+                                <span class="text-rose-500">*</span></label
+                            >
                             <textarea
                                 v-model="form.diagnosis"
                                 required
@@ -607,11 +760,17 @@ const formatSession = (session) => {
                                 placeholder="Diagnosa dokter..."
                                 class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                             ></textarea>
-                            <span v-if="form.errors.diagnosis" class="text-rose-500 text-[10px]">{{ form.errors.diagnosis }}</span>
+                            <span
+                                v-if="form.errors.diagnosis"
+                                class="text-[10px] text-rose-500"
+                                >{{ form.errors.diagnosis }}</span
+                            >
                         </div>
 
                         <div class="space-y-1">
-                            <label class="text-slate-600">Tindakan / Catatan Tambahan</label>
+                            <label class="text-slate-600"
+                                >Tindakan / Catatan Tambahan</label
+                            >
                             <textarea
                                 v-model="form.notes_on_treatment"
                                 rows="2"
@@ -621,42 +780,66 @@ const formatSession = (session) => {
                         </div>
 
                         <!-- Resep Obat -->
-                        <div class="pt-2 border-t border-slate-100 space-y-2">
+                        <div class="space-y-2 border-t border-slate-100 pt-2">
                             <div class="flex items-center justify-between">
-                                <label class="font-semibold text-slate-700">Resep Obat</label>
+                                <label class="font-semibold text-slate-700"
+                                    >Resep Obat</label
+                                >
                                 <Button
                                     type="button"
                                     size="sm"
                                     variant="outline"
-                                    class="h-6 px-2 text-[11px] gap-1"
+                                    class="h-6 gap-1 px-2 text-[11px]"
                                     @click="addPrescription"
                                 >
                                     <Plus class="size-3" /> Tambah Obat
                                 </Button>
                             </div>
 
-                            <div v-if="form.prescriptions.length > 0" class="space-y-1.5">
+                            <div
+                                v-if="form.prescriptions.length > 0"
+                                class="space-y-1.5"
+                            >
                                 <div
                                     v-for="(item, index) in form.prescriptions"
                                     :key="index"
-                                    class="p-2 rounded-lg bg-slate-50 border border-slate-200 grid grid-cols-12 gap-2 items-center"
+                                    class="grid grid-cols-12 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2"
                                 >
                                     <div class="col-span-6">
                                         <Select
-                                            :model-value="item.medication_id ? String(item.medication_id) : ''"
-                                            @update:model-value="(val) => item.medication_id = Number(val)"
+                                            :model-value="
+                                                item.medication_id
+                                                    ? String(item.medication_id)
+                                                    : ''
+                                            "
+                                            @update:model-value="
+                                                (val) =>
+                                                    (item.medication_id =
+                                                        Number(val))
+                                            "
                                         >
-                                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
-                                                <SelectValue placeholder="Pilih Obat" />
+                                            <SelectTrigger
+                                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                                            >
+                                                <SelectValue
+                                                    placeholder="Pilih Obat"
+                                                />
                                             </SelectTrigger>
-                                            <SelectContent class="bg-white border-slate-200 max-h-56 z-[60]">
+                                            <SelectContent
+                                                class="z-[60] max-h-56 border-slate-200 bg-white"
+                                            >
                                                 <SelectItem
                                                     v-for="med in props.medications"
                                                     :key="med.medication_id"
-                                                    :value="String(med.medication_id)"
+                                                    :value="
+                                                        String(
+                                                            med.medication_id,
+                                                        )
+                                                    "
                                                     class="text-xs"
                                                 >
-                                                    {{ med.medication_name }} (Stok: {{ med.stock }})
+                                                    {{ med.medication_name }}
+                                                    (Stok: {{ med.stock }})
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -667,7 +850,7 @@ const formatSession = (session) => {
                                             v-model="item.dosage"
                                             placeholder="Dosis (e.g. 3x1)"
                                             required
-                                            class="w-full h-8 rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"
+                                            class="h-8 w-full rounded border border-slate-200 bg-white px-2.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                         />
                                     </div>
                                     <div class="col-span-1">
@@ -676,20 +859,43 @@ const formatSession = (session) => {
                                             v-model="item.qty"
                                             min="1"
                                             required
-                                            class="w-full h-8 rounded border border-slate-200 bg-white px-1 text-xs text-slate-800 text-center focus:outline-none focus:border-indigo-500"
+                                            class="h-8 w-full rounded border border-slate-200 bg-white px-1 text-center text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                                         />
                                     </div>
                                     <div class="col-span-1 text-center">
                                         <button
                                             type="button"
-                                            class="text-slate-400 hover:text-rose-600 transition"
+                                            class="text-slate-400 transition hover:text-rose-600"
                                             @click="removePrescription(index)"
                                         >
                                             <Trash2 class="size-3.5" />
                                         </button>
                                     </div>
-                                    <div v-if="form.errors[`prescriptions.${index}.medication_id`] || form.errors[`prescriptions.${index}.dosage`] || form.errors[`prescriptions.${index}.qty`]" class="col-span-12 text-[10px] text-rose-500">
-                                        {{ form.errors[`prescriptions.${index}.medication_id`] || form.errors[`prescriptions.${index}.dosage`] || form.errors[`prescriptions.${index}.qty`] }}
+                                    <div
+                                        v-if="
+                                            form.errors[
+                                                `prescriptions.${index}.medication_id`
+                                            ] ||
+                                            form.errors[
+                                                `prescriptions.${index}.dosage`
+                                            ] ||
+                                            form.errors[
+                                                `prescriptions.${index}.qty`
+                                            ]
+                                        "
+                                        class="col-span-12 text-[10px] text-rose-500"
+                                    >
+                                        {{
+                                            form.errors[
+                                                `prescriptions.${index}.medication_id`
+                                            ] ||
+                                            form.errors[
+                                                `prescriptions.${index}.dosage`
+                                            ] ||
+                                            form.errors[
+                                                `prescriptions.${index}.qty`
+                                            ]
+                                        }}
                                     </div>
                                 </div>
                             </div>
@@ -698,16 +904,28 @@ const formatSession = (session) => {
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="px-4 py-2.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-2">
-                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-2.5"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="closeModal"
+                        >Batal</Button
+                    >
                     <Button
                         type="submit"
                         form="medrecForm"
                         size="sm"
                         :disabled="form.processing"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700"
                     >
-                        {{ form.processing ? 'Menyimpan...' : 'Simpan Rekam Medis' }}
+                        {{
+                            form.processing
+                                ? 'Menyimpan...'
+                                : 'Simpan Rekam Medis'
+                        }}
                     </Button>
                 </div>
             </div>
@@ -720,19 +938,37 @@ const formatSession = (session) => {
             :title="statusModalData?.title || 'Ubah Status Antrean'"
             :description="`Konfirmasi perubahan status nomor antrean ${statusModalData?.queue?.queue_number}.`"
         >
-            <div class="py-2 text-xs text-slate-600 leading-relaxed">
+            <div class="py-2 text-xs leading-relaxed text-slate-600">
                 <template v-if="statusModalData?.newStatus === 'cancel'">
-                    <div class="p-3 bg-rose-50/70 border border-rose-100 rounded-lg text-rose-700">
-                        Apakah Anda yakin ingin <strong class="font-bold">membatalkan</strong> antrean pasien
-                        <strong>"{{ statusModalData?.queue?.patient?.patient_name }}"</strong>
-                        (No: {{ statusModalData?.queue?.queue_number }})? Pasien tidak akan dipanggil lagi hari ini.
+                    <div
+                        class="rounded-lg border border-rose-100 bg-rose-50/70 p-3 text-rose-700"
+                    >
+                        Apakah Anda yakin ingin
+                        <strong class="font-bold">membatalkan</strong> antrean
+                        pasien
+                        <strong
+                            >"{{
+                                statusModalData?.queue?.patient?.patient_name
+                            }}"</strong
+                        >
+                        (No: {{ statusModalData?.queue?.queue_number }})? Pasien
+                        tidak akan dipanggil lagi hari ini.
                     </div>
                 </template>
                 <template v-else>
-                    <div class="p-3 bg-indigo-50/70 border border-indigo-100 rounded-lg text-indigo-900">
-                        Ubah status antrean <strong>"{{ statusModalData?.queue?.patient?.patient_name }}"</strong>
+                    <div
+                        class="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3 text-indigo-900"
+                    >
+                        Ubah status antrean
+                        <strong
+                            >"{{
+                                statusModalData?.queue?.patient?.patient_name
+                            }}"</strong
+                        >
                         (No: {{ statusModalData?.queue?.queue_number }}) menjadi
-                        <strong class="font-bold text-indigo-700">"{{ statusModalData?.label }}"</strong>?
+                        <strong class="font-bold text-indigo-700"
+                            >"{{ statusModalData?.label }}"</strong
+                        >?
                     </div>
                 </template>
             </div>
@@ -742,7 +978,7 @@ const formatSession = (session) => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    class="h-8 text-xs border-slate-200"
+                    class="h-8 border-slate-200 text-xs"
                     :disabled="isUpdatingStatus"
                     @click="isStatusModalOpen = false"
                 >
@@ -750,14 +986,28 @@ const formatSession = (session) => {
                 </Button>
                 <Button
                     type="button"
-                    :variant="statusModalData?.newStatus === 'cancel' ? 'destructive' : 'default'"
+                    :variant="
+                        statusModalData?.newStatus === 'cancel'
+                            ? 'destructive'
+                            : 'default'
+                    "
                     size="sm"
                     class="h-8 text-xs"
-                    :class="statusModalData?.newStatus === 'cancel' ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'"
+                    :class="
+                        statusModalData?.newStatus === 'cancel'
+                            ? 'bg-rose-600 text-white hover:bg-rose-700'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    "
                     :disabled="isUpdatingStatus"
                     @click="confirmUpdateStatus"
                 >
-                    {{ isUpdatingStatus ? 'Memproses...' : (statusModalData?.newStatus === 'cancel' ? 'Ya, Batalkan' : 'Ya, Ubah') }}
+                    {{
+                        isUpdatingStatus
+                            ? 'Memproses...'
+                            : statusModalData?.newStatus === 'cancel'
+                              ? 'Ya, Batalkan'
+                              : 'Ya, Ubah'
+                    }}
                 </Button>
             </template>
         </SpringModal>

@@ -38,7 +38,10 @@ const overlayTransition = {
 
 <template>
     <Dialog :open="props.open" @update:open="emit('update:open', $event)">
-        <MotionDialogContent :force-mount="true" class="p-0 border-0 bg-transparent shadow-none">
+        <MotionDialogContent
+            :force-mount="true"
+            class="border-0 bg-transparent p-0 shadow-none"
+        >
             <AnimatePresence>
                 <!-- Backdrop Overlay (Fade-in / Fade-out) -->
                 <motion.div
@@ -48,7 +51,7 @@ const overlayTransition = {
                     :animate="{ opacity: 1 }"
                     :exit="{ opacity: 0 }"
                     :transition="overlayTransition"
-                    class="fixed inset-0 bg-slate-950/45 backdrop-blur-xs pointer-events-auto z-40"
+                    class="pointer-events-auto fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-xs"
                     @click="emit('update:open', false)"
                 />
 
@@ -58,27 +61,41 @@ const overlayTransition = {
                     key="spring-modal-card"
                     :initial="{ opacity: 0, scale: 0.8, y: 16 }"
                     :animate="{ opacity: 1, scale: 1, y: 0 }"
-                    :exit="{ opacity: 0, scale: 0.92, y: 10, transition: { duration: 0.18, ease: 'easeIn' } }"
+                    :exit="{
+                        opacity: 0,
+                        scale: 0.92,
+                        y: 10,
+                        transition: { duration: 0.18, ease: 'easeIn' },
+                    }"
                     :transition="springTransition"
-                    class="pointer-events-auto relative z-50 w-full overflow-hidden rounded-xl border border-slate-200/90 bg-white p-6 shadow-2xl mx-4"
+                    class="pointer-events-auto relative z-50 mx-4 w-full overflow-hidden rounded-xl border border-slate-200/90 bg-white p-6 shadow-2xl"
                     :class="props.maxWidth"
                 >
                     <!-- Close button -->
                     <button
                         type="button"
                         @click="emit('update:open', false)"
-                        class="absolute right-4 top-4 rounded-md p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                        class="absolute top-4 right-4 cursor-pointer rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
                     >
                         <X class="size-4" />
                         <span class="sr-only">Tutup</span>
                     </button>
 
                     <!-- Header -->
-                    <div v-if="props.title || props.description" class="mb-4 space-y-1 pr-6">
-                        <h2 v-if="props.title" class="text-base font-bold text-slate-900 tracking-tight">
+                    <div
+                        v-if="props.title || props.description"
+                        class="mb-4 space-y-1 pr-6"
+                    >
+                        <h2
+                            v-if="props.title"
+                            class="text-base font-bold tracking-tight text-slate-900"
+                        >
                             {{ props.title }}
                         </h2>
-                        <p v-if="props.description" class="text-xs text-slate-500 leading-relaxed">
+                        <p
+                            v-if="props.description"
+                            class="text-xs leading-relaxed text-slate-500"
+                        >
                             {{ props.description }}
                         </p>
                     </div>
@@ -89,7 +106,10 @@ const overlayTransition = {
                     </div>
 
                     <!-- Footer Slot -->
-                    <div v-if="$slots.footer" class="mt-6 flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <div
+                        v-if="$slots.footer"
+                        class="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-3"
+                    >
                         <slot name="footer" />
                     </div>
                 </motion.div>

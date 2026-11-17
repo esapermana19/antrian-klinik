@@ -43,7 +43,9 @@ const passwordInput = useTemplateRef('passwordInput');
                         >Delete account</Button
                     >
                 </DialogTrigger>
-                <DialogContent class="bg-white dark:bg-slate-900 border border-slate-200/90 shadow-2xl rounded-2xl z-50">
+                <DialogContent
+                    class="z-50 rounded-2xl border border-slate-200/90 bg-white shadow-2xl dark:bg-slate-900"
+                >
                     <Form
                         v-bind="ProfileController.destroy.form()"
                         reset-on-success
@@ -55,17 +57,23 @@ const passwordInput = useTemplateRef('passwordInput');
                         v-slot="{ errors, processing, reset, clearErrors }"
                     >
                         <DialogHeader class="space-y-2 text-left">
-                            <DialogTitle class="text-base font-bold text-slate-900 dark:text-white"
+                            <DialogTitle
+                                class="text-base font-bold text-slate-900 dark:text-white"
                                 >Hapus Akun Anda?</DialogTitle
                             >
-                            <DialogDescription class="text-xs text-slate-500 leading-relaxed">
-                                Setelah akun dihapus, seluruh data dan hak akses Anda akan dihapus secara permanen.
-                                Masukkan kata sandi untuk mengonfirmasi penghapusan akun.
+                            <DialogDescription
+                                class="text-xs leading-relaxed text-slate-500"
+                            >
+                                Setelah akun dihapus, seluruh data dan hak akses
+                                Anda akan dihapus secara permanen. Masukkan kata
+                                sandi untuk mengonfirmasi penghapusan akun.
                             </DialogDescription>
                         </DialogHeader>
 
                         <div class="grid gap-1.5 pt-1">
-                            <Label for="password" class="text-xs font-medium text-slate-700 dark:text-slate-300"
+                            <Label
+                                for="password"
+                                class="text-xs font-medium text-slate-700 dark:text-slate-300"
                                 >Kata Sandi Konfirmasi</Label
                             >
                             <PasswordInput
@@ -73,17 +81,19 @@ const passwordInput = useTemplateRef('passwordInput');
                                 name="password"
                                 ref="passwordInput"
                                 placeholder="Masukkan kata sandi akun Anda"
-                                class="h-9.5 text-xs bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
+                                class="h-9.5 border-slate-200 bg-slate-50 text-xs dark:border-slate-700 dark:bg-slate-800"
                             />
                             <InputError :message="errors.password" />
                         </div>
 
-                        <DialogFooter class="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+                        <DialogFooter
+                            class="flex flex-col-reverse gap-2 pt-2 sm:flex-row"
+                        >
                             <DialogClose as-child>
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    class="h-9 text-xs border-slate-200 cursor-pointer"
+                                    class="h-9 cursor-pointer border-slate-200 text-xs"
                                     @click="
                                         () => {
                                             clearErrors();
@@ -98,7 +108,7 @@ const passwordInput = useTemplateRef('passwordInput');
                             <Button
                                 type="submit"
                                 variant="destructive"
-                                class="h-9 text-xs bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
+                                class="h-9 cursor-pointer bg-rose-600 text-xs text-white hover:bg-rose-700"
                                 :disabled="processing"
                                 data-test="confirm-delete-user-button"
                             >

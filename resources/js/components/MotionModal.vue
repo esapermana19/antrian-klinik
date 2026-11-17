@@ -34,7 +34,7 @@ const overlayTransition = {
         <AnimatePresence>
             <div
                 v-if="props.show"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+                class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4"
             >
                 <!-- Backdrop Overlay (Fade-in / Fade-out) -->
                 <motion.div
@@ -43,7 +43,7 @@ const overlayTransition = {
                     :animate="{ opacity: 1 }"
                     :exit="{ opacity: 0 }"
                     :transition="overlayTransition"
-                    class="fixed inset-0 bg-slate-950/45 backdrop-blur-2xs cursor-pointer z-40"
+                    class="backdrop-blur-2xs fixed inset-0 z-40 cursor-pointer bg-slate-950/45"
                     @click="emit('close')"
                 />
 
@@ -52,9 +52,14 @@ const overlayTransition = {
                     key="motion-modal-card"
                     :initial="{ opacity: 0, scale: 0.8, y: 16 }"
                     :animate="{ opacity: 1, scale: 1, y: 0 }"
-                    :exit="{ opacity: 0, scale: 0.92, y: 10, transition: { duration: 0.16, ease: 'easeIn' } }"
+                    :exit="{
+                        opacity: 0,
+                        scale: 0.92,
+                        y: 10,
+                        transition: { duration: 0.16, ease: 'easeIn' },
+                    }"
                     :transition="springTransition"
-                    class="pointer-events-auto relative z-50 w-full overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-2xl my-auto"
+                    class="pointer-events-auto relative z-50 my-auto w-full overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-2xl"
                     :class="props.maxWidth"
                 >
                     <slot />
@@ -63,4 +68,3 @@ const overlayTransition = {
         </AnimatePresence>
     </Teleport>
 </template>
-

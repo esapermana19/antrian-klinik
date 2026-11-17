@@ -3,7 +3,8 @@ import { ref } from 'vue';
 export function useQueueAnnouncer() {
     const isSpeaking = ref(false);
     const isMuted = ref(false);
-    const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+    const isSupported =
+        typeof window !== 'undefined' && 'speechSynthesis' in window;
 
     // Load setting mute dari localStorage bila ada
     if (typeof window !== 'undefined') {
@@ -30,7 +31,8 @@ export function useQueueAnnouncer() {
     const playBellChime = (): Promise<void> => {
         return new Promise((resolve) => {
             try {
-                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                const AudioCtx =
+                    window.AudioContext || (window as any).webkitAudioContext;
                 if (!AudioCtx) {
                     resolve();
                     return;
@@ -75,7 +77,11 @@ export function useQueueAnnouncer() {
     /**
      * Memanggil antrean menggunakan Web Speech Synthesis API Bahasa Indonesia
      */
-    const announceQueue = async (queueNumber: string, patientName?: string, doctorName?: string) => {
+    const announceQueue = async (
+        queueNumber: string,
+        patientName?: string,
+        doctorName?: string,
+    ) => {
         if (!isSupported || isMuted.value || !queueNumber) return;
 
         window.speechSynthesis.cancel();
@@ -102,7 +108,9 @@ export function useQueueAnnouncer() {
 
         // Pilih voice Bahasa Indonesia bila tersedia di browser
         const voices = window.speechSynthesis.getVoices();
-        const idVoice = voices.find((v) => v.lang.startsWith('id') || v.lang.includes('ID'));
+        const idVoice = voices.find(
+            (v) => v.lang.startsWith('id') || v.lang.includes('ID'),
+        );
         if (idVoice) {
             utterance.voice = idVoice;
         }

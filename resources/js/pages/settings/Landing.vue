@@ -5,7 +5,14 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Save, Layers, UserCheck, CalendarDays, PhoneCall } from 'lucide-vue-next';
+import {
+    Sparkles,
+    Save,
+    Layers,
+    UserCheck,
+    CalendarDays,
+    PhoneCall,
+} from 'lucide-vue-next';
 
 const props = defineProps<{
     landing: {
@@ -57,14 +64,22 @@ const submit = () => {
 
         <form @submit.prevent="submit" class="space-y-8">
             <!-- Hero Section Group -->
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <div class="p-1.5 rounded-lg bg-sky-50 text-sky-600">
+            <div
+                class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+            >
+                <div
+                    class="flex items-center gap-2 border-b border-slate-100 pb-3"
+                >
+                    <div class="rounded-lg bg-sky-50 p-1.5 text-sky-600">
                         <Sparkles class="size-4" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-800">Bagian Utama (Hero Section)</h3>
-                        <p class="text-xs text-slate-500">Banner atmosferik atas dengan sky-gradient lembut.</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                            Bagian Utama (Hero Section)
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Banner atmosferik atas dengan sky-gradient lembut.
+                        </p>
                     </div>
                 </div>
 
@@ -81,7 +96,10 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-1.5">
-                        <Label for="hero_title">Headline Utama (Judul Besar) <span class="text-rose-500">*</span></Label>
+                        <Label for="hero_title"
+                            >Headline Utama (Judul Besar)
+                            <span class="text-rose-500">*</span></Label
+                        >
                         <Input
                             id="hero_title"
                             v-model="form.hero_title"
@@ -93,7 +111,10 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-1.5">
-                        <Label for="hero_subtitle">Subheadline (Deskripsi Pendukung) <span class="text-rose-500">*</span></Label>
+                        <Label for="hero_subtitle"
+                            >Subheadline (Deskripsi Pendukung)
+                            <span class="text-rose-500">*</span></Label
+                        >
                         <textarea
                             id="hero_subtitle"
                             v-model="form.hero_subtitle"
@@ -105,53 +126,73 @@ const submit = () => {
                         <InputError :message="form.errors.hero_subtitle" />
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div class="grid gap-1.5">
-                            <Label for="cta_primary">Teks Tombol Utama (CTA 1)</Label>
+                            <Label for="cta_primary"
+                                >Teks Tombol Utama (CTA 1)</Label
+                            >
                             <Input
                                 id="cta_primary"
                                 v-model="form.cta_primary_text"
                                 placeholder="Contoh: Daftar Antrean Sekarang"
                                 class="text-xs"
                             />
-                            <InputError :message="form.errors.cta_primary_text" />
+                            <InputError
+                                :message="form.errors.cta_primary_text"
+                            />
                         </div>
                         <div class="grid gap-1.5">
-                            <Label for="cta_secondary">Teks Tombol Kedua (CTA 2)</Label>
+                            <Label for="cta_secondary"
+                                >Teks Tombol Kedua (CTA 2)</Label
+                            >
                             <Input
                                 id="cta_secondary"
                                 v-model="form.cta_secondary_text"
                                 placeholder="Contoh: Lihat Jadwal Dokter"
                                 class="text-xs"
                             />
-                            <InputError :message="form.errors.cta_secondary_text" />
+                            <InputError
+                                :message="form.errors.cta_secondary_text"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Features Section Group -->
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <div class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+            <div
+                class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+            >
+                <div
+                    class="flex items-center gap-2 border-b border-slate-100 pb-3"
+                >
+                    <div class="rounded-lg bg-indigo-50 p-1.5 text-indigo-600">
                         <Layers class="size-4" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-800">Bagian Fitur & Keunggulan</h3>
-                        <p class="text-xs text-slate-500">Judul blok fitur pelayanan klinik.</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                            Bagian Fitur & Keunggulan
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Judul blok fitur pelayanan klinik.
+                        </p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div class="grid gap-1.5">
-                        <Label for="features_title">Judul Section Keunggulan</Label>
+                        <Label for="features_title"
+                            >Judul Section Keunggulan</Label
+                        >
                         <Input
                             id="features_title"
                             v-model="form.features_section_title"
                             placeholder="Contoh: Mengapa Memilih Klinik Kami?"
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.features_section_title" />
+                        <InputError
+                            :message="form.errors.features_section_title"
+                        />
                     </div>
                     <div class="grid gap-1.5">
                         <Label for="features_subtitle">Deskripsi Singkat</Label>
@@ -161,24 +202,34 @@ const submit = () => {
                             placeholder="Contoh: Standar pelayanan medis terbaik dengan kemudahan..."
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.features_section_subtitle" />
+                        <InputError
+                            :message="form.errors.features_section_subtitle"
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Doctors Section Group -->
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <div class="p-1.5 rounded-lg bg-teal-50 text-teal-600">
+            <div
+                class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+            >
+                <div
+                    class="flex items-center gap-2 border-b border-slate-100 pb-3"
+                >
+                    <div class="rounded-lg bg-teal-50 p-1.5 text-teal-600">
                         <UserCheck class="size-4" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-800">Bagian Profil Tim Dokter</h3>
-                        <p class="text-xs text-slate-500">Daftar dokter dan spesialisasi yang tampil dinamis.</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                            Bagian Profil Tim Dokter
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Daftar dokter dan spesialisasi yang tampil dinamis.
+                        </p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div class="grid gap-1.5">
                         <Label for="doctors_title">Judul Section Dokter</Label>
                         <Input
@@ -187,7 +238,9 @@ const submit = () => {
                             placeholder="Contoh: Tim Dokter & Tenaga Medis"
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.doctors_section_title" />
+                        <InputError
+                            :message="form.errors.doctors_section_title"
+                        />
                     </div>
                     <div class="grid gap-1.5">
                         <Label for="doctors_subtitle">Deskripsi Singkat</Label>
@@ -197,61 +250,89 @@ const submit = () => {
                             placeholder="Contoh: Dokter berdedikasi tinggi dengan keahlian profesional..."
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.doctors_section_subtitle" />
+                        <InputError
+                            :message="form.errors.doctors_section_subtitle"
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Schedules Section Group -->
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <div class="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+            <div
+                class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+            >
+                <div
+                    class="flex items-center gap-2 border-b border-slate-100 pb-3"
+                >
+                    <div class="rounded-lg bg-amber-50 p-1.5 text-amber-600">
                         <CalendarDays class="size-4" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-800">Bagian Jadwal Praktik Mingguan</h3>
-                        <p class="text-xs text-slate-500">Tabel ringkasan hari dan jam layanan klinik.</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                            Bagian Jadwal Praktik Mingguan
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Tabel ringkasan hari dan jam layanan klinik.
+                        </p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div class="grid gap-1.5">
-                        <Label for="schedules_title">Judul Section Jadwal</Label>
+                        <Label for="schedules_title"
+                            >Judul Section Jadwal</Label
+                        >
                         <Input
                             id="schedules_title"
                             v-model="form.schedules_section_title"
                             placeholder="Contoh: Jadwal Praktik Mingguan"
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.schedules_section_title" />
+                        <InputError
+                            :message="form.errors.schedules_section_title"
+                        />
                     </div>
                     <div class="grid gap-1.5">
-                        <Label for="schedules_subtitle">Deskripsi Singkat</Label>
+                        <Label for="schedules_subtitle"
+                            >Deskripsi Singkat</Label
+                        >
                         <Input
                             id="schedules_subtitle"
                             v-model="form.schedules_section_subtitle"
                             placeholder="Contoh: Pilih waktu konsultasi yang sesuai..."
                             class="text-xs"
                         />
-                        <InputError :message="form.errors.schedules_section_subtitle" />
+                        <InputError
+                            :message="form.errors.schedules_section_subtitle"
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Emergency / Footer Group -->
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <div class="p-1.5 rounded-lg bg-rose-50 text-rose-600">
+            <div
+                class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs"
+            >
+                <div
+                    class="flex items-center gap-2 border-b border-slate-100 pb-3"
+                >
+                    <div class="rounded-lg bg-rose-50 p-1.5 text-rose-600">
                         <PhoneCall class="size-4" />
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-800">Kontak Darurat / Callout</h3>
-                        <p class="text-xs text-slate-500">Teks kontak hotline yang disorot pada landing page.</p>
+                        <h3 class="text-sm font-semibold text-slate-800">
+                            Kontak Darurat / Callout
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Teks kontak hotline yang disorot pada landing page.
+                        </p>
                     </div>
                 </div>
 
                 <div class="grid gap-1.5">
-                    <Label for="emergency_contact">Teks Hotline / Kontak Darurat</Label>
+                    <Label for="emergency_contact"
+                        >Teks Hotline / Kontak Darurat</Label
+                    >
                     <Input
                         id="emergency_contact"
                         v-model="form.emergency_contact"
@@ -266,11 +347,15 @@ const submit = () => {
             <div class="flex items-center justify-end gap-3 pt-2">
                 <Button
                     type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs px-5 h-9 rounded-lg gap-2 shadow-xs"
+                    class="h-9 gap-2 rounded-lg bg-indigo-600 px-5 text-xs font-medium text-white shadow-xs hover:bg-indigo-700"
                     :disabled="form.processing"
                 >
                     <Save class="size-3.5" />
-                    {{ form.processing ? 'Menyimpan...' : 'Simpan Perubahan Landing' }}
+                    {{
+                        form.processing
+                            ? 'Menyimpan...'
+                            : 'Simpan Perubahan Landing'
+                    }}
                 </Button>
             </div>
         </form>

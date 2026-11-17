@@ -40,7 +40,7 @@ const handleSearch = () => {
         router.get(
             '/medication-category',
             { search: searchQuery.value || undefined },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     }, 300);
 };
@@ -106,7 +106,9 @@ const confirmDeleteCategory = (dataCategory) => {
 
 const handleDeleteCategory = () => {
     if (!categoryToDelete.value) return;
-    const id = categoryToDelete.value.medication_category_id ?? categoryToDelete.value.id;
+    const id =
+        categoryToDelete.value.medication_category_id ??
+        categoryToDelete.value.id;
     isDeleting.value = true;
     router.delete(medicationCategoryRoute.destroy.url(id), {
         onFinish: () => {
@@ -121,26 +123,39 @@ const handleDeleteCategory = () => {
 <template>
     <Head title="Kategori Obat" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Kategori Obat</h1>
-                <p class="text-xs text-slate-500">Kelola kategori obat untuk mempermudah klasifikasi data inventaris.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Master Kategori Obat
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola kategori obat untuk mempermudah klasifikasi data
+                    inventaris.
+                </p>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Search Input Kategori Obat -->
                 <div class="relative w-64">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari nama atau kode kategori..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Kategori
                 </Button>
@@ -148,14 +163,16 @@ const handleDeleteCategory = () => {
         </div>
 
         <!-- Clean Standard Table -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-lg">
+        <Card
+            class="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead class="w-12 text-center">No</TableHead>
                         <TableHead class="w-36">Kode</TableHead>
                         <TableHead>Nama Kategori</TableHead>
-                        <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
+                        <TableHead class="w-28 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -163,21 +180,29 @@ const handleDeleteCategory = () => {
                         v-for="(item, index) in medication_categories.data"
                         :key="item.medication_category_id ?? item.id"
                     >
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (medication_categories.current_page - 1) * medication_categories.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (medication_categories.current_page - 1) *
+                                    medication_categories.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
-                        <TableCell class="font-mono text-xs font-semibold text-slate-700">
+                        <TableCell
+                            class="font-mono text-xs font-semibold text-slate-700"
+                        >
                             {{ item.medication_category_code }}
                         </TableCell>
-                        <TableCell class="font-medium text-xs text-slate-900">
+                        <TableCell class="text-xs font-medium text-slate-900">
                             {{ item.medication_category_name }}
                         </TableCell>
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(item)"
                                     title="Edit"
                                 >
@@ -186,7 +211,7 @@ const handleDeleteCategory = () => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeleteCategory(item)"
                                     title="Hapus"
                                 >
@@ -196,8 +221,11 @@ const handleDeleteCategory = () => {
                         </TableCell>
                     </TableRow>
 
-                    <TableEmpty v-if="medication_categories.data.length === 0" :colspan="4">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                    <TableEmpty
+                        v-if="medication_categories.data.length === 0"
+                        :colspan="4"
+                    >
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada kategori obat ditambahkan.
                         </div>
                     </TableEmpty>
@@ -205,9 +233,15 @@ const handleDeleteCategory = () => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ medication_categories.current_page }}</strong> dari {{ medication_categories.last_page }}
+                    Hal
+                    <strong class="text-slate-700">{{
+                        medication_categories.current_page
+                    }}</strong>
+                    dari {{ medication_categories.last_page }}
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -217,10 +251,13 @@ const handleDeleteCategory = () => {
                         :disabled="!medication_categories.prev_page_url"
                         as-child
                     >
-                        <Link v-if="medication_categories.prev_page_url" :href="medication_categories.prev_page_url">
+                        <Link
+                            v-if="medication_categories.prev_page_url"
+                            :href="medication_categories.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" /> Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" /> Prev
                         </span>
                     </Button>
@@ -231,10 +268,13 @@ const handleDeleteCategory = () => {
                         :disabled="!medication_categories.next_page_url"
                         as-child
                     >
-                        <Link v-if="medication_categories.next_page_url" :href="medication_categories.next_page_url">
+                        <Link
+                            v-if="medication_categories.next_page_url"
+                            :href="medication_categories.next_page_url"
+                        >
                             Next <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next <ChevronRight class="size-3" />
                         </span>
                     </Button>
@@ -243,53 +283,100 @@ const handleDeleteCategory = () => {
         </Card>
 
         <!-- Modal Form (Physics Spring Motion) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
-                    {{ isEditMode ? 'Edit Kategori Obat' : 'Tambah Kategori Obat' }}
+                    {{
+                        isEditMode
+                            ? 'Edit Kategori Obat'
+                            : 'Tambah Kategori Obat'
+                    }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Kode Kategori <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Kode Kategori
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="text"
                         v-model="form.medication_category_code"
                         placeholder="Contoh: ABX, ANAL"
                         maxlength="10"
-                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
-                        :class="{ 'border-rose-500 focus:border-rose-500': form.errors.medication_category_code }"
+                        class="h-8 w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 uppercase focus:border-indigo-500 focus:outline-none"
+                        :class="{
+                            'border-rose-500 focus:border-rose-500':
+                                form.errors.medication_category_code,
+                        }"
                         required
                     />
-                    <p v-if="form.errors.medication_category_code" class="text-[11px] text-rose-500 mt-0.5">
+                    <p
+                        v-if="form.errors.medication_category_code"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
                         {{ form.errors.medication_category_code }}
                     </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Nama Kategori <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Nama Kategori
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="text"
                         v-model="form.medication_category_name"
                         placeholder="Contoh: Antibiotik, Analgesik"
                         maxlength="30"
-                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
-                        :class="{ 'border-rose-500 focus:border-rose-500': form.errors.medication_category_name }"
+                        class="h-8 w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        :class="{
+                            'border-rose-500 focus:border-rose-500':
+                                form.errors.medication_category_name,
+                        }"
                         required
                     />
-                    <p v-if="form.errors.medication_category_name" class="text-[11px] text-rose-500 mt-0.5">
+                    <p
+                        v-if="form.errors.medication_category_name"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
                         {{ form.errors.medication_category_name }}
                     </p>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
-                        {{ form.processing ? 'Menyimpan...' : 'Simpan Kategori' }}
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="closeModal"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="form.processing"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
+                        {{
+                            form.processing ? 'Menyimpan...' : 'Simpan Kategori'
+                        }}
                     </Button>
                 </div>
             </form>
@@ -306,8 +393,9 @@ const handleDeleteCategory = () => {
             @cancel="isDeleteModalOpen = false"
         >
             Apakah Anda yakin ingin menghapus kategori obat
-            <span class="font-semibold text-slate-900">"{{ categoryToDelete?.medication_category_name }}"</span>?
-            Obat yang terdaftar dalam kategori ini dapat terpengaruh.
+            <span class="font-semibold text-slate-900"
+                >"{{ categoryToDelete?.medication_category_name }}"</span
+            >? Obat yang terdaftar dalam kategori ini dapat terpengaruh.
         </ConfirmDeleteModal>
     </div>
 </template>

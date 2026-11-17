@@ -23,7 +23,9 @@ const props = defineProps<{
 }>();
 
 const previewUrl = ref<string | null>(props.settings?.clinic_logo_url || null);
-const bannerPreviewUrl = ref<string | null>(props.settings?.clinic_banner_url || '/images/backround_display.jpg');
+const bannerPreviewUrl = ref<string | null>(
+    props.settings?.clinic_banner_url || '/images/backround_display.jpg',
+);
 
 const form = useForm({
     clinic_name: props.settings?.clinic_name || '',
@@ -81,19 +83,23 @@ const submit = () => {
             <div class="space-y-2">
                 <Label>Logo Klinik</Label>
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                    <div
+                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-2xs dark:border-slate-700 dark:bg-slate-800"
+                    >
                         <img
                             v-if="previewUrl"
                             :src="previewUrl"
                             alt="Logo Klinik"
-                            class="w-full h-full object-contain p-1"
+                            class="h-full w-full object-contain p-1"
                         />
-                        <Image v-else class="w-7 h-7 text-slate-400" />
+                        <Image v-else class="h-7 w-7 text-slate-400" />
                     </div>
 
                     <div class="space-y-1">
-                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer shadow-2xs text-slate-700 dark:text-slate-200 transition">
-                            <Upload class="w-3.5 h-3.5" />
+                        <label
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        >
+                            <Upload class="h-3.5 w-3.5" />
                             Pilih Logo Baru
                             <input
                                 type="file"
@@ -103,7 +109,8 @@ const submit = () => {
                             />
                         </label>
                         <p class="text-[11px] text-muted-foreground">
-                            Format JPG, PNG, atau WebP (Maks. 2MB). Ditampilkan di header sidebar, invoice, & display TV.
+                            Format JPG, PNG, atau WebP (Maks. 2MB). Ditampilkan
+                            di header sidebar, invoice, & display TV.
                         </p>
                     </div>
                 </div>
@@ -114,22 +121,31 @@ const submit = () => {
             <div class="space-y-2">
                 <Label>Gambar Banner Klinik & Background Display TV</Label>
                 <div class="space-y-3">
-                    <div class="w-full max-w-lg h-44 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 overflow-hidden relative shadow-xs">
+                    <div
+                        class="relative h-44 w-full max-w-lg overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+                    >
                         <img
                             v-if="bannerPreviewUrl"
                             :src="bannerPreviewUrl"
                             alt="Banner Preview"
                             class="size-full object-cover"
                         />
-                        <div v-else class="size-full flex flex-col items-center justify-center text-slate-400 gap-1">
-                            <Image class="w-8 h-8 opacity-40" />
-                            <span class="text-xs">Belum ada banner diunggah</span>
+                        <div
+                            v-else
+                            class="flex size-full flex-col items-center justify-center gap-1 text-slate-400"
+                        >
+                            <Image class="h-8 w-8 opacity-40" />
+                            <span class="text-xs"
+                                >Belum ada banner diunggah</span
+                            >
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 cursor-pointer shadow-2xs text-slate-700 dark:text-slate-200 transition">
-                            <Upload class="w-3.5 h-3.5" />
+                        <label
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        >
+                            <Upload class="h-3.5 w-3.5" />
                             Pilih Banner Baru
                             <input
                                 type="file"
@@ -139,7 +155,9 @@ const submit = () => {
                             />
                         </label>
                         <p class="text-[11px] text-muted-foreground">
-                            Format JPG, PNG, atau WebP (Maks. 5MB). Digunakan untuk banner foto utama Landing Page dan background layar monitor antrean (Display Queue).
+                            Format JPG, PNG, atau WebP (Maks. 5MB). Digunakan
+                            untuk banner foto utama Landing Page dan background
+                            layar monitor antrean (Display Queue).
                         </p>
                     </div>
                 </div>
@@ -157,7 +175,8 @@ const submit = () => {
                     :class="{ 'border-destructive': form.errors.clinic_name }"
                 />
                 <p class="text-xs text-muted-foreground">
-                    Nama ini akan muncul pada kuitansi/invoice serta judul papan antrean layar TV (Display Queue).
+                    Nama ini akan muncul pada kuitansi/invoice serta judul papan
+                    antrean layar TV (Display Queue).
                 </p>
                 <InputError :message="form.errors.clinic_name" />
             </div>
@@ -170,10 +189,13 @@ const submit = () => {
                     type="text"
                     required
                     placeholder="Contoh: Jl. Kesehatan No. 123, Kota Sejahtera"
-                    :class="{ 'border-destructive': form.errors.clinic_address }"
+                    :class="{
+                        'border-destructive': form.errors.clinic_address,
+                    }"
                 />
                 <p class="text-xs text-muted-foreground">
-                    Alamat klinik akan tertera pada kop surat faktur / cetak invoice.
+                    Alamat klinik akan tertera pada kop surat faktur / cetak
+                    invoice.
                 </p>
                 <InputError :message="form.errors.clinic_address" />
             </div>
@@ -188,41 +210,55 @@ const submit = () => {
                     :class="{ 'border-destructive': form.errors.clinic_phone }"
                 />
                 <p class="text-xs text-muted-foreground">
-                    Nomor telepon atau kontak resmi klinik pada kuitansi/invoice.
+                    Nomor telepon atau kontak resmi klinik pada
+                    kuitansi/invoice.
                 </p>
                 <InputError :message="form.errors.clinic_phone" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="space-y-2">
-                    <Label for="default_examination_fee">Tarif Pemeriksaan Dokter Bawaan (Rp)</Label>
+                    <Label for="default_examination_fee"
+                        >Tarif Pemeriksaan Dokter Bawaan (Rp)</Label
+                    >
                     <Input
                         id="default_examination_fee"
                         v-model="form.default_examination_fee"
                         type="number"
                         min="0"
                         placeholder="50000"
-                        :class="{ 'border-destructive': form.errors.default_examination_fee }"
+                        :class="{
+                            'border-destructive':
+                                form.errors.default_examination_fee,
+                        }"
                     />
                     <p class="text-xs text-muted-foreground">
                         Biaya jasa standar rekam medis & invoice baru.
                     </p>
-                    <InputError :message="form.errors.default_examination_fee" />
+                    <InputError
+                        :message="form.errors.default_examination_fee"
+                    />
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="queue_prefix">Format Prefix Nomor Antrean Default</Label>
+                    <Label for="queue_prefix"
+                        >Format Prefix Nomor Antrean Default</Label
+                    >
                     <Input
                         id="queue_prefix"
                         v-model="form.queue_prefix"
                         type="text"
                         maxlength="10"
                         placeholder="Contoh: A, ANT, KLN"
-                        class="uppercase font-mono"
-                        :class="{ 'border-destructive': form.errors.queue_prefix }"
+                        class="font-mono uppercase"
+                        :class="{
+                            'border-destructive': form.errors.queue_prefix,
+                        }"
                     />
                     <p class="text-xs text-muted-foreground">
-                        Awalan nomor tiket antrean (misal: <strong>A</strong>-001). Bisa di-override per dokter di Data Dokter.
+                        Awalan nomor tiket antrean (misal:
+                        <strong>A</strong>-001). Bisa di-override per dokter di
+                        Data Dokter.
                     </p>
                     <InputError :message="form.errors.queue_prefix" />
                 </div>
@@ -232,7 +268,7 @@ const submit = () => {
                 <Button
                     type="submit"
                     :disabled="form.processing"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
+                    class="cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700"
                 >
                     <span v-if="form.processing">Menyimpan...</span>
                     <span v-else>Simpan Perubahan</span>
@@ -240,7 +276,7 @@ const submit = () => {
 
                 <p
                     v-if="form.recentlySuccessful"
-                    class="text-xs text-emerald-600 font-medium"
+                    class="text-xs font-medium text-emerald-600"
                 >
                     Tersimpan.
                 </p>

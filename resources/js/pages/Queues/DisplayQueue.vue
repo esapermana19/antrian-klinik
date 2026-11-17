@@ -26,9 +26,21 @@ const props = defineProps({
 });
 
 const page = usePage();
-const clinicName = computed(() => props.clinic?.clinic_name || page.props.clinic?.clinic_name || 'ANTRIAN KLINIK');
-const clinicLogoUrl = computed(() => props.clinic?.clinic_logo_url || page.props.clinic?.clinic_logo_url);
-const clinicBannerUrl = computed(() => props.clinic?.clinic_banner_url || page.props.clinic?.clinic_banner_url || '/images/backround_display.jpg');
+const clinicName = computed(
+    () =>
+        props.clinic?.clinic_name ||
+        page.props.clinic?.clinic_name ||
+        'ANTRIAN KLINIK',
+);
+const clinicLogoUrl = computed(
+    () => props.clinic?.clinic_logo_url || page.props.clinic?.clinic_logo_url,
+);
+const clinicBannerUrl = computed(
+    () =>
+        props.clinic?.clinic_banner_url ||
+        page.props.clinic?.clinic_banner_url ||
+        '/images/backround_display.jpg',
+);
 
 const selectedDoctor = ref(props.selectedDoctorId || '');
 const activeQueue = ref(props.currentQueue);
@@ -47,21 +59,27 @@ const checkAndAnnounce = (queue) => {
         announceQueue(
             queue.queue_number,
             queue.patient?.patient_name,
-            queue.doctor?.doctor_name
+            queue.doctor?.doctor_name,
         );
     }
 };
 
 // Sinkronkan bila props dari server berubah
-watch(() => props.currentQueue, (newVal) => {
-    activeQueue.value = newVal;
-    if (newVal) {
-        checkAndAnnounce(newVal);
-    }
-});
-watch(() => props.nextQueues, (newVal) => {
-    upcomingList.value = newVal || [];
-});
+watch(
+    () => props.currentQueue,
+    (newVal) => {
+        activeQueue.value = newVal;
+        if (newVal) {
+            checkAndAnnounce(newVal);
+        }
+    },
+);
+watch(
+    () => props.nextQueues,
+    (newVal) => {
+        upcomingList.value = newVal || [];
+    },
+);
 
 const currentTime = ref('');
 const currentDate = ref('');
@@ -136,9 +154,12 @@ const initCountdown = () => {
 };
 
 // Pantau perubahan pasien aktif untuk reset/sync timer
-watch(() => activeQueue.value?.queue_id, () => {
-    initCountdown();
-});
+watch(
+    () => activeQueue.value?.queue_id,
+    () => {
+        initCountdown();
+    },
+);
 
 // Format menit & detik (mm:ss)
 const formattedCountdown = computed(() => {
@@ -165,7 +186,7 @@ const fetchLatestData = async () => {
             ? `/display-queue/data?doctor_id=${selectedDoctor.value}`
             : '/display-queue/data';
         const response = await fetch(url, {
-            headers: { 'Accept': 'application/json' },
+            headers: { Accept: 'application/json' },
             cache: 'no-store',
         });
         if (response.ok) {
@@ -212,15 +233,18 @@ onUnmounted(() => {
     <Head :title="`Display Antrean - ${clinicName}`" />
 
     <!-- Container Full Viewport: Pas Layar, Kompak, Tanpa Scrollbar (h-screen w-screen overflow-hidden) -->
-    <div class="h-screen w-screen bg-slate-50 text-slate-800 flex flex-col p-3 sm:p-4 md:p-5 overflow-hidden font-sans select-none box-border">
-        
+    <div
+        class="box-border flex h-screen w-screen flex-col overflow-hidden bg-slate-50 p-3 font-sans text-slate-800 select-none sm:p-4 md:p-5"
+    >
         <!-- 1. Header Display TV: Ramping & Kompak (shrink-0) -->
-        <header class="flex items-center justify-between gap-3 pb-2.5 sm:pb-3 border-b border-slate-200 shrink-0">
+        <header
+            class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 pb-2.5 sm:pb-3"
+        >
             <!-- Sisi Kiri: Tombol Back & Branding Klinik -->
-            <div class="flex items-center gap-2.5 min-w-0">
+            <div class="flex min-w-0 items-center gap-2.5">
                 <Link
                     href="/dashboard"
-                    class="size-8 sm:size-9 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition shrink-0"
+                    class="flex size-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-2xs transition hover:bg-slate-50 hover:text-slate-900 sm:size-9"
                     title="Kembali ke Dashboard"
                 >
                     <ArrowLeft class="size-4" />
@@ -229,43 +253,66 @@ onUnmounted(() => {
                     v-if="clinicLogoUrl"
                     :src="clinicLogoUrl"
                     alt="Logo Klinik"
-                    class="h-8 sm:h-9 w-auto max-w-[100px] object-contain shrink-0"
+                    class="h-8 w-auto max-w-[100px] shrink-0 object-contain sm:h-9"
                 />
                 <div class="min-w-0">
-                    <h1 class="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 leading-tight uppercase truncate">
+                    <h1
+                        class="truncate text-base leading-tight font-bold tracking-tight text-slate-900 uppercase sm:text-lg md:text-xl"
+                    >
                         {{ clinicName }}
                     </h1>
-                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium truncate">
+                    <p
+                        class="truncate text-[10px] font-medium text-slate-500 sm:text-xs"
+                    >
                         Papan Antrean Poliklinik • {{ currentDate }}
                     </p>
                 </div>
             </div>
 
             <!-- Sisi Kanan: Filter Dokter/Poli, Kontrol Suara, Jam Digital & Fullscreen Button -->
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex shrink-0 items-center gap-2">
                 <!-- Tombol Suara TTS (Mute / Unmute) -->
                 <button
                     type="button"
                     @click="toggleMute"
-                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border transition shadow-2xs text-[11px] sm:text-xs font-medium cursor-pointer"
-                    :class="isMuted
-                        ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'"
-                    :title="isMuted ? 'Suara Panggilan Dinonaktifkan (Klik untuk Aktifkan)' : 'Suara Panggilan Aktif (Klik untuk Mute)'"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium shadow-2xs transition sm:px-3 sm:text-xs"
+                    :class="
+                        isMuted
+                            ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    "
+                    :title="
+                        isMuted
+                            ? 'Suara Panggilan Dinonaktifkan (Klik untuk Aktifkan)'
+                            : 'Suara Panggilan Aktif (Klik untuk Mute)'
+                    "
                 >
-                    <component :is="isMuted ? VolumeX : Volume2" class="size-3.5" :class="isMuted ? 'text-rose-600' : 'text-indigo-600'" />
-                    <span class="hidden sm:inline">{{ isMuted ? 'Mute' : 'Suara Aktif' }}</span>
+                    <component
+                        :is="isMuted ? VolumeX : Volume2"
+                        class="size-3.5"
+                        :class="isMuted ? 'text-rose-600' : 'text-indigo-600'"
+                    />
+                    <span class="hidden sm:inline">{{
+                        isMuted ? 'Mute' : 'Suara Aktif'
+                    }}</span>
                 </button>
 
                 <!-- Dropdown Poli / Dokter -->
-                <div v-if="doctors && doctors.length > 0" class="flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
+                <div
+                    v-if="doctors && doctors.length > 0"
+                    class="flex items-center rounded-lg border border-slate-200 bg-white px-2 py-1 shadow-2xs"
+                >
                     <select
                         v-model="selectedDoctor"
                         @change="changeDoctor(selectedDoctor)"
-                        class="text-[11px] sm:text-xs font-medium text-slate-800 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
+                        class="cursor-pointer border-0 bg-transparent p-0 text-[11px] font-medium text-slate-800 focus:outline-none sm:text-xs"
                     >
                         <option value="">Semua Poli / Dokter</option>
-                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                        <option
+                            v-for="doc in doctors"
+                            :key="doc.doctor_id"
+                            :value="doc.doctor_id"
+                        >
                             {{ doc.doctor_name }} ({{ doc.specialization }})
                         </option>
                     </select>
@@ -274,16 +321,27 @@ onUnmounted(() => {
                 <button
                     type="button"
                     @click="toggleFullscreen"
-                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition shadow-2xs text-[11px] sm:text-xs font-medium cursor-pointer"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 sm:px-3 sm:text-xs"
                     title="Toggle Fullscreen"
                 >
-                    <component :is="isFullscreen ? Minimize : Maximize" class="size-3.5 text-indigo-600" />
-                    <span class="hidden sm:inline">{{ isFullscreen ? 'Keluar' : 'Layar Penuh TV' }}</span>
+                    <component
+                        :is="isFullscreen ? Minimize : Maximize"
+                        class="size-3.5 text-indigo-600"
+                    />
+                    <span class="hidden sm:inline">{{
+                        isFullscreen ? 'Keluar' : 'Layar Penuh TV'
+                    }}</span>
                 </button>
 
-                <div class="flex items-center gap-1.5 sm:gap-2 bg-white px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
-                    <Clock class="size-3.5 sm:size-4 text-indigo-600 shrink-0" />
-                    <span class="text-xs sm:text-sm md:text-base font-bold font-mono text-slate-900 tracking-tight">
+                <div
+                    class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-2xs sm:gap-2 sm:px-3"
+                >
+                    <Clock
+                        class="size-3.5 shrink-0 text-indigo-600 sm:size-4"
+                    />
+                    <span
+                        class="font-mono text-xs font-bold tracking-tight text-slate-900 sm:text-sm md:text-base"
+                    >
                         {{ currentTime }}
                     </span>
                 </div>
@@ -291,78 +349,134 @@ onUnmounted(() => {
         </header>
 
         <!-- 2. Konten Utama: 2 Kolom Grid Pas di Layar (min-h-0 flex-1 overflow-hidden) -->
-        <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-stretch pt-2.5 sm:pt-3 min-h-0 overflow-hidden">
-            
+        <main
+            class="grid min-h-0 flex-1 grid-cols-1 items-stretch gap-3 overflow-hidden pt-2.5 sm:gap-4 sm:pt-3 lg:grid-cols-12"
+        >
             <!-- Sisi Kiri (7 Kolom): Card Antrean Sedang Dilayani (Banner Ruang Dokter + Glass Card) -->
-            <div class="col-span-12 lg:col-span-7 flex flex-col min-h-0 h-full">
-                <div class="flex-1 rounded-2xl overflow-hidden border border-slate-200/90 relative flex flex-col justify-between shadow-xs bg-white min-h-0">
+            <div class="col-span-12 flex h-full min-h-0 flex-col lg:col-span-7">
+                <div
+                    class="relative flex min-h-0 flex-1 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs"
+                >
                     <!-- Banner Full Memenuhi Seluruh Card -->
                     <div class="absolute inset-0 z-0 overflow-hidden">
                         <img
                             :src="clinicBannerUrl"
                             alt="Ruang Pemeriksaan Dokter"
-                            class="w-full h-full object-cover clinic-banner-breathing"
+                            class="clinic-banner-breathing h-full w-full object-cover"
                         />
                         <!-- Soft Gradient Halus di atas Banner -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/55 to-white/70"></div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/55 to-white/70"
+                        ></div>
                     </div>
 
                     <!-- Label Status & Countdown Atas -->
-                    <div class="relative z-10 flex items-center justify-between p-3.5 sm:p-4 pb-0 shrink-0">
+                    <div
+                        class="relative z-10 flex shrink-0 items-center justify-between p-3.5 pb-0 sm:p-4"
+                    >
                         <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-xs">
+                            <span
+                                class="rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase shadow-xs sm:text-xs"
+                            >
                                 Sedang Diperiksa
                             </span>
                             <div
                                 v-if="activeQueue"
-                                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold border backdrop-blur-md transition-colors"
-                                :class="remainingSeconds <= 180
-                                    ? 'bg-rose-50 text-rose-700 border-rose-300'
-                                    : 'bg-white/80 text-indigo-700 border-indigo-200'"
+                                class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-bold backdrop-blur-md transition-colors sm:text-xs"
+                                :class="
+                                    remainingSeconds <= 180
+                                        ? 'border-rose-300 bg-rose-50 text-rose-700'
+                                        : 'border-indigo-200 bg-white/80 text-indigo-700'
+                                "
                             >
-                                <Hourglass class="size-3 animate-spin" style="animation-duration: 4s;" />
+                                <Hourglass
+                                    class="size-3 animate-spin"
+                                    style="animation-duration: 4s"
+                                />
                                 <span>Sisa: {{ formattedCountdown }}</span>
                             </div>
                         </div>
-                        <span class="text-[10px] sm:text-xs text-slate-700 font-medium bg-white/70 backdrop-blur-xs px-2.5 py-0.5 rounded-md border border-white/60">
-                            {{ activeQueue?.doctor?.doctor_name ? `${activeQueue.doctor.doctor_name} (${activeQueue.doctor.specialization})` : 'Poli Rawat Jalan' }}
+                        <span
+                            class="rounded-md border border-white/60 bg-white/70 px-2.5 py-0.5 text-[10px] font-medium text-slate-700 backdrop-blur-xs sm:text-xs"
+                        >
+                            {{
+                                activeQueue?.doctor?.doctor_name
+                                    ? `${activeQueue.doctor.doctor_name} (${activeQueue.doctor.specialization})`
+                                    : 'Poli Rawat Jalan'
+                            }}
                         </span>
                     </div>
 
                     <!-- Foreground: Card Nomor Antrean Glassmorphism -->
-                    <div v-if="activeQueue" class="relative z-10 my-auto px-4 py-2 sm:py-3 flex flex-col items-center text-center">
-                        <div class="w-full max-w-md bg-white/55 backdrop-blur-xl border border-white/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_15px_35px_rgba(79,70,229,0.1)] ring-1 ring-white/60">
-                            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-indigo-700/80 mb-0.5">
+                    <div
+                        v-if="activeQueue"
+                        class="relative z-10 my-auto flex flex-col items-center px-4 py-2 text-center sm:py-3"
+                    >
+                        <div
+                            class="w-full max-w-md rounded-2xl border border-white/80 bg-white/55 p-4 shadow-[0_15px_35px_rgba(79,70,229,0.1)] ring-1 ring-white/60 backdrop-blur-xl sm:rounded-3xl sm:p-6"
+                        >
+                            <p
+                                class="mb-0.5 text-[10px] font-bold tracking-widest text-indigo-700/80 uppercase sm:text-xs"
+                            >
                                 Nomor Antrean Panggilan
                             </p>
                             <!-- Nomor Antrean Font Monospace Besar -->
-                            <div class="text-5xl sm:text-6xl md:text-7xl font-black font-mono tracking-tight text-indigo-600 my-0.5 drop-shadow-xs">
+                            <div
+                                class="my-0.5 font-mono text-5xl font-black tracking-tight text-indigo-600 drop-shadow-xs sm:text-6xl md:text-7xl"
+                            >
                                 {{ activeQueue.queue_number }}
                             </div>
                             <!-- Nama Pasien -->
-                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-1 truncate">
+                            <h2
+                                class="mt-1 truncate text-xl font-extrabold text-slate-900 sm:text-2xl"
+                            >
                                 {{ activeQueue.patient?.patient_name }}
                             </h2>
-                            <div class="mt-2 flex items-center justify-center gap-2.5 text-[11px] sm:text-xs text-slate-600 font-mono">
-                                <span>Sesi: <strong class="text-slate-900">{{ activeQueue.session === 'morning' ? 'Pagi' : 'Sore' }}</strong></span>
+                            <div
+                                class="mt-2 flex items-center justify-center gap-2.5 font-mono text-[11px] text-slate-600 sm:text-xs"
+                            >
+                                <span
+                                    >Sesi:
+                                    <strong class="text-slate-900">{{
+                                        activeQueue.session === 'morning'
+                                            ? 'Pagi'
+                                            : 'Sore'
+                                    }}</strong></span
+                                >
                                 <span>•</span>
-                                <span>Estimasi: <strong class="text-slate-900">{{ activeQueue.estimate_time || '-' }}</strong></span>
+                                <span
+                                    >Estimasi:
+                                    <strong class="text-slate-900">{{
+                                        activeQueue.estimate_time || '-'
+                                    }}</strong></span
+                                >
                             </div>
                         </div>
                     </div>
 
                     <!-- State Kosong jika belum ada panggilan aktif -->
                     <div v-else class="relative z-10 my-auto p-4 text-center">
-                        <div class="inline-block bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-5 max-w-xs sm:max-w-sm shadow-sm">
-                            <h3 class="text-sm sm:text-base font-bold text-slate-800">Belum Ada Panggilan Aktif</h3>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-1 leading-relaxed">
-                                Silakan bersiap di ruang tunggu, dokter akan segera memanggil nomor antrean Anda.
+                        <div
+                            class="inline-block max-w-xs rounded-2xl border border-white/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl sm:max-w-sm"
+                        >
+                            <h3
+                                class="text-sm font-bold text-slate-800 sm:text-base"
+                            >
+                                Belum Ada Panggilan Aktif
+                            </h3>
+                            <p
+                                class="mt-1 text-[11px] leading-relaxed text-slate-500 sm:text-xs"
+                            >
+                                Silakan bersiap di ruang tunggu, dokter akan
+                                segera memanggil nomor antrean Anda.
                             </p>
                         </div>
                     </div>
 
                     <!-- Bottom Bar di depan banner -->
-                    <div class="relative z-10 p-3 sm:p-4 pt-0 flex items-center justify-between text-[10px] sm:text-xs text-slate-500 shrink-0">
+                    <div
+                        class="relative z-10 flex shrink-0 items-center justify-between p-3 pt-0 text-[10px] text-slate-500 sm:p-4 sm:text-xs"
+                    >
                         <span>Klinik Pratama</span>
                         <span>Harap bersiap saat nomor antrean tertera</span>
                     </div>
@@ -370,49 +484,84 @@ onUnmounted(() => {
             </div>
 
             <!-- Sisi Kanan (5 Kolom): Daftar Antrean Selanjutnya (Card Kompak) -->
-            <div class="col-span-12 lg:col-span-5 flex flex-col min-h-0 h-full">
-                <div class="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 md:p-5 flex flex-col justify-between overflow-hidden shadow-xs min-h-0">
-                    
+            <div class="col-span-12 flex h-full min-h-0 flex-col lg:col-span-5">
+                <div
+                    class="flex min-h-0 flex-1 flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs sm:p-4 md:p-5"
+                >
                     <!-- Sub-Header Kanan -->
-                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 shrink-0">
+                    <div
+                        class="flex shrink-0 items-center justify-between border-b border-slate-100 pb-2.5"
+                    >
                         <div>
-                            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900">
+                            <h3
+                                class="text-xs font-bold tracking-wider text-slate-900 uppercase sm:text-sm"
+                            >
                                 Antrean Selanjutnya
                             </h3>
-                            <p class="text-[10px] sm:text-xs text-slate-500">Ruang Tunggu Pasien</p>
+                            <p class="text-[10px] text-slate-500 sm:text-xs">
+                                Ruang Tunggu Pasien
+                            </p>
                         </div>
-                        <span class="text-[10px] sm:text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                        <span
+                            class="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-semibold text-slate-700 sm:text-xs"
+                        >
                             {{ (props.nextQueues || []).length }} Menunggu
                         </span>
                     </div>
 
                     <!-- List Card Antrean Selanjutnya (Kompak & Auto-fit) -->
-                    <div v-if="upcomingQueues.length > 0" class="flex-1 flex flex-col justify-center gap-2 py-2 min-h-0 overflow-y-auto">
+                    <div
+                        v-if="upcomingQueues.length > 0"
+                        class="flex min-h-0 flex-1 flex-col justify-center gap-2 overflow-y-auto py-2"
+                    >
                         <div
                             v-for="(queue, index) in upcomingQueues"
                             :key="queue.queue_id"
-                            class="p-2.5 sm:p-3 rounded-xl border flex items-center justify-between transition-all shrink-0"
-                            :class="index === 0
-                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                                : 'bg-slate-900 border-slate-800 text-white'"
+                            class="flex shrink-0 items-center justify-between rounded-xl border p-2.5 transition-all sm:p-3"
+                            :class="
+                                index === 0
+                                    ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
+                                    : 'border-slate-800 bg-slate-900 text-white'
+                            "
                         >
                             <!-- Kiri: Nomor Antrean Box Solid & Info Pasien Rapi -->
-                            <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="flex min-w-0 items-center gap-2.5">
                                 <div
-                                    class="shrink-0 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg font-mono font-bold text-xs sm:text-sm tracking-tight flex items-center justify-center"
-                                    :class="index === 0
-                                        ? 'bg-white text-indigo-950 shadow-2xs'
-                                        : 'bg-indigo-600 text-white'"
+                                    class="flex shrink-0 items-center justify-center rounded-lg px-2 py-1 font-mono text-xs font-bold tracking-tight sm:px-2.5 sm:py-1.5 sm:text-sm"
+                                    :class="
+                                        index === 0
+                                            ? 'bg-white text-indigo-950 shadow-2xs'
+                                            : 'bg-indigo-600 text-white'
+                                    "
                                 >
                                     {{ queue.queue_number }}
                                 </div>
 
                                 <div class="min-w-0">
-                                    <h4 class="font-bold text-xs sm:text-sm leading-snug truncate" :class="index === 0 ? 'text-white' : 'text-slate-100'">
+                                    <h4
+                                        class="truncate text-xs leading-snug font-bold sm:text-sm"
+                                        :class="
+                                            index === 0
+                                                ? 'text-white'
+                                                : 'text-slate-100'
+                                        "
+                                    >
                                         {{ queue.patient?.patient_name }}
                                     </h4>
-                                    <p class="text-[10px] sm:text-[11px] font-mono mt-0.5 truncate" :class="index === 0 ? 'text-indigo-100' : 'text-slate-400'">
-                                        Est: {{ queue.estimate_time }} • Sesi {{ queue.session === 'morning' ? 'Pagi' : 'Sore' }}
+                                    <p
+                                        class="mt-0.5 truncate font-mono text-[10px] sm:text-[11px]"
+                                        :class="
+                                            index === 0
+                                                ? 'text-indigo-100'
+                                                : 'text-slate-400'
+                                        "
+                                    >
+                                        Est: {{ queue.estimate_time }} • Sesi
+                                        {{
+                                            queue.session === 'morning'
+                                                ? 'Pagi'
+                                                : 'Sore'
+                                        }}
                                     </p>
                                 </div>
                             </div>
@@ -421,13 +570,13 @@ onUnmounted(() => {
                             <div class="shrink-0 pl-2">
                                 <span
                                     v-if="index === 0"
-                                    class="px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold bg-white text-indigo-900 shadow-2xs"
+                                    class="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-900 shadow-2xs sm:text-xs"
                                 >
                                     Bersiap
                                 </span>
                                 <span
                                     v-else
-                                    class="text-[10px] sm:text-xs font-medium text-slate-400"
+                                    class="text-[10px] font-medium text-slate-400 sm:text-xs"
                                 >
                                     Ke-{{ index + 1 }}
                                 </span>
@@ -436,14 +585,25 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Jika Tidak Ada Antrean Menunggu -->
-                    <div v-else class="flex-1 flex flex-col items-center justify-center text-center p-4 text-slate-400 my-auto">
-                        <CheckCircle2 class="size-7 text-emerald-500 mb-1.5" />
-                        <p class="font-semibold text-xs sm:text-sm text-slate-800">Tidak Ada Antrean Menunggu</p>
-                        <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Semua pasien pada sesi ini telah dipanggil.</p>
+                    <div
+                        v-else
+                        class="my-auto flex flex-1 flex-col items-center justify-center p-4 text-center text-slate-400"
+                    >
+                        <CheckCircle2 class="mb-1.5 size-7 text-emerald-500" />
+                        <p
+                            class="text-xs font-semibold text-slate-800 sm:text-sm"
+                        >
+                            Tidak Ada Antrean Menunggu
+                        </p>
+                        <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">
+                            Semua pasien pada sesi ini telah dipanggil.
+                        </p>
                     </div>
 
                     <!-- Footer Note Kanan -->
-                    <div class="pt-2 border-t border-slate-100 text-center text-[10px] sm:text-[11px] text-slate-400 shrink-0">
+                    <div
+                        class="shrink-0 border-t border-slate-100 pt-2 text-center text-[10px] text-slate-400 sm:text-[11px]"
+                    >
                         Harap perhatikan nomor panggilan pada layar ini
                     </div>
                 </div>
@@ -455,7 +615,8 @@ onUnmounted(() => {
 <style scoped>
 /* Animasi halus napas pada latar belakang banner */
 @keyframes bannerBreathing {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
     }
     50% {

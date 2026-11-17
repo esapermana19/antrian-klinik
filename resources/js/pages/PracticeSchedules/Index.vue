@@ -49,7 +49,7 @@ const handleSearch = () => {
         router.get(
             scheduleRoute.index.url(),
             { search: searchQuery.value || undefined },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     }, 300);
 };
@@ -92,7 +92,9 @@ const formatDay = (day) => {
         sabtu: 'Sabtu',
         minggu: 'Minggu',
     };
-    return dayMap[day.toLowerCase()] || day.charAt(0).toUpperCase() + day.slice(1);
+    return (
+        dayMap[day.toLowerCase()] || day.charAt(0).toUpperCase() + day.slice(1)
+    );
 };
 
 // Format nama sesi ke Bahasa Indonesia TitleCase
@@ -106,7 +108,10 @@ const formatSession = (session) => {
         sore: 'Sore',
         malam: 'Malam',
     };
-    return sessionMap[session.toLowerCase()] || session.charAt(0).toUpperCase() + session.slice(1);
+    return (
+        sessionMap[session.toLowerCase()] ||
+        session.charAt(0).toUpperCase() + session.slice(1)
+    );
 };
 
 const openAddModal = () => {
@@ -181,26 +186,39 @@ const formatTime = (timeStr) => {
 <template>
     <Head title="Jadwal Praktik Dokter" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Jadwal Praktik Dokter</h1>
-                <p class="text-xs text-slate-500">Atur hari, sesi, jam buka/tutup pelayanan, kuota pasien, dan status operasional.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Jadwal Praktik Dokter
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Atur hari, sesi, jam buka/tutup pelayanan, kuota pasien, dan
+                    status operasional.
+                </p>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Search Input Nama Dokter / Spesialis -->
                 <div class="relative w-64">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari dokter atau spesialis..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 font-medium text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Jadwal
                 </Button>
@@ -208,7 +226,9 @@ const formatTime = (timeStr) => {
         </div>
 
         <!-- Proporsional Clean Table -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-lg">
+        <Card
+            class="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -217,9 +237,11 @@ const formatTime = (timeStr) => {
                         <TableHead class="w-28">Hari</TableHead>
                         <TableHead class="w-36">Sesi Pelayanan</TableHead>
                         <TableHead class="w-44">Jam Operasional</TableHead>
-                        <TableHead class="w-28 text-center">Kuota Maks</TableHead>
+                        <TableHead class="w-28 text-center"
+                            >Kuota Maks</TableHead
+                        >
                         <TableHead class="w-24 text-center">Status</TableHead>
-                        <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
+                        <TableHead class="w-28 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -227,47 +249,80 @@ const formatTime = (timeStr) => {
                         v-for="(item, index) in schedules.data"
                         :key="item.schedule_id ?? item.id"
                     >
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (schedules.current_page - 1) * schedules.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (schedules.current_page - 1) *
+                                    schedules.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
                         <TableCell>
-                            <div class="font-medium text-xs text-slate-900">
-                                {{ item.doctor?.doctor_name || 'Dokter Umum / Seluruh Dokter' }}
+                            <div class="text-xs font-medium text-slate-900">
+                                {{
+                                    item.doctor?.doctor_name ||
+                                    'Dokter Umum / Seluruh Dokter'
+                                }}
                             </div>
-                            <div v-if="item.doctor?.specialization" class="text-[11px] text-slate-500">
+                            <div
+                                v-if="item.doctor?.specialization"
+                                class="text-[11px] text-slate-500"
+                            >
                                 {{ item.doctor.specialization }}
                             </div>
                         </TableCell>
-                        <TableCell class="font-semibold text-xs text-slate-900">
+                        <TableCell class="text-xs font-semibold text-slate-900">
                             {{ formatDay(item.day) }}
                         </TableCell>
-                        <TableCell class="text-xs text-slate-700 font-medium">
+                        <TableCell class="text-xs font-medium text-slate-700">
                             Sesi {{ formatSession(item.session) }}
                         </TableCell>
                         <TableCell>
-                            <span class="inline-flex items-center gap-1.5 font-mono text-xs text-slate-700">
+                            <span
+                                class="inline-flex items-center gap-1.5 font-mono text-xs text-slate-700"
+                            >
                                 <Clock class="size-3.5 text-slate-400" />
-                                {{ formatTime(item.opening_hours) }} - {{ formatTime(item.closing_hours) }}
+                                {{ formatTime(item.opening_hours) }} -
+                                {{ formatTime(item.closing_hours) }}
                             </span>
                         </TableCell>
-                        <TableCell class="text-center text-slate-700 text-xs font-mono">
-                            {{ item.max_quota ? `${item.max_quota} Pasien` : '-' }}
+                        <TableCell
+                            class="text-center font-mono text-xs text-slate-700"
+                        >
+                            {{
+                                item.max_quota
+                                    ? `${item.max_quota} Pasien`
+                                    : '-'
+                            }}
                         </TableCell>
                         <TableCell class="text-center">
                             <!-- Clean Status Dot -->
-                            <span v-if="item.status === 'open'" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                <span class="size-1.5 rounded-full bg-emerald-600"></span> Buka
+                            <span
+                                v-if="item.status === 'open'"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-emerald-600"
+                                ></span>
+                                Buka
                             </span>
-                            <span v-else class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <span class="size-1.5 rounded-full bg-slate-400"></span> Tutup
+                            <span
+                                v-else
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-slate-400"
+                                ></span>
+                                Tutup
                             </span>
                         </TableCell>
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(item)"
                                     title="Edit"
                                 >
@@ -276,7 +331,7 @@ const formatTime = (timeStr) => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeleteSchedule(item)"
                                     title="Hapus"
                                 >
@@ -287,7 +342,7 @@ const formatTime = (timeStr) => {
                     </TableRow>
 
                     <TableEmpty v-if="schedules.data.length === 0" :colspan="7">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada jadwal praktik dokter ditambahkan.
                         </div>
                     </TableEmpty>
@@ -295,9 +350,15 @@ const formatTime = (timeStr) => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ schedules.current_page }}</strong> dari {{ schedules.last_page }}
+                    Hal
+                    <strong class="text-slate-700">{{
+                        schedules.current_page
+                    }}</strong>
+                    dari {{ schedules.last_page }}
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -307,10 +368,13 @@ const formatTime = (timeStr) => {
                         :disabled="!schedules.prev_page_url"
                         as-child
                     >
-                        <Link v-if="schedules.prev_page_url" :href="schedules.prev_page_url">
+                        <Link
+                            v-if="schedules.prev_page_url"
+                            :href="schedules.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" /> Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" /> Prev
                         </span>
                     </Button>
@@ -321,10 +385,13 @@ const formatTime = (timeStr) => {
                         :disabled="!schedules.next_page_url"
                         as-child
                     >
-                        <Link v-if="schedules.next_page_url" :href="schedules.next_page_url">
+                        <Link
+                            v-if="schedules.next_page_url"
+                            :href="schedules.next_page_url"
+                        >
                             Next <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next <ChevronRight class="size-3" />
                         </span>
                     </Button>
@@ -333,26 +400,46 @@ const formatTime = (timeStr) => {
         </Card>
 
         <!-- Modal Form Tambah / Edit (Physics Spring Motion) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
-                    {{ isEditMode ? 'Edit Jadwal Praktik' : 'Tambah Jadwal Praktik' }}
+                    {{
+                        isEditMode
+                            ? 'Edit Jadwal Praktik'
+                            : 'Tambah Jadwal Praktik'
+                    }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <!-- Pilihan Dokter -->
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Dokter Praktik</label>
+                    <label class="font-semibold text-slate-700"
+                        >Dokter Praktik</label
+                    >
                     <select
                         v-model="form.doctor_id"
-                        class="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900"
+                        class="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-900 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                     >
                         <option value="">Semua Dokter / Dokter Umum</option>
-                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                        <option
+                            v-for="doc in doctors"
+                            :key="doc.doctor_id"
+                            :value="doc.doctor_id"
+                        >
                             {{ doc.doctor_name }} ({{ doc.specialization }})
                         </option>
                     </select>
@@ -361,34 +448,68 @@ const formatTime = (timeStr) => {
                 <div class="grid grid-cols-2 gap-2">
                     <!-- Shadcn Select Hari -->
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Hari Praktik</label>
-                        <Select :model-value="form.day" @update:model-value="(val) => form.day = val">
-                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                        <label class="font-semibold text-slate-700"
+                            >Hari Praktik</label
+                        >
+                        <Select
+                            :model-value="form.day"
+                            @update:model-value="(val) => (form.day = val)"
+                        >
+                            <SelectTrigger
+                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                            >
                                 <SelectValue placeholder="Pilih Hari" />
                             </SelectTrigger>
-                            <SelectContent class="bg-white border-slate-200">
-                                <SelectItem value="monday" class="text-xs">Senin</SelectItem>
-                                <SelectItem value="tuesday" class="text-xs">Selasa</SelectItem>
-                                <SelectItem value="wednesday" class="text-xs">Rabu</SelectItem>
-                                <SelectItem value="thursday" class="text-xs">Kamis</SelectItem>
-                                <SelectItem value="friday" class="text-xs">Jumat</SelectItem>
-                                <SelectItem value="saturday" class="text-xs">Sabtu</SelectItem>
-                                <SelectItem value="sunday" class="text-xs">Minggu</SelectItem>
+                            <SelectContent class="border-slate-200 bg-white">
+                                <SelectItem value="monday" class="text-xs"
+                                    >Senin</SelectItem
+                                >
+                                <SelectItem value="tuesday" class="text-xs"
+                                    >Selasa</SelectItem
+                                >
+                                <SelectItem value="wednesday" class="text-xs"
+                                    >Rabu</SelectItem
+                                >
+                                <SelectItem value="thursday" class="text-xs"
+                                    >Kamis</SelectItem
+                                >
+                                <SelectItem value="friday" class="text-xs"
+                                    >Jumat</SelectItem
+                                >
+                                <SelectItem value="saturday" class="text-xs"
+                                    >Sabtu</SelectItem
+                                >
+                                <SelectItem value="sunday" class="text-xs"
+                                    >Minggu</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                     </div>
 
                     <!-- Shadcn Select Sesi -->
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Sesi Pelayanan</label>
-                        <Select :model-value="form.session" @update:model-value="(val) => form.session = val">
-                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                        <label class="font-semibold text-slate-700"
+                            >Sesi Pelayanan</label
+                        >
+                        <Select
+                            :model-value="form.session"
+                            @update:model-value="(val) => (form.session = val)"
+                        >
+                            <SelectTrigger
+                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                            >
                                 <SelectValue placeholder="Pilih Sesi" />
                             </SelectTrigger>
-                            <SelectContent class="bg-white border-slate-200">
-                                <SelectItem value="morning" class="text-xs">Pagi</SelectItem>
-                                <SelectItem value="afternoon" class="text-xs">Sore</SelectItem>
-                                <SelectItem value="evening" class="text-xs">Malam</SelectItem>
+                            <SelectContent class="border-slate-200 bg-white">
+                                <SelectItem value="morning" class="text-xs"
+                                    >Pagi</SelectItem
+                                >
+                                <SelectItem value="afternoon" class="text-xs"
+                                    >Sore</SelectItem
+                                >
+                                <SelectItem value="evening" class="text-xs"
+                                    >Malam</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                     </div>
@@ -397,23 +518,27 @@ const formatTime = (timeStr) => {
                 <!-- Shadcn Time Picker Controls -->
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Jam Buka</label>
+                        <label class="font-semibold text-slate-700"
+                            >Jam Buka</label
+                        >
                         <div class="relative flex items-center">
                             <input
                                 type="time"
                                 v-model="form.opening_hours"
-                                class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
+                                class="h-8 w-full cursor-pointer rounded-md border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs text-slate-800 shadow-2xs focus:border-indigo-500 focus:outline-none"
                             />
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Jam Tutup</label>
+                        <label class="font-semibold text-slate-700"
+                            >Jam Tutup</label
+                        >
                         <div class="relative flex items-center">
                             <input
                                 type="time"
                                 v-model="form.closing_hours"
-                                class="w-full h-8 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 font-mono shadow-2xs focus:border-indigo-500 focus:outline-none cursor-pointer"
+                                class="h-8 w-full cursor-pointer rounded-md border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs text-slate-800 shadow-2xs focus:border-indigo-500 focus:outline-none"
                             />
                         </div>
                     </div>
@@ -421,34 +546,60 @@ const formatTime = (timeStr) => {
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Kuota Maks Pasien</label>
+                        <label class="font-semibold text-slate-700"
+                            >Kuota Maks Pasien</label
+                        >
                         <input
                             type="number"
                             v-model="form.max_quota"
                             placeholder="Contoh: 30"
                             min="1"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
 
                     <!-- Shadcn Select Status -->
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Status Operasional</label>
-                        <Select :model-value="form.status" @update:model-value="(val) => form.status = val">
-                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                        <label class="font-semibold text-slate-700"
+                            >Status Operasional</label
+                        >
+                        <Select
+                            :model-value="form.status"
+                            @update:model-value="(val) => (form.status = val)"
+                        >
+                            <SelectTrigger
+                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                            >
                                 <SelectValue placeholder="Pilih Status" />
                             </SelectTrigger>
-                            <SelectContent class="bg-white border-slate-200">
-                                <SelectItem value="open" class="text-xs">Buka</SelectItem>
-                                <SelectItem value="closed" class="text-xs">Tutup</SelectItem>
+                            <SelectContent class="border-slate-200 bg-white">
+                                <SelectItem value="open" class="text-xs"
+                                    >Buka</SelectItem
+                                >
+                                <SelectItem value="closed" class="text-xs"
+                                    >Tutup</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="closeModal"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="form.processing"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
                         {{ form.processing ? 'Menyimpan...' : 'Simpan Jadwal' }}
                     </Button>
                 </div>
@@ -467,9 +618,11 @@ const formatTime = (timeStr) => {
         >
             Apakah Anda yakin ingin menghapus jadwal praktik
             <span class="font-semibold text-slate-900">
-                Hari {{ formatDay(scheduleToDelete?.day) }} Sesi {{ formatSession(scheduleToDelete?.session) }}
+                Hari {{ formatDay(scheduleToDelete?.day) }} Sesi
+                {{ formatSession(scheduleToDelete?.session) }}
             </span>
-            ({{ formatTime(scheduleToDelete?.opening_hours) }} - {{ formatTime(scheduleToDelete?.closing_hours) }})?
+            ({{ formatTime(scheduleToDelete?.opening_hours) }} -
+            {{ formatTime(scheduleToDelete?.closing_hours) }})?
         </ConfirmDeleteModal>
     </div>
 </template>

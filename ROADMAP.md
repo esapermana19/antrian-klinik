@@ -143,12 +143,12 @@ Tujuan: Modul utama klinik untuk mengambil nomor antrean, menghitung kuota, dan 
     - `index()`: Tampilkan antrean hari ini untuk display ruang tunggu atau dashboard pasien.
     - `store()`: Eksekusi logika booking antrean di atas.
     - `updateStatus(Request $request, Queue $queue)`: Endpoint khusus untuk petugas/dokter memanggil atau memajukan status antrean (`waiting` $\rightarrow$ `called` $\rightarrow$ `checking` $\rightarrow$ `completed` / `cancel`).
-- [X] **4.4 Frontend Halaman Antrean**
+- [x] **4.4 Frontend Halaman Antrean**
     - Halaman Ambil Antrean (untuk Pasien).
     - Halaman Display TV Antrean / Panggilan Antrean (untuk Petugas Klinik).
 
 ---
-    
+
 ## 🩺 FASE 5: Pemeriksaan Medis & Resep Obat (`MedicalRecord` & `MedicationPrescription`)
 
 Tujuan: Dokter melakukan pencatatan hasil diagnosa dan meresepkan obat, dengan otomatis memotong stok obat di gudang farmasi.

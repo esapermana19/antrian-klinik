@@ -11,12 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Calendar as CalendarIcon,
-    Clock,
-    X,
-    Info,
-} from 'lucide-vue-next';
+import { Calendar as CalendarIcon, Clock, X, Info } from 'lucide-vue-next';
 
 const props = defineProps({
     patients: Array,
@@ -173,7 +168,10 @@ const getStatusLabel = (status) => {
         case 'available':
             return { text: 'Tersedia', class: 'text-emerald-700 font-medium' };
         case 'locked_by_me':
-            return { text: 'Dipilih Anda', class: 'text-amber-800 font-semibold' };
+            return {
+                text: 'Dipilih Anda',
+                class: 'text-amber-800 font-semibold',
+            };
         case 'booked':
             return { text: 'Terisi', class: 'text-slate-400' };
         case 'locked':
@@ -189,48 +187,68 @@ const getStatusLabel = (status) => {
 <template>
     <Head title="Ambil Antrean Pasien" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Ambil Nomor Antrean</h1>
-                <p class="text-xs text-slate-500">Pilih tanggal periksa dan slot antrean dokter yang masih tersedia.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Ambil Nomor Antrean
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Pilih tanggal periksa dan slot antrean dokter yang masih
+                    tersedia.
+                </p>
             </div>
 
             <!-- Filter Date & Doctor -->
             <div class="flex flex-wrap items-center gap-2">
-                <div v-if="doctors && doctors.length > 0" class="flex items-center gap-2 h-9 px-3 rounded-md border border-slate-200 bg-white text-xs shadow-2xs">
-                    <span class="text-slate-500 font-medium">Dokter/Poli:</span>
+                <div
+                    v-if="doctors && doctors.length > 0"
+                    class="flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-xs shadow-2xs"
+                >
+                    <span class="font-medium text-slate-500">Dokter/Poli:</span>
                     <select
                         v-model="filterDoctor"
                         @change="changeFilter"
-                        class="text-xs font-medium text-slate-900 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
+                        class="cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-slate-900 focus:outline-none"
                     >
                         <option value="">Semua Dokter</option>
-                        <option v-for="doc in doctors" :key="doc.doctor_id" :value="doc.doctor_id">
+                        <option
+                            v-for="doc in doctors"
+                            :key="doc.doctor_id"
+                            :value="doc.doctor_id"
+                        >
                             {{ doc.doctor_name }} ({{ doc.specialization }})
                         </option>
                     </select>
                 </div>
 
-                <div class="flex items-center gap-2 h-9 px-3 rounded-md border border-slate-200 bg-white text-xs shadow-2xs">
+                <div
+                    class="flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-xs shadow-2xs"
+                >
                     <CalendarIcon class="size-3.5 text-slate-500" />
-                    <span class="text-slate-500 font-medium">Tanggal:</span>
+                    <span class="font-medium text-slate-500">Tanggal:</span>
                     <input
                         type="date"
                         v-model="filterDate"
                         @change="changeFilter"
                         :min="minDate"
-                        class="text-xs font-mono font-medium text-slate-900 bg-transparent border-0 p-0 focus:outline-none cursor-pointer"
+                        class="cursor-pointer border-0 bg-transparent p-0 font-mono text-xs font-medium text-slate-900 focus:outline-none"
                     />
                 </div>
             </div>
         </div>
 
         <!-- Legend / Petunjuk Status Slot -->
-        <div class="flex flex-wrap items-center gap-4 text-xs text-slate-600 px-1">
+        <div
+            class="flex flex-wrap items-center gap-4 px-1 text-xs text-slate-600"
+        >
             <div class="flex items-center gap-1.5">
-                <span class="size-2 rounded-full border border-slate-300 bg-white"></span>
+                <span
+                    class="size-2 rounded-full border border-slate-300 bg-white"
+                ></span>
                 <span>Tersedia</span>
             </div>
             <div class="flex items-center gap-1.5">
@@ -244,47 +262,77 @@ const getStatusLabel = (status) => {
         </div>
 
         <!-- Schedules Grid -->
-        <div v-if="props.schedulesData && props.schedulesData.length > 0" class="space-y-3.5">
+        <div
+            v-if="props.schedulesData && props.schedulesData.length > 0"
+            class="space-y-3.5"
+        >
             <Card
                 v-for="data in props.schedulesData"
                 :key="data.schedules.schedule_id"
-                class="p-4 space-y-3 rounded-lg border-slate-200"
+                class="space-y-3 rounded-lg border-slate-200 p-4"
             >
-                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div
+                    class="flex items-center justify-between border-b border-slate-100 pb-2"
+                >
                     <div class="flex items-center gap-2">
                         <Clock class="size-3.5 text-indigo-600" />
                         <div>
                             <h3 class="text-xs font-bold text-slate-900">
-                                {{ data.schedules.doctor?.doctor_name || 'Dokter Umum' }} • Sesi {{ formatSession(data.schedules.session) }}
+                                {{
+                                    data.schedules.doctor?.doctor_name ||
+                                    'Dokter Umum'
+                                }}
+                                • Sesi
+                                {{ formatSession(data.schedules.session) }}
                             </h3>
-                            <p v-if="data.schedules.doctor?.specialization" class="text-[11px] text-slate-500">
+                            <p
+                                v-if="data.schedules.doctor?.specialization"
+                                class="text-[11px] text-slate-500"
+                            >
                                 {{ data.schedules.doctor.specialization }}
                             </p>
                         </div>
                     </div>
-                    <span class="text-xs font-mono text-slate-500">
-                        {{ data.schedules.opening_hours?.substring(0, 5) }} - {{ data.schedules.closing_hours?.substring(0, 5) }}
+                    <span class="font-mono text-xs text-slate-500">
+                        {{ data.schedules.opening_hours?.substring(0, 5) }} -
+                        {{ data.schedules.closing_hours?.substring(0, 5) }}
                     </span>
                 </div>
 
                 <!-- Slots List (Proporsional & Compact) -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                <div
+                    class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
+                >
                     <button
                         v-for="slot in data.slots"
                         :key="slot.time"
                         type="button"
-                        @click="clickSlot(data.schedules.schedule_id, slot.time, slot.queue_number, slot.status)"
-                        :disabled="['booked', 'locked', 'passed'].includes(slot.status)"
-                        class="p-2 rounded-md border text-center transition flex flex-col items-center justify-center gap-0.5"
+                        @click="
+                            clickSlot(
+                                data.schedules.schedule_id,
+                                slot.time,
+                                slot.queue_number,
+                                slot.status,
+                            )
+                        "
+                        :disabled="
+                            ['booked', 'locked', 'passed'].includes(slot.status)
+                        "
+                        class="flex flex-col items-center justify-center gap-0.5 rounded-md border p-2 text-center transition"
                         :class="getSlotStyle(slot.status)"
                     >
-                        <span class="font-mono text-xs font-semibold whitespace-nowrap">
+                        <span
+                            class="font-mono text-xs font-semibold whitespace-nowrap"
+                        >
                             {{ slot.queue_number }}
                         </span>
                         <span class="font-mono text-[11px] text-slate-500">
                             {{ slot.time?.substring(0, 5) }}
                         </span>
-                        <span class="text-[10px]" :class="getStatusLabel(slot.status).class">
+                        <span
+                            class="text-[10px]"
+                            :class="getStatusLabel(slot.status).class"
+                        >
                             {{ getStatusLabel(slot.status).text }}
                         </span>
                     </button>
@@ -293,37 +341,75 @@ const getStatusLabel = (status) => {
         </div>
 
         <!-- Empty Schedule -->
-        <Card v-else class="p-8 text-center text-slate-400 text-xs rounded-lg border-slate-200">
-            <Info class="size-7 mx-auto mb-2 text-slate-300" />
-            <p class="font-semibold text-slate-700">Tidak ada jadwal dokter untuk tanggal ini</p>
-            <p class="text-slate-400 mt-0.5">Silakan pilih tanggal lain pada pemilih tanggal di atas.</p>
+        <Card
+            v-else
+            class="rounded-lg border-slate-200 p-8 text-center text-xs text-slate-400"
+        >
+            <Info class="mx-auto mb-2 size-7 text-slate-300" />
+            <p class="font-semibold text-slate-700">
+                Tidak ada jadwal dokter untuk tanggal ini
+            </p>
+            <p class="mt-0.5 text-slate-400">
+                Silakan pilih tanggal lain pada pemilih tanggal di atas.
+            </p>
         </Card>
 
         <!-- Modal Booking Antrean (Shadcn UI Dropdown / Select) -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-2xs p-4">
-            <div class="w-full max-w-md bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <div
+            v-if="isModalOpen"
+            class="backdrop-blur-2xs fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+        >
+            <div
+                class="w-full max-w-md overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+            >
+                <div
+                    class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+                >
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900">Konfirmasi Booking Antrean</h2>
+                        <h2 class="text-sm font-bold text-slate-900">
+                            Konfirmasi Booking Antrean
+                        </h2>
                         <p class="text-[11px] text-slate-500">
-                            Tiket: <span class="font-mono font-semibold text-slate-900">{{ bookingForm.queue_number }}</span> • Jam: {{ bookingForm.time }}
+                            Tiket:
+                            <span
+                                class="font-mono font-semibold text-slate-900"
+                                >{{ bookingForm.queue_number }}</span
+                            >
+                            • Jam: {{ bookingForm.time }}
                         </p>
                     </div>
-                    <button type="button" @click="cancelBooking" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <button
+                        type="button"
+                        @click="cancelBooking"
+                        class="rounded p-1 text-slate-400 hover:text-slate-600"
+                    >
                         <X class="size-4" />
                     </button>
                 </div>
 
-                <form @submit.prevent="submitBooking" class="p-4 space-y-3 text-xs">
+                <form
+                    @submit.prevent="submitBooking"
+                    class="space-y-3 p-4 text-xs"
+                >
                     <!-- Shadcn Select Pasien -->
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Pilih Pasien</label>
-                        <Select :model-value="selectedPatientMode" @update:model-value="onSelectPatientChange">
-                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                        <label class="font-semibold text-slate-700"
+                            >Pilih Pasien</label
+                        >
+                        <Select
+                            :model-value="selectedPatientMode"
+                            @update:model-value="onSelectPatientChange"
+                        >
+                            <SelectTrigger
+                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                            >
                                 <SelectValue placeholder="Pilih Pasien" />
                             </SelectTrigger>
-                            <SelectContent class="bg-white border-slate-200">
-                                <SelectItem value="new" class="text-xs font-medium text-indigo-600">
+                            <SelectContent class="border-slate-200 bg-white">
+                                <SelectItem
+                                    value="new"
+                                    class="text-xs font-medium text-indigo-600"
+                                >
                                     + Daftarkan Pasien Baru
                                 </SelectItem>
                                 <SelectItem
@@ -339,59 +425,94 @@ const getStatusLabel = (status) => {
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Nomor Induk Kependudukan (NIK)</label>
+                        <label class="font-semibold text-slate-700"
+                            >Nomor Induk Kependudukan (NIK)</label
+                        >
                         <input
                             type="text"
                             v-model="bookingForm.nik"
                             maxlength="16"
                             required
                             placeholder="16 digit NIK"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
-                        <span v-if="bookingForm.errors.nik" class="text-[10px] text-rose-500">{{ bookingForm.errors.nik }}</span>
+                        <span
+                            v-if="bookingForm.errors.nik"
+                            class="text-[10px] text-rose-500"
+                            >{{ bookingForm.errors.nik }}</span
+                        >
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Nama Lengkap Pasien</label>
+                        <label class="font-semibold text-slate-700"
+                            >Nama Lengkap Pasien</label
+                        >
                         <input
                             type="text"
                             v-model="bookingForm.patient_name"
                             required
                             placeholder="Nama pasien..."
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
-                        <span v-if="bookingForm.errors.patient_name" class="text-[10px] text-rose-500">{{ bookingForm.errors.patient_name }}</span>
+                        <span
+                            v-if="bookingForm.errors.patient_name"
+                            class="text-[10px] text-rose-500"
+                            >{{ bookingForm.errors.patient_name }}</span
+                        >
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Tanggal Lahir</label>
+                            <label class="font-semibold text-slate-700"
+                                >Tanggal Lahir</label
+                            >
                             <input
                                 type="date"
                                 v-model="bookingForm.date_of_birth"
                                 required
-                                class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none cursor-pointer"
+                                class="h-8 w-full cursor-pointer rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                             />
-                            <span v-if="bookingForm.errors.date_of_birth" class="text-[10px] text-rose-500">{{ bookingForm.errors.date_of_birth }}</span>
+                            <span
+                                v-if="bookingForm.errors.date_of_birth"
+                                class="text-[10px] text-rose-500"
+                                >{{ bookingForm.errors.date_of_birth }}</span
+                            >
                         </div>
 
                         <!-- Shadcn Select Gender -->
                         <div class="space-y-1">
-                            <label class="font-semibold text-slate-700">Jenis Kelamin</label>
-                            <Select :model-value="bookingForm.gender" @update:model-value="(val) => bookingForm.gender = val">
-                                <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                            <label class="font-semibold text-slate-700"
+                                >Jenis Kelamin</label
+                            >
+                            <Select
+                                :model-value="bookingForm.gender"
+                                @update:model-value="
+                                    (val) => (bookingForm.gender = val)
+                                "
+                            >
+                                <SelectTrigger
+                                    class="h-8 w-full border-slate-200 bg-white text-xs"
+                                >
                                     <SelectValue placeholder="Pilih Gender" />
                                 </SelectTrigger>
-                                <SelectContent class="bg-white border-slate-200">
-                                    <SelectItem value="male" class="text-xs">Laki-laki</SelectItem>
-                                    <SelectItem value="female" class="text-xs">Perempuan</SelectItem>
+                                <SelectContent
+                                    class="border-slate-200 bg-white"
+                                >
+                                    <SelectItem value="male" class="text-xs"
+                                        >Laki-laki</SelectItem
+                                    >
+                                    <SelectItem value="female" class="text-xs"
+                                        >Perempuan</SelectItem
+                                    >
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Alamat Rumah</label>
+                        <label class="font-semibold text-slate-700"
+                            >Alamat Rumah</label
+                        >
                         <textarea
                             v-model="bookingForm.address"
                             rows="2"
@@ -400,17 +521,28 @@ const getStatusLabel = (status) => {
                         ></textarea>
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                        <Button type="button" variant="outline" size="sm" @click="cancelBooking">
+                    <div
+                        class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                    >
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            @click="cancelBooking"
+                        >
                             Batal
                         </Button>
                         <Button
                             type="submit"
                             size="sm"
                             :disabled="bookingForm.processing"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            class="bg-indigo-600 text-white hover:bg-indigo-700"
                         >
-                            {{ bookingForm.processing ? 'Memproses...' : 'Konfirmasi Booking' }}
+                            {{
+                                bookingForm.processing
+                                    ? 'Memproses...'
+                                    : 'Konfirmasi Booking'
+                            }}
                         </Button>
                     </div>
                 </form>

@@ -55,7 +55,7 @@ const handleSearch = () => {
         router.get(
             '/patient',
             { search: searchQuery.value || undefined },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     }, 300);
 };
@@ -201,26 +201,39 @@ const formatDate = (dateStr) => {
 <template>
     <Head title="Master Data Pasien" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Top Action / Header Area -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Data Pasien</h1>
-                <p class="text-xs text-slate-500">Kelola dan pantau seluruh data pasien klinik dengan rekam medis terpadu.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Master Data Pasien
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola dan pantau seluruh data pasien klinik dengan rekam
+                    medis terpadu.
+                </p>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Search Input Pasien by NIK / Nama -->
                 <div class="relative w-64">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari nama atau NIK..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 font-medium text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Pasien
                 </Button>
@@ -228,7 +241,9 @@ const formatDate = (dateStr) => {
         </div>
 
         <!-- Main Card & Clean Table (Shadcn Style) -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-xl">
+        <Card
+            class="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -238,7 +253,7 @@ const formatDate = (dateStr) => {
                         <TableHead>Tgl Lahir</TableHead>
                         <TableHead>Gender</TableHead>
                         <TableHead>Alamat</TableHead>
-                        <TableHead class="text-right pr-4">Aksi</TableHead>
+                        <TableHead class="pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -247,8 +262,14 @@ const formatDate = (dateStr) => {
                         :key="item.patient_id ?? item.id"
                     >
                         <!-- No -->
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (patients.current_page - 1) * patients.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (patients.current_page - 1) *
+                                    patients.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
 
                         <!-- NIK -->
@@ -257,12 +278,12 @@ const formatDate = (dateStr) => {
                         </TableCell>
 
                         <!-- Nama Pasien -->
-                        <TableCell class="font-medium text-xs text-slate-900">
+                        <TableCell class="text-xs font-medium text-slate-900">
                             {{ item.patient_name }}
                         </TableCell>
 
                         <!-- Tgl Lahir -->
-                        <TableCell class="text-xs text-slate-600 font-mono">
+                        <TableCell class="font-mono text-xs text-slate-600">
                             {{ item.date_of_birth || '-' }}
                         </TableCell>
 
@@ -272,26 +293,28 @@ const formatDate = (dateStr) => {
                         </TableCell>
 
                         <!-- Alamat -->
-                        <TableCell class="text-xs text-slate-500 max-w-xs truncate">
+                        <TableCell
+                            class="max-w-xs truncate text-xs text-slate-500"
+                        >
                             {{ item.address || '-' }}
                         </TableCell>
 
                         <!-- Aksi -->
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    class="h-7 px-2 text-xs font-normal text-indigo-700 hover:text-indigo-800 hover:bg-indigo-50 border-slate-200"
+                                    class="h-7 border-slate-200 px-2 text-xs font-normal text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800"
                                     @click="openHistoryModal(item)"
                                 >
-                                    <FileText class="size-3 mr-1" />
+                                    <FileText class="mr-1 size-3" />
                                     Riwayat
                                 </Button>
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(item)"
                                     title="Edit"
                                 >
@@ -300,7 +323,7 @@ const formatDate = (dateStr) => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeletePatient(item)"
                                     title="Hapus"
                                 >
@@ -311,7 +334,7 @@ const formatDate = (dateStr) => {
                     </TableRow>
 
                     <TableEmpty v-if="patients.data.length === 0" :colspan="7">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada data pasien terdaftar.
                         </div>
                     </TableEmpty>
@@ -319,9 +342,15 @@ const formatDate = (dateStr) => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ patients.current_page }}</strong> dari {{ patients.last_page }} (Total: {{ patients.total }})
+                    Hal
+                    <strong class="text-slate-700">{{
+                        patients.current_page
+                    }}</strong>
+                    dari {{ patients.last_page }} (Total: {{ patients.total }})
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -331,11 +360,14 @@ const formatDate = (dateStr) => {
                         :disabled="!patients.prev_page_url"
                         as-child
                     >
-                        <Link v-if="patients.prev_page_url" :href="patients.prev_page_url">
+                        <Link
+                            v-if="patients.prev_page_url"
+                            :href="patients.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" />
                             Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" />
                             Prev
                         </span>
@@ -347,11 +379,14 @@ const formatDate = (dateStr) => {
                         :disabled="!patients.next_page_url"
                         as-child
                     >
-                        <Link v-if="patients.next_page_url" :href="patients.next_page_url">
+                        <Link
+                            v-if="patients.next_page_url"
+                            :href="patients.next_page_url"
+                        >
                             Next
                             <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next
                             <ChevronRight class="size-3" />
                         </span>
@@ -361,42 +396,66 @@ const formatDate = (dateStr) => {
         </Card>
 
         <!-- Modal Tambah / Edit Pasien (Spring Physics Motion) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
                     {{ isEditMode ? 'Edit Data Pasien' : 'Tambah Pasien Baru' }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">NIK (16 Digit)</label>
+                    <label class="font-semibold text-slate-700"
+                        >NIK (16 Digit)</label
+                    >
                     <input
                         type="text"
                         v-model="form.nik"
                         placeholder="320..."
                         class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                     />
-                    <span v-if="form.errors.nik" class="text-[10px] text-rose-500">{{ form.errors.nik }}</span>
+                    <span
+                        v-if="form.errors.nik"
+                        class="text-[10px] text-rose-500"
+                        >{{ form.errors.nik }}</span
+                    >
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Nama Lengkap Pasien</label>
+                    <label class="font-semibold text-slate-700"
+                        >Nama Lengkap Pasien</label
+                    >
                     <input
                         type="text"
                         v-model="form.patient_name"
                         placeholder="Nama pasien..."
                         class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                     />
-                    <span v-if="form.errors.patient_name" class="text-[10px] text-rose-500">{{ form.errors.patient_name }}</span>
+                    <span
+                        v-if="form.errors.patient_name"
+                        class="text-[10px] text-rose-500"
+                        >{{ form.errors.patient_name }}</span
+                    >
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Tanggal Lahir</label>
+                        <label class="font-semibold text-slate-700"
+                            >Tanggal Lahir</label
+                        >
                         <input
                             type="date"
                             v-model="form.date_of_birth"
@@ -405,21 +464,36 @@ const formatDate = (dateStr) => {
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Jenis Kelamin</label>
-                        <Select :model-value="form.gender" @update:model-value="(val) => form.gender = val">
-                            <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
-                                <SelectValue placeholder="Pilih Jenis Kelamin" />
+                        <label class="font-semibold text-slate-700"
+                            >Jenis Kelamin</label
+                        >
+                        <Select
+                            :model-value="form.gender"
+                            @update:model-value="(val) => (form.gender = val)"
+                        >
+                            <SelectTrigger
+                                class="h-8 w-full border-slate-200 bg-white text-xs"
+                            >
+                                <SelectValue
+                                    placeholder="Pilih Jenis Kelamin"
+                                />
                             </SelectTrigger>
-                            <SelectContent class="bg-white border-slate-200">
-                                <SelectItem value="male" class="text-xs">Laki-laki</SelectItem>
-                                <SelectItem value="female" class="text-xs">Perempuan</SelectItem>
+                            <SelectContent class="border-slate-200 bg-white">
+                                <SelectItem value="male" class="text-xs"
+                                    >Laki-laki</SelectItem
+                                >
+                                <SelectItem value="female" class="text-xs"
+                                    >Perempuan</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Alamat Rumah</label>
+                    <label class="font-semibold text-slate-700"
+                        >Alamat Rumah</label
+                    >
                     <textarea
                         v-model="form.address"
                         rows="2"
@@ -428,9 +502,22 @@ const formatDate = (dateStr) => {
                     ></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="closeModal"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="form.processing"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>
@@ -438,25 +525,44 @@ const formatDate = (dateStr) => {
         </MotionModal>
 
         <!-- Modal Riwayat Rekam Medis (Spring Physics Motion) -->
-        <MotionModal :show="isHistoryOpen" max-width="max-w-xl" @close="closeHistoryModal">
-            <div class="max-h-[85vh] flex flex-col overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isHistoryOpen"
+            max-width="max-w-xl"
+            @close="closeHistoryModal"
+        >
+            <div class="flex max-h-[85vh] flex-col overflow-hidden">
+                <div
+                    class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+                >
                     <div>
-                        <h2 class="text-sm font-bold text-slate-900">Riwayat Rekam Medis</h2>
+                        <h2 class="text-sm font-bold text-slate-900">
+                            Riwayat Rekam Medis
+                        </h2>
                         <p class="text-[11px] text-slate-500">
-                            {{ selectedPatient?.patient_name }} (NIK: {{ selectedPatient?.nik }})
+                            {{ selectedPatient?.patient_name }} (NIK:
+                            {{ selectedPatient?.nik }})
                         </p>
                     </div>
-                    <button type="button" @click="closeHistoryModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                    <button
+                        type="button"
+                        @click="closeHistoryModal"
+                        class="rounded p-1 text-slate-400 hover:text-slate-600"
+                    >
                         <X class="size-4" />
                     </button>
                 </div>
 
-                <div class="p-4 overflow-y-auto space-y-3 text-xs">
-                    <div v-if="isLoadingHistory" class="text-center py-8 text-slate-400">
+                <div class="space-y-3 overflow-y-auto p-4 text-xs">
+                    <div
+                        v-if="isLoadingHistory"
+                        class="py-8 text-center text-slate-400"
+                    >
                         Memuat riwayat medis...
                     </div>
-                    <div v-else-if="medicalRecords.length === 0" class="text-center py-8 text-slate-400">
+                    <div
+                        v-else-if="medicalRecords.length === 0"
+                        class="py-8 text-center text-slate-400"
+                    >
                         Belum ada riwayat rekam medis.
                     </div>
                     <div v-else class="space-y-2">
@@ -464,32 +570,45 @@ const formatDate = (dateStr) => {
                         <div
                             v-for="record in medicalRecords"
                             :key="record.medrec_id"
-                            class="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs transition"
+                            class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xs transition"
                         >
                             <!-- Accordion Header (Baris Ringkas: Kode, Tanggal, Diagnosa Singkat) -->
                             <button
                                 type="button"
                                 @click="toggleAccordion(record.medrec_id)"
-                                class="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+                                class="flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-left transition hover:bg-slate-50"
                             >
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="size-6 rounded-md flex items-center justify-center transition-transform text-slate-400"
-                                        :class="expandedRecords[record.medrec_id] ? 'rotate-180 text-indigo-600' : ''"
+                                        class="flex size-6 items-center justify-center rounded-md text-slate-400 transition-transform"
+                                        :class="
+                                            expandedRecords[record.medrec_id]
+                                                ? 'rotate-180 text-indigo-600'
+                                                : ''
+                                        "
                                     >
                                         <ChevronDown class="size-4" />
                                     </div>
                                     <div>
-                                        <span class="font-mono font-bold text-xs text-slate-800">
+                                        <span
+                                            class="font-mono text-xs font-bold text-slate-800"
+                                        >
                                             {{ record.medrec_code }}
                                         </span>
-                                        <span class="ml-2 text-[11px] text-slate-500 font-medium">
-                                            Diagnosa: <strong class="text-slate-800">{{ record.diagnosis || '-' }}</strong>
+                                        <span
+                                            class="ml-2 text-[11px] font-medium text-slate-500"
+                                        >
+                                            Diagnosa:
+                                            <strong class="text-slate-800">{{
+                                                record.diagnosis || '-'
+                                            }}</strong>
                                         </span>
                                     </div>
                                 </div>
 
-                                <div class="text-[11px] text-slate-400 font-mono">
+                                <div
+                                    class="font-mono text-[11px] text-slate-400"
+                                >
                                     {{ formatDate(record.created_at) }}
                                 </div>
                             </button>
@@ -497,27 +616,72 @@ const formatDate = (dateStr) => {
                             <!-- Accordion Detail (Hanya tampil saat dibuka) -->
                             <div
                                 v-show="expandedRecords[record.medrec_id]"
-                                class="px-3 pb-3 pt-2 border-t border-slate-100 bg-slate-50/60 space-y-2.5 text-xs text-slate-700"
+                                class="space-y-2.5 border-t border-slate-100 bg-slate-50/60 px-3 pt-2 pb-3 text-xs text-slate-700"
                             >
-                                <div class="grid grid-cols-3 gap-2 text-[11px] p-2 bg-white rounded-md border border-slate-100">
-                                    <div>Tensi: <strong class="text-slate-900 font-mono">{{ record.blood_pressure || '-' }}</strong></div>
-                                    <div>Suhu: <strong class="text-slate-900 font-mono">{{ record.temperature || '-' }}°C</strong></div>
-                                    <div>Berat: <strong class="text-slate-900 font-mono">{{ record.weight || '-' }}kg</strong></div>
+                                <div
+                                    class="grid grid-cols-3 gap-2 rounded-md border border-slate-100 bg-white p-2 text-[11px]"
+                                >
+                                    <div>
+                                        Tensi:
+                                        <strong
+                                            class="font-mono text-slate-900"
+                                            >{{
+                                                record.blood_pressure || '-'
+                                            }}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        Suhu:
+                                        <strong class="font-mono text-slate-900"
+                                            >{{
+                                                record.temperature || '-'
+                                            }}°C</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        Berat:
+                                        <strong class="font-mono text-slate-900"
+                                            >{{
+                                                record.weight || '-'
+                                            }}kg</strong
+                                        >
+                                    </div>
                                 </div>
 
                                 <div class="space-y-1">
-                                    <div><span class="text-slate-500">Keluhan:</span> {{ record.main_complaint || '-' }}</div>
-                                    <div v-if="record.notes_on_treatment"><span class="text-slate-500">Tindakan:</span> {{ record.notes_on_treatment }}</div>
+                                    <div>
+                                        <span class="text-slate-500"
+                                            >Keluhan:</span
+                                        >
+                                        {{ record.main_complaint || '-' }}
+                                    </div>
+                                    <div v-if="record.notes_on_treatment">
+                                        <span class="text-slate-500"
+                                            >Tindakan:</span
+                                        >
+                                        {{ record.notes_on_treatment }}
+                                    </div>
                                 </div>
 
-                                <div v-if="record.prescriptions && record.prescriptions.length > 0" class="pt-2 border-t border-slate-200/80 text-[11px]">
-                                    <span class="text-slate-500 font-medium">Resep Obat: </span>
+                                <div
+                                    v-if="
+                                        record.prescriptions &&
+                                        record.prescriptions.length > 0
+                                    "
+                                    class="border-t border-slate-200/80 pt-2 text-[11px]"
+                                >
+                                    <span class="font-medium text-slate-500"
+                                        >Resep Obat:
+                                    </span>
                                     <span
                                         v-for="rx in record.prescriptions"
                                         :key="rx.prescription_id"
-                                        class="inline-block mr-2 text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200"
+                                        class="mr-2 inline-block rounded border border-slate-200 bg-white px-2 py-0.5 text-slate-800"
                                     >
-                                        {{ rx.medication?.medication_name }} ({{ rx.qty }} unit, {{ rx.dosage }})
+                                        {{ rx.medication?.medication_name }} ({{
+                                            rx.qty
+                                        }}
+                                        unit, {{ rx.dosage }})
                                     </span>
                                 </div>
                             </div>
@@ -525,8 +689,15 @@ const formatDate = (dateStr) => {
                     </div>
                 </div>
 
-                <div class="px-4 py-2 border-t border-slate-100 bg-slate-50/80 flex justify-end">
-                    <Button variant="outline" size="sm" @click="closeHistoryModal">Tutup</Button>
+                <div
+                    class="flex justify-end border-t border-slate-100 bg-slate-50/80 px-4 py-2"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        @click="closeHistoryModal"
+                        >Tutup</Button
+                    >
                 </div>
             </div>
         </MotionModal>
@@ -542,9 +713,14 @@ const formatDate = (dateStr) => {
             @cancel="isDeleteModalOpen = false"
         >
             Apakah Anda yakin ingin menghapus data pasien
-            <span class="font-semibold text-slate-900">"{{ patientToDelete?.patient_name }}"</span>
-            (NIK: <span class="font-mono text-slate-800">{{ patientToDelete?.nik }}</span>)?
-            Seluruh catatan antrean yang terkait akan ikut dibatalkan.
+            <span class="font-semibold text-slate-900"
+                >"{{ patientToDelete?.patient_name }}"</span
+            >
+            (NIK:
+            <span class="font-mono text-slate-800">{{
+                patientToDelete?.nik
+            }}</span
+            >)? Seluruh catatan antrean yang terkait akan ikut dibatalkan.
         </ConfirmDeleteModal>
     </div>
 </template>

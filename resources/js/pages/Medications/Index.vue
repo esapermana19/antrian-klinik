@@ -42,7 +42,9 @@ const props = defineProps({
 });
 
 const searchQuery = ref(props.filters?.search || '');
-const selectedCategoryFilter = ref(props.filters?.category_id ? String(props.filters.category_id) : 'all');
+const selectedCategoryFilter = ref(
+    props.filters?.category_id ? String(props.filters.category_id) : 'all',
+);
 const lowStockFilter = ref(Boolean(props.filters?.low_stock));
 let searchTimeout = null;
 
@@ -51,17 +53,20 @@ const applyFilters = () => {
     if (searchQuery.value) {
         params.search = searchQuery.value;
     }
-    if (selectedCategoryFilter.value && selectedCategoryFilter.value !== 'all') {
+    if (
+        selectedCategoryFilter.value &&
+        selectedCategoryFilter.value !== 'all'
+    ) {
         params.category_id = selectedCategoryFilter.value;
     }
     if (lowStockFilter.value) {
         params.low_stock = 1;
     }
-    router.get(
-        '/medication',
-        params,
-        { preserveState: true, preserveScroll: true, replace: true }
-    );
+    router.get('/medication', params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
 };
 
 const toggleLowStockFilter = () => {
@@ -145,7 +150,8 @@ const confirmDeleteMedication = (medication) => {
 
 const handleDeleteMedication = () => {
     if (!medicationToDelete.value) return;
-    const id = medicationToDelete.value.medication_id ?? medicationToDelete.value.id;
+    const id =
+        medicationToDelete.value.medication_id ?? medicationToDelete.value.id;
     isDeleting.value = true;
     router.delete(medicationRoute.destroy.url(id), {
         onFinish: () => {
@@ -169,26 +175,42 @@ const formatCurrency = (val) => {
 <template>
     <Head title="Data Obat & Farmasi" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Data Obat & Farmasi</h1>
-                <p class="text-xs text-slate-500">Kelola inventaris obat-obatan, stok persediaan, dan harga satuan klinik.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Data Obat & Farmasi
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola inventaris obat-obatan, stok persediaan, dan harga
+                    satuan klinik.
+                </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Filter Kategori Shadcn Select -->
                 <div class="w-44">
-                    <Select :model-value="selectedCategoryFilter" @update:model-value="handleCategoryFilterChange">
-                        <SelectTrigger class="w-full h-8 text-xs bg-white/80 border-slate-200/80 shadow-2xs">
+                    <Select
+                        :model-value="selectedCategoryFilter"
+                        @update:model-value="handleCategoryFilterChange"
+                    >
+                        <SelectTrigger
+                            class="h-8 w-full border-slate-200/80 bg-white/80 text-xs shadow-2xs"
+                        >
                             <SelectValue placeholder="Semua Kategori" />
                         </SelectTrigger>
-                        <SelectContent class="bg-white border-slate-200">
-                            <SelectItem value="all" class="text-xs font-medium">Semua Kategori</SelectItem>
+                        <SelectContent class="border-slate-200 bg-white">
+                            <SelectItem value="all" class="text-xs font-medium"
+                                >Semua Kategori</SelectItem
+                            >
                             <SelectItem
                                 v-for="cat in medication_categories"
                                 :key="cat.medication_category_id ?? cat.id"
-                                :value="String(cat.medication_category_id ?? cat.id)"
+                                :value="
+                                    String(cat.medication_category_id ?? cat.id)
+                                "
                                 class="text-xs"
                             >
                                 {{ cat.medication_category_name }}
@@ -199,13 +221,15 @@ const formatCurrency = (val) => {
 
                 <!-- Search Input Nama Obat -->
                 <div class="relative w-56">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari nama obat..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
 
@@ -213,17 +237,28 @@ const formatCurrency = (val) => {
                 <button
                     type="button"
                     @click="toggleLowStockFilter"
-                    class="h-8 px-2.5 inline-flex items-center gap-1.5 rounded-lg text-xs font-medium border transition cursor-pointer"
-                    :class="lowStockFilter
-                        ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-2xs'
-                        : 'bg-white/80 border-slate-200/80 text-slate-600 hover:bg-slate-50 shadow-2xs'"
+                    class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition"
+                    :class="
+                        lowStockFilter
+                            ? 'border-rose-300 bg-rose-50 text-rose-700 shadow-2xs'
+                            : 'border-slate-200/80 bg-white/80 text-slate-600 shadow-2xs hover:bg-slate-50'
+                    "
                     title="Filter obat yang stoknya di bawah batas minimum"
                 >
-                    <AlertTriangle class="size-3.5" :class="lowStockFilter ? 'text-rose-600' : 'text-slate-400'" />
+                    <AlertTriangle
+                        class="size-3.5"
+                        :class="
+                            lowStockFilter ? 'text-rose-600' : 'text-slate-400'
+                        "
+                    />
                     <span>Stok Menipis</span>
                 </button>
 
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Obat
                 </Button>
@@ -231,63 +266,92 @@ const formatCurrency = (val) => {
         </div>
 
         <!-- Clean Standard Table (Tanpa Badge AI) -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-lg">
+        <Card
+            class="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead class="w-12 text-center">No</TableHead>
                         <TableHead>Nama Obat</TableHead>
                         <TableHead class="w-48">Kategori</TableHead>
-                        <TableHead class="w-36 text-right">Stok / Min</TableHead>
-                        <TableHead class="w-40 text-right">Harga Satuan</TableHead>
-                        <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
+                        <TableHead class="w-36 text-right"
+                            >Stok / Min</TableHead
+                        >
+                        <TableHead class="w-40 text-right"
+                            >Harga Satuan</TableHead
+                        >
+                        <TableHead class="w-28 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     <TableRow
                         v-for="(item, index) in medications.data"
                         :key="item.medication_id ?? item.id"
-                        :class="item.stock <= (item.min_stock ?? 10) ? 'bg-rose-50/40 hover:bg-rose-50/60' : ''"
+                        :class="
+                            item.stock <= (item.min_stock ?? 10)
+                                ? 'bg-rose-50/40 hover:bg-rose-50/60'
+                                : ''
+                        "
                     >
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (medications.current_page - 1) * medications.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (medications.current_page - 1) *
+                                    medications.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
-                        <TableCell class="font-medium text-xs text-slate-900">
+                        <TableCell class="text-xs font-medium text-slate-900">
                             <div class="flex items-center gap-2">
                                 <span>{{ item.medication_name }}</span>
                                 <span
                                     v-if="item.stock <= (item.min_stock ?? 10)"
-                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700"
+                                    class="inline-flex items-center gap-1 rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700"
                                     title="Stok menipis, segera restock"
                                 >
-                                    <span class="size-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    <span
+                                        class="size-1.5 animate-pulse rounded-full bg-rose-500"
+                                    ></span>
                                     Restock
                                 </span>
                             </div>
                         </TableCell>
                         <TableCell class="text-xs text-slate-600">
-                            {{ item.medication_category?.medication_category_name || '-' }}
+                            {{
+                                item.medication_category
+                                    ?.medication_category_name || '-'
+                            }}
                         </TableCell>
-                        <TableCell class="text-right text-xs font-mono">
+                        <TableCell class="text-right font-mono text-xs">
                             <div class="flex items-center justify-end gap-1.5">
                                 <span
                                     class="font-semibold"
-                                    :class="item.stock <= (item.min_stock ?? 10) ? 'text-rose-600' : 'text-slate-800'"
+                                    :class="
+                                        item.stock <= (item.min_stock ?? 10)
+                                            ? 'text-rose-600'
+                                            : 'text-slate-800'
+                                    "
                                 >
                                     {{ item.stock }}
                                 </span>
-                                <span class="text-slate-400 text-[11px]">/ min {{ item.min_stock ?? 10 }}</span>
+                                <span class="text-[11px] text-slate-400"
+                                    >/ min {{ item.min_stock ?? 10 }}</span
+                                >
                             </div>
                         </TableCell>
-                        <TableCell class="text-right text-xs font-mono text-slate-700">
+                        <TableCell
+                            class="text-right font-mono text-xs text-slate-700"
+                        >
                             {{ formatCurrency(item.unit_price) }}
                         </TableCell>
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(item)"
                                     title="Edit"
                                 >
@@ -296,7 +360,7 @@ const formatCurrency = (val) => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeleteMedication(item)"
                                     title="Hapus"
                                 >
@@ -306,8 +370,11 @@ const formatCurrency = (val) => {
                         </TableCell>
                     </TableRow>
 
-                    <TableEmpty v-if="medications.data.length === 0" :colspan="6">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                    <TableEmpty
+                        v-if="medications.data.length === 0"
+                        :colspan="6"
+                    >
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada data obat terdaftar.
                         </div>
                     </TableEmpty>
@@ -315,9 +382,15 @@ const formatCurrency = (val) => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ medications.current_page }}</strong> dari {{ medications.last_page }}
+                    Hal
+                    <strong class="text-slate-700">{{
+                        medications.current_page
+                    }}</strong>
+                    dari {{ medications.last_page }}
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -327,10 +400,13 @@ const formatCurrency = (val) => {
                         :disabled="!medications.prev_page_url"
                         as-child
                     >
-                        <Link v-if="medications.prev_page_url" :href="medications.prev_page_url">
+                        <Link
+                            v-if="medications.prev_page_url"
+                            :href="medications.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" /> Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" /> Prev
                         </span>
                     </Button>
@@ -341,10 +417,13 @@ const formatCurrency = (val) => {
                         :disabled="!medications.next_page_url"
                         as-child
                     >
-                        <Link v-if="medications.next_page_url" :href="medications.next_page_url">
+                        <Link
+                            v-if="medications.next_page_url"
+                            :href="medications.next_page_url"
+                        >
                             Next <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next <ChevronRight class="size-3" />
                         </span>
                     </Button>
@@ -353,31 +432,59 @@ const formatCurrency = (val) => {
         </Card>
 
         <!-- Modal Form Tambah / Edit (Physics Spring Motion + Shadcn Select) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
                     {{ isEditMode ? 'Edit Data Obat' : 'Tambah Obat Baru' }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Kategori Obat</label>
-                    <Select
-                        :model-value="form.medication_category_id ? String(form.medication_category_id) : ''"
-                        @update:model-value="(val) => form.medication_category_id = val"
+                    <label class="font-semibold text-slate-700"
+                        >Kategori Obat</label
                     >
-                        <SelectTrigger class="w-full h-8 text-xs bg-white border-slate-200">
+                    <Select
+                        :model-value="
+                            form.medication_category_id
+                                ? String(form.medication_category_id)
+                                : ''
+                        "
+                        @update:model-value="
+                            (val) => (form.medication_category_id = val)
+                        "
+                    >
+                        <SelectTrigger
+                            class="h-8 w-full border-slate-200 bg-white text-xs"
+                        >
                             <SelectValue placeholder="Pilih Kategori Obat" />
                         </SelectTrigger>
-                        <SelectContent class="bg-white border-slate-200">
+                        <SelectContent class="border-slate-200 bg-white">
                             <SelectItem
                                 v-for="category in medication_categories"
-                                :key="category.medication_category_id ?? category.id"
-                                :value="String(category.medication_category_id ?? category.id)"
+                                :key="
+                                    category.medication_category_id ??
+                                    category.id
+                                "
+                                :value="
+                                    String(
+                                        category.medication_category_id ??
+                                            category.id,
+                                    )
+                                "
                                 class="text-xs"
                             >
                                 {{ category.medication_category_name }}
@@ -387,53 +494,74 @@ const formatCurrency = (val) => {
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Nama Obat</label>
+                    <label class="font-semibold text-slate-700"
+                        >Nama Obat</label
+                    >
                     <input
                         type="text"
                         v-model="form.medication_name"
                         placeholder="Contoh: Paracetamol 500mg"
-                        class="w-full h-8 rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-md border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                     />
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Stok Saat Ini</label>
+                        <label class="font-semibold text-slate-700"
+                            >Stok Saat Ini</label
+                        >
                         <input
                             type="number"
                             v-model="form.stock"
                             min="0"
                             placeholder="0"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Batas Min. Stok</label>
+                        <label class="font-semibold text-slate-700"
+                            >Batas Min. Stok</label
+                        >
                         <input
                             type="number"
                             v-model="form.min_stock"
                             min="0"
                             placeholder="10"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
 
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Harga Satuan</label>
+                        <label class="font-semibold text-slate-700"
+                            >Harga Satuan</label
+                        >
                         <input
                             type="number"
                             v-model="form.unit_price"
                             min="0"
                             placeholder="0"
-                            class="w-full h-8 rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-md border border-slate-200 px-3 py-1 font-mono text-xs text-slate-800 focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" @click="closeModal">Batal</Button>
-                    <Button type="submit" size="sm" :disabled="form.processing" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="closeModal"
+                        >Batal</Button
+                    >
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="form.processing"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
                         {{ form.processing ? 'Menyimpan...' : 'Simpan' }}
                     </Button>
                 </div>
@@ -451,8 +579,9 @@ const formatCurrency = (val) => {
             @cancel="isDeleteModalOpen = false"
         >
             Apakah Anda yakin ingin menghapus obat
-            <span class="font-semibold text-slate-900">"{{ medicationToDelete?.medication_name }}"</span>?
-            Data riwayat transaksi obat ini dapat terpengaruh.
+            <span class="font-semibold text-slate-900"
+                >"{{ medicationToDelete?.medication_name }}"</span
+            >? Data riwayat transaksi obat ini dapat terpengaruh.
         </ConfirmDeleteModal>
     </div>
 </template>

@@ -124,59 +124,91 @@ const formatDate = (dateStr) => {
 <template>
     <Head title="Kasir & Tagihan" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Top Action / Header Area -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Kasir & Tagihan Pembayaran</h1>
-                <p class="text-xs text-slate-500">Kelola dan selesaikan transaksi pembayaran pasien klinik serta cetak bukti pembayaran.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Kasir & Tagihan Pembayaran
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola dan selesaikan transaksi pembayaran pasien klinik
+                    serta cetak bukti pembayaran.
+                </p>
             </div>
 
             <!-- Toolbar Pencarian & Filter Status Compact -->
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Filter Status -->
                 <div class="w-40">
-                    <Select :model-value="statusFilter" @update:model-value="handleStatusChange">
-                        <SelectTrigger class="w-full h-8 text-xs bg-white/80 border-slate-200/80 shadow-2xs">
+                    <Select
+                        :model-value="statusFilter"
+                        @update:model-value="handleStatusChange"
+                    >
+                        <SelectTrigger
+                            class="h-8 w-full border-slate-200/80 bg-white/80 text-xs shadow-2xs"
+                        >
                             <SelectValue placeholder="Semua Status" />
                         </SelectTrigger>
-                        <SelectContent class="bg-white border-slate-200">
-                            <SelectItem value="all" class="text-xs font-medium">Semua Status</SelectItem>
-                            <SelectItem value="unpaid" class="text-xs">Belum Lunas</SelectItem>
-                            <SelectItem value="paid" class="text-xs">Lunas</SelectItem>
-                            <SelectItem value="canceled" class="text-xs">Dibatalkan</SelectItem>
+                        <SelectContent class="border-slate-200 bg-white">
+                            <SelectItem value="all" class="text-xs font-medium"
+                                >Semua Status</SelectItem
+                            >
+                            <SelectItem value="unpaid" class="text-xs"
+                                >Belum Lunas</SelectItem
+                            >
+                            <SelectItem value="paid" class="text-xs"
+                                >Lunas</SelectItem
+                            >
+                            <SelectItem value="canceled" class="text-xs"
+                                >Dibatalkan</SelectItem
+                            >
                         </SelectContent>
                     </Select>
                 </div>
 
                 <!-- Input Pencarian -->
                 <div class="relative w-56">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari kode/pasien/NIK..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
             </div>
         </div>
 
         <!-- Clean Standard Table (Konsisten dengan menu Pasien & Obat) -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-lg">
+        <Card
+            class="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead class="w-12 text-center">No</TableHead>
                         <TableHead class="w-36">Kode Invoice</TableHead>
                         <TableHead>Pasien</TableHead>
-                        <TableHead class="w-24 text-center">No. Antrean</TableHead>
-                        <TableHead class="w-32 text-right">Biaya Dokter</TableHead>
-                        <TableHead class="w-32 text-right">Biaya Obat</TableHead>
-                        <TableHead class="w-32 text-right">Total Biaya</TableHead>
+                        <TableHead class="w-24 text-center"
+                            >No. Antrean</TableHead
+                        >
+                        <TableHead class="w-32 text-right"
+                            >Biaya Dokter</TableHead
+                        >
+                        <TableHead class="w-32 text-right"
+                            >Biaya Obat</TableHead
+                        >
+                        <TableHead class="w-32 text-right"
+                            >Total Biaya</TableHead
+                        >
                         <TableHead class="w-28 text-center">Status</TableHead>
-                        <TableHead class="text-right pr-4 w-32">Aksi</TableHead>
+                        <TableHead class="w-32 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,45 +217,66 @@ const formatDate = (dateStr) => {
                         :key="item.invoice_id"
                     >
                         <!-- No -->
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (invoices.current_page - 1) * invoices.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (invoices.current_page - 1) *
+                                    invoices.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
 
                         <!-- Kode Invoice -->
-                        <TableCell class="font-mono text-xs font-medium text-slate-700">
+                        <TableCell
+                            class="font-mono text-xs font-medium text-slate-700"
+                        >
                             {{ item.invoice_code }}
-                            <div class="text-[10px] font-sans text-slate-400">
+                            <div class="font-sans text-[10px] text-slate-400">
                                 {{ formatDate(item.created_at) }}
                             </div>
                         </TableCell>
 
                         <!-- Pasien -->
                         <TableCell>
-                            <div class="font-medium text-xs text-slate-900">
-                                {{ item.medical_record?.patient?.patient_name || '-' }}
+                            <div class="text-xs font-medium text-slate-900">
+                                {{
+                                    item.medical_record?.patient
+                                        ?.patient_name || '-'
+                                }}
                             </div>
-                            <div class="text-[11px] text-slate-400 font-mono">
+                            <div class="font-mono text-[11px] text-slate-400">
                                 {{ item.medical_record?.patient?.nik || '-' }}
                             </div>
                         </TableCell>
 
                         <!-- No. Antrean -->
-                        <TableCell class="text-center font-mono text-xs text-slate-700">
-                            {{ item.medical_record?.queue?.queue_number || '-' }}
+                        <TableCell
+                            class="text-center font-mono text-xs text-slate-700"
+                        >
+                            {{
+                                item.medical_record?.queue?.queue_number || '-'
+                            }}
                         </TableCell>
 
                         <!-- Biaya Dokter -->
-                        <TableCell class="text-right text-xs font-mono text-slate-600">
+                        <TableCell
+                            class="text-right font-mono text-xs text-slate-600"
+                        >
                             {{ formatRupiah(item.examination_fee) }}
                         </TableCell>
 
                         <!-- Biaya Obat -->
-                        <TableCell class="text-right text-xs font-mono text-slate-600">
+                        <TableCell
+                            class="text-right font-mono text-xs text-slate-600"
+                        >
                             {{ formatRupiah(item.medication_fee) }}
                         </TableCell>
 
                         <!-- Total Tagihan -->
-                        <TableCell class="text-right text-xs font-mono font-semibold text-slate-900">
+                        <TableCell
+                            class="text-right font-mono text-xs font-semibold text-slate-900"
+                        >
                             {{ formatRupiah(item.total_amount) }}
                         </TableCell>
 
@@ -231,31 +284,32 @@ const formatDate = (dateStr) => {
                         <TableCell class="text-center text-xs">
                             <span
                                 v-if="item.payment_status === 'paid'"
-                                class="text-emerald-700 font-medium"
+                                class="font-medium text-emerald-700"
                             >
-                                Lunas ({{ item.payment_method === 'cash' ? 'Tunai' : 'Transfer' }})
+                                Lunas ({{
+                                    item.payment_method === 'cash'
+                                        ? 'Tunai'
+                                        : 'Transfer'
+                                }})
                             </span>
                             <span
                                 v-else-if="item.payment_status === 'unpaid'"
-                                class="text-amber-600 font-medium"
+                                class="font-medium text-amber-600"
                             >
                                 Belum Bayar
                             </span>
-                            <span
-                                v-else
-                                class="text-slate-400 font-medium"
-                            >
+                            <span v-else class="font-medium text-slate-400">
                                 Batal
                             </span>
                         </TableCell>
 
                         <!-- Aksi Tombol -->
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1.5">
                                 <Button
                                     v-if="item.payment_status === 'unpaid'"
                                     size="sm"
-                                    class="h-7 px-2.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-2xs gap-1"
+                                    class="h-7 gap-1 bg-indigo-600 px-2.5 text-xs font-medium text-white shadow-2xs hover:bg-indigo-700"
                                     @click="openPayModal(item)"
                                 >
                                     Bayar
@@ -265,7 +319,7 @@ const formatDate = (dateStr) => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        class="h-7 px-2 text-xs text-slate-600 hover:text-slate-900 border-slate-200"
+                                        class="h-7 border-slate-200 px-2 text-xs text-slate-600 hover:text-slate-900"
                                         title="Lihat Struk"
                                     >
                                         <FileText class="size-3" />
@@ -276,8 +330,11 @@ const formatDate = (dateStr) => {
                         </TableCell>
                     </TableRow>
 
-                    <TableEmpty v-if="!invoices.data || invoices.data.length === 0" colspan="9">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                    <TableEmpty
+                        v-if="!invoices.data || invoices.data.length === 0"
+                        colspan="9"
+                    >
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada data tagihan kasir.
                         </div>
                     </TableEmpty>
@@ -287,25 +344,39 @@ const formatDate = (dateStr) => {
             <!-- Standard Compact Pagination (Identik dengan Patient & Medication Index) -->
             <div
                 v-if="invoices.links && invoices.links.length > 3"
-                class="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50"
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-3 text-xs text-slate-500"
             >
                 <div>
-                    Menampilkan <span class="font-medium text-slate-700">{{ invoices.from || 0 }}</span> -
-                    <span class="font-medium text-slate-700">{{ invoices.to || 0 }}</span> dari
-                    <span class="font-medium text-slate-700">{{ invoices.total }}</span> tagihan
+                    Menampilkan
+                    <span class="font-medium text-slate-700">{{
+                        invoices.from || 0
+                    }}</span>
+                    -
+                    <span class="font-medium text-slate-700">{{
+                        invoices.to || 0
+                    }}</span>
+                    dari
+                    <span class="font-medium text-slate-700">{{
+                        invoices.total
+                    }}</span>
+                    tagihan
                 </div>
                 <div class="flex items-center gap-1">
                     <template v-for="(link, i) in invoices.links" :key="i">
                         <Link
                             v-if="link.url"
                             :href="link.url"
-                            class="h-7 min-w-7 px-2 flex items-center justify-center rounded text-xs transition"
-                            :class="link.active ? 'bg-indigo-600 text-white font-medium' : 'hover:bg-slate-200 text-slate-600'"
+                            class="flex h-7 min-w-7 items-center justify-center rounded px-2 text-xs transition"
+                            :class="
+                                link.active
+                                    ? 'bg-indigo-600 font-medium text-white'
+                                    : 'text-slate-600 hover:bg-slate-200'
+                            "
                             v-html="link.label"
                         />
                         <span
                             v-else
-                            class="h-7 min-w-7 px-2 flex items-center justify-center rounded text-xs text-slate-300 cursor-not-allowed"
+                            class="flex h-7 min-w-7 cursor-not-allowed items-center justify-center rounded px-2 text-xs text-slate-300"
                             v-html="link.label"
                         />
                     </template>
@@ -314,16 +385,26 @@ const formatDate = (dateStr) => {
         </Card>
 
         <!-- Modal Sederhana Pembayaran Kasir -->
-        <MotionModal :show="isPayModalOpen" max-width="max-w-sm" @close="closePayModal">
-            <div class="p-5 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <MotionModal
+            :show="isPayModalOpen"
+            max-width="max-w-sm"
+            @close="closePayModal"
+        >
+            <div class="space-y-4 p-5">
+                <div
+                    class="flex items-center justify-between border-b border-slate-100 pb-3"
+                >
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900">Pembayaran Kasir</h3>
-                        <p class="text-[11px] font-mono text-slate-400">{{ activeInvoice?.invoice_code }}</p>
+                        <h3 class="text-sm font-bold text-slate-900">
+                            Pembayaran Kasir
+                        </h3>
+                        <p class="font-mono text-[11px] text-slate-400">
+                            {{ activeInvoice?.invoice_code }}
+                        </p>
                     </div>
                     <button
                         type="button"
-                        class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                        class="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                         @click="closePayModal"
                     >
                         <X class="size-4" />
@@ -331,32 +412,55 @@ const formatDate = (dateStr) => {
                 </div>
 
                 <!-- Info Rincian -->
-                <div class="bg-slate-50 rounded-lg p-3 space-y-1.5 text-xs border border-slate-100">
+                <div
+                    class="space-y-1.5 rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs"
+                >
                     <div class="flex justify-between text-slate-500">
                         <span>Nama Pasien</span>
-                        <span class="font-medium text-slate-800">{{ activeInvoice?.medical_record?.patient?.patient_name }}</span>
+                        <span class="font-medium text-slate-800">{{
+                            activeInvoice?.medical_record?.patient?.patient_name
+                        }}</span>
                     </div>
                     <div class="flex justify-between text-slate-500">
                         <span>Biaya Dokter</span>
-                        <span class="font-mono text-slate-800">{{ formatRupiah(activeInvoice?.examination_fee) }}</span>
+                        <span class="font-mono text-slate-800">{{
+                            formatRupiah(activeInvoice?.examination_fee)
+                        }}</span>
                     </div>
                     <div class="flex justify-between text-slate-500">
                         <span>Biaya Obat</span>
-                        <span class="font-mono text-slate-800">{{ formatRupiah(activeInvoice?.medication_fee) }}</span>
+                        <span class="font-mono text-slate-800">{{
+                            formatRupiah(activeInvoice?.medication_fee)
+                        }}</span>
                     </div>
-                    <div class="border-t border-slate-200 pt-1.5 flex justify-between items-center text-xs">
-                        <span class="font-semibold text-slate-800">Total Tagihan</span>
-                        <span class="text-sm font-bold font-mono text-indigo-600">{{ formatRupiah(activeInvoice?.total_amount) }}</span>
+                    <div
+                        class="flex items-center justify-between border-t border-slate-200 pt-1.5 text-xs"
+                    >
+                        <span class="font-semibold text-slate-800"
+                            >Total Tagihan</span
+                        >
+                        <span
+                            class="font-mono text-sm font-bold text-indigo-600"
+                            >{{
+                                formatRupiah(activeInvoice?.total_amount)
+                            }}</span
+                        >
                     </div>
                 </div>
 
                 <!-- Pilih Metode Pembayaran -->
                 <div class="space-y-1.5">
-                    <label class="text-xs font-medium text-slate-700">Metode Pembayaran</label>
+                    <label class="text-xs font-medium text-slate-700"
+                        >Metode Pembayaran</label
+                    >
                     <div class="grid grid-cols-2 gap-2">
                         <label
-                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium cursor-pointer transition"
-                            :class="payForm.payment_method === 'cash' ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                            class="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition"
+                            :class="
+                                payForm.payment_method === 'cash'
+                                    ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            "
                         >
                             <input
                                 v-model="payForm.payment_method"
@@ -368,8 +472,12 @@ const formatDate = (dateStr) => {
                         </label>
 
                         <label
-                            class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border text-xs font-medium cursor-pointer transition"
-                            :class="payForm.payment_method === 'transfer' ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                            class="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition"
+                            :class="
+                                payForm.payment_method === 'transfer'
+                                    ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            "
                         >
                             <input
                                 v-model="payForm.payment_method"
@@ -383,17 +491,29 @@ const formatDate = (dateStr) => {
                 </div>
 
                 <!-- Action Button -->
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <Button variant="outline" size="sm" class="h-8 text-xs" type="button" @click="closePayModal">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-2"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-8 text-xs"
+                        type="button"
+                        @click="closePayModal"
+                    >
                         Batal
                     </Button>
                     <Button
                         size="sm"
-                        class="h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+                        class="h-8 bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700"
                         :disabled="payForm.processing"
                         @click="submitPayment"
                     >
-                        {{ payForm.processing ? 'Memproses...' : 'Selesaikan Pembayaran' }}
+                        {{
+                            payForm.processing
+                                ? 'Memproses...'
+                                : 'Selesaikan Pembayaran'
+                        }}
                     </Button>
                 </div>
             </div>

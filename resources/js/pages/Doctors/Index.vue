@@ -43,7 +43,7 @@ const handleSearch = () => {
         router.get(
             '/doctor',
             { search: searchQuery.value || undefined },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     }, 300);
 };
@@ -90,7 +90,9 @@ const openEditModal = (doctor) => {
     form.phone_number = doctor.phone_number || '';
     form.is_active = Boolean(doctor.is_active);
     form.photo = null;
-    previewPhotoUrl.value = doctor.photo_url || (doctor.photo_path ? `/storage/${doctor.photo_path}` : null);
+    previewPhotoUrl.value =
+        doctor.photo_url ||
+        (doctor.photo_path ? `/storage/${doctor.photo_path}` : null);
     isModalOpen.value = true;
 };
 
@@ -144,27 +146,40 @@ const handleDeleteDoctor = () => {
 <template>
     <Head title="Master Data Dokter" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Top Action / Header Area -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Master Data Dokter</h1>
-                <p class="text-xs text-slate-500">Kelola informasi tenaga medis, spesialisasi, dan status praktik dokter.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Master Data Dokter
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola informasi tenaga medis, spesialisasi, dan status
+                    praktik dokter.
+                </p>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Search Input Dokter -->
                 <div class="relative w-64">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleSearch"
                         placeholder="Cari nama atau spesialis..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
 
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 font-medium text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Dokter
                 </Button>
@@ -172,7 +187,9 @@ const handleDeleteDoctor = () => {
         </div>
 
         <!-- Main Card & Clean Table (Shadcn Style) -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-xl">
+        <Card
+            class="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -182,7 +199,7 @@ const handleDeleteDoctor = () => {
                         <TableHead class="w-36">Kontak Telepon</TableHead>
                         <TableHead class="w-32 text-center">Status</TableHead>
                         <TableHead class="w-36">Jadwal / Antrean</TableHead>
-                        <TableHead class="text-right pr-4 w-28">Aksi</TableHead>
+                        <TableHead class="w-28 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -191,35 +208,55 @@ const handleDeleteDoctor = () => {
                         :key="doc.doctor_id"
                     >
                         <!-- No -->
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (doctors.current_page - 1) * doctors.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (doctors.current_page - 1) * doctors.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
 
                         <!-- Nama Dokter & Spesialis -->
                         <TableCell>
                             <div class="flex items-center gap-2.5">
-                                <div class="size-9 rounded-full overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0 flex items-center justify-center">
+                                <div
+                                    class="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/80 bg-slate-100"
+                                >
                                     <img
                                         v-if="doc.photo_url || doc.photo_path"
-                                        :src="doc.photo_url || `/storage/${doc.photo_path}`"
+                                        :src="
+                                            doc.photo_url ||
+                                            `/storage/${doc.photo_path}`
+                                        "
                                         :alt="doc.doctor_name"
                                         class="size-full object-cover"
                                     />
-                                    <User v-else class="size-4 text-slate-400" />
+                                    <User
+                                        v-else
+                                        class="size-4 text-slate-400"
+                                    />
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-1.5">
-                                        <span class="font-medium text-xs text-slate-900">{{ doc.doctor_name }}</span>
+                                        <span
+                                            class="text-xs font-medium text-slate-900"
+                                            >{{ doc.doctor_name }}</span
+                                        >
                                         <span
                                             v-if="doc.queue_prefix"
-                                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60"
+                                            class="inline-flex items-center rounded border border-indigo-200/60 bg-indigo-50 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-indigo-700"
                                             title="Prefix nomor antrean dokter"
                                         >
                                             {{ doc.queue_prefix }}
                                         </span>
                                     </div>
-                                    <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                                        <Stethoscope class="size-3 text-indigo-500" />
+                                    <div
+                                        class="mt-0.5 flex items-center gap-1 text-[11px] text-slate-500"
+                                    >
+                                        <Stethoscope
+                                            class="size-3 text-indigo-500"
+                                        />
                                         {{ doc.specialization }}
                                     </div>
                                 </div>
@@ -232,32 +269,45 @@ const handleDeleteDoctor = () => {
                         </TableCell>
 
                         <!-- Kontak Telepon -->
-                        <TableCell class="text-xs text-slate-600 font-mono">
+                        <TableCell class="font-mono text-xs text-slate-600">
                             {{ doc.phone_number || '-' }}
                         </TableCell>
 
                         <!-- Status Praktik (Clean Dot Indicator Konsisten) -->
                         <TableCell class="text-center">
-                            <span v-if="doc.is_active" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                <span class="size-1.5 rounded-full bg-emerald-600"></span> Aktif
+                            <span
+                                v-if="doc.is_active"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-emerald-600"
+                                ></span>
+                                Aktif
                             </span>
-                            <span v-else class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                                <span class="size-1.5 rounded-full bg-slate-400"></span> Nonaktif
+                            <span
+                                v-else
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500"
+                            >
+                                <span
+                                    class="size-1.5 rounded-full bg-slate-400"
+                                ></span>
+                                Nonaktif
                             </span>
                         </TableCell>
 
                         <!-- Jadwal & Antrean -->
-                        <TableCell class="text-xs text-slate-500 font-mono">
-                            {{ doc.practice_schedules_count ?? 0 }} jadwal • {{ doc.queues_count ?? 0 }} antrean
+                        <TableCell class="font-mono text-xs text-slate-500">
+                            {{ doc.practice_schedules_count ?? 0 }} jadwal •
+                            {{ doc.queues_count ?? 0 }} antrean
                         </TableCell>
 
                         <!-- Aksi -->
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(doc)"
                                     title="Edit"
                                 >
@@ -266,7 +316,7 @@ const handleDeleteDoctor = () => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeleteDoctor(doc)"
                                     title="Hapus"
                                 >
@@ -277,7 +327,7 @@ const handleDeleteDoctor = () => {
                     </TableRow>
 
                     <TableEmpty v-if="doctors.data.length === 0" :colspan="7">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Belum ada data dokter terdaftar.
                         </div>
                     </TableEmpty>
@@ -285,9 +335,15 @@ const handleDeleteDoctor = () => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ doctors.current_page }}</strong> dari {{ doctors.last_page }} (Total: {{ doctors.total }})
+                    Hal
+                    <strong class="text-slate-700">{{
+                        doctors.current_page
+                    }}</strong>
+                    dari {{ doctors.last_page }} (Total: {{ doctors.total }})
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -297,11 +353,14 @@ const handleDeleteDoctor = () => {
                         :disabled="!doctors.prev_page_url"
                         as-child
                     >
-                        <Link v-if="doctors.prev_page_url" :href="doctors.prev_page_url">
+                        <Link
+                            v-if="doctors.prev_page_url"
+                            :href="doctors.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" />
                             Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" />
                             Prev
                         </span>
@@ -313,11 +372,14 @@ const handleDeleteDoctor = () => {
                         :disabled="!doctors.next_page_url"
                         as-child
                     >
-                        <Link v-if="doctors.next_page_url" :href="doctors.next_page_url">
+                        <Link
+                            v-if="doctors.next_page_url"
+                            :href="doctors.next_page_url"
+                        >
                             Next
                             <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next
                             <ChevronRight class="size-3" />
                         </span>
@@ -327,22 +389,36 @@ const handleDeleteDoctor = () => {
         </Card>
 
         <!-- Modal Form Tambah / Edit (MotionModal Style Konsisten) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
                     {{ isEditMode ? 'Edit Data Dokter' : 'Tambah Dokter Baru' }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <!-- Foto Profil Dokter -->
                 <div class="space-y-1.5">
-                    <label class="font-semibold text-slate-700">Foto Profil Dokter</label>
+                    <label class="font-semibold text-slate-700"
+                        >Foto Profil Dokter</label
+                    >
                     <div class="flex items-center gap-3">
-                        <div class="size-14 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0 flex items-center justify-center">
+                        <div
+                            class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100"
+                        >
                             <img
                                 v-if="previewPhotoUrl"
                                 :src="previewPhotoUrl"
@@ -352,7 +428,9 @@ const handleDeleteDoctor = () => {
                             <User v-else class="size-6 text-slate-400" />
                         </div>
                         <div class="space-y-1">
-                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs cursor-pointer transition shadow-2xs">
+                            <label
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50"
+                            >
                                 <Upload class="size-3.5 text-slate-500" />
                                 <span>Pilih Foto</span>
                                 <input
@@ -362,87 +440,140 @@ const handleDeleteDoctor = () => {
                                     @change="handlePhotoChange"
                                 />
                             </label>
-                            <p class="text-[10px] text-slate-400">Format: JPG, PNG, WEBP (Maksimal 2MB).</p>
+                            <p class="text-[10px] text-slate-400">
+                                Format: JPG, PNG, WEBP (Maksimal 2MB).
+                            </p>
                         </div>
                     </div>
-                    <p v-if="form.errors.photo" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.photo }}</p>
+                    <p
+                        v-if="form.errors.photo"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.photo }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Nama Dokter Lengkap <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Nama Dokter Lengkap
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="text"
                         v-model="form.doctor_name"
                         placeholder="Contoh: dr. Budi Santoso, Sp.A"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="form.errors.doctor_name" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.doctor_name }}</p>
+                    <p
+                        v-if="form.errors.doctor_name"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.doctor_name }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Spesialisasi / Poli <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Spesialisasi / Poli
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="text"
                         v-model="form.specialization"
                         placeholder="Contoh: Dokter Umum / Spesialis Anak / Gigi"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="form.errors.specialization" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.specialization }}</p>
+                    <p
+                        v-if="form.errors.specialization"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.specialization }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Prefix Nomor Antrean (Opsional)</label>
+                    <label class="font-semibold text-slate-700"
+                        >Prefix Nomor Antrean (Opsional)</label
+                    >
                     <input
                         type="text"
                         v-model="form.queue_prefix"
                         placeholder="Contoh: GGI, ANK, UMM (Jika kosong, memakai default klinik)"
                         maxlength="10"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none uppercase font-mono"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 font-mono text-xs uppercase focus:border-indigo-500 focus:outline-none"
                     />
-                    <p class="text-[10px] text-slate-400">Contoh hasil: <strong>GGI-001</strong> untuk membedakan antrean poli/dokter di display TV.</p>
-                    <p v-if="form.errors.queue_prefix" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.queue_prefix }}</p>
+                    <p class="text-[10px] text-slate-400">
+                        Contoh hasil: <strong>GGI-001</strong> untuk membedakan
+                        antrean poli/dokter di display TV.
+                    </p>
+                    <p
+                        v-if="form.errors.queue_prefix"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.queue_prefix }}
+                    </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">Nomor STR</label>
+                        <label class="font-semibold text-slate-700"
+                            >Nomor STR</label
+                        >
                         <input
                             type="text"
                             v-model="form.str_number"
                             placeholder="Nomor Surat Tanda Registrasi"
-                            class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-lg border border-slate-200 px-2.5 font-mono text-xs focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
                     <div class="space-y-1">
-                        <label class="font-semibold text-slate-700">No. Telepon / WA</label>
+                        <label class="font-semibold text-slate-700"
+                            >No. Telepon / WA</label
+                        >
                         <input
                             type="text"
                             v-model="form.phone_number"
                             placeholder="08xxxxxxxxxx"
-                            class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none font-mono"
+                            class="h-8 w-full rounded-lg border border-slate-200 px-2.5 font-mono text-xs focus:border-indigo-500 focus:outline-none"
                         />
                     </div>
                 </div>
 
-                <div class="pt-1 flex items-center gap-2">
+                <div class="flex items-center gap-2 pt-1">
                     <input
                         v-model="form.is_active"
                         id="doctor_is_active"
                         type="checkbox"
-                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        class="cursor-pointer rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <label for="doctor_is_active" class="text-xs font-medium text-slate-700 cursor-pointer select-none">
+                    <label
+                        for="doctor_is_active"
+                        class="cursor-pointer text-xs font-medium text-slate-700 select-none"
+                    >
                         Dokter Aktif Melayani Praktik
                     </label>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" class="h-8 text-xs border-slate-200" @click="closeModal">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="h-8 border-slate-200 text-xs"
+                        @click="closeModal"
+                    >
                         Batal
                     </Button>
-                    <Button type="submit" size="sm" class="h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium" :disabled="form.processing">
+                    <Button
+                        type="submit"
+                        size="sm"
+                        class="h-8 bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700"
+                        :disabled="form.processing"
+                    >
                         {{ isEditMode ? 'Simpan Perubahan' : 'Tambah Dokter' }}
                     </Button>
                 </div>

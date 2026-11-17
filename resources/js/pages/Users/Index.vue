@@ -36,7 +36,8 @@ const props = defineProps({
 });
 
 const page = usePage();
-const currentAuthId = page.props.auth?.user?.id || page.props.auth?.user?.user_id;
+const currentAuthId =
+    page.props.auth?.user?.id || page.props.auth?.user?.user_id;
 
 const searchQuery = ref(props.filters?.search || '');
 const roleFilter = ref(props.filters?.role || '');
@@ -51,7 +52,7 @@ const handleFilter = () => {
                 search: searchQuery.value || undefined,
                 role: roleFilter.value || undefined,
             },
-            { preserveState: true, preserveScroll: true, replace: true }
+            { preserveState: true, preserveScroll: true, replace: true },
         );
     }, 300);
 };
@@ -152,19 +153,26 @@ const handleDeleteUser = () => {
 <template>
     <Head title="Manajemen Pengguna" />
 
-    <div class="space-y-4 p-4 md:p-6 max-w-7xl">
+    <div class="max-w-7xl space-y-4 p-4 md:p-6">
         <!-- Top Action / Header Area -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Manajemen Pengguna</h1>
-                <p class="text-xs text-slate-500">Kelola dan pantau seluruh data staf, dokter, dan pasien klinik.</p>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">
+                    Manajemen Pengguna
+                </h1>
+                <p class="text-xs text-slate-500">
+                    Kelola dan pantau seluruh data staf, dokter, dan pasien
+                    klinik.
+                </p>
             </div>
             <div class="flex items-center gap-2">
                 <!-- Filter Role -->
                 <select
                     v-model="roleFilter"
                     @change="handleFilter"
-                    class="h-8 px-2.5 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs text-slate-700 cursor-pointer"
+                    class="h-8 cursor-pointer rounded-lg border border-slate-200/80 bg-white/80 px-2.5 text-xs text-slate-700 shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                 >
                     <option value="">Semua Role</option>
                     <option value="administrator">Administrator</option>
@@ -173,17 +181,23 @@ const handleDeleteUser = () => {
 
                 <!-- Search Input Pengguna -->
                 <div class="relative w-64">
-                    <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Search
+                        class="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-slate-400"
+                    />
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="handleFilter"
                         placeholder="Cari username, email, kode..."
-                        class="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-slate-200/80 bg-white/80 focus:bg-white focus:border-indigo-500 focus:outline-none transition shadow-2xs"
+                        class="h-8 w-full rounded-lg border border-slate-200/80 bg-white/80 pr-3 pl-8 text-xs shadow-2xs transition focus:border-indigo-500 focus:bg-white focus:outline-none"
                     />
                 </div>
 
-                <Button size="sm" class="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-xs" @click="openAddModal">
+                <Button
+                    size="sm"
+                    class="gap-1.5 bg-indigo-600 font-medium text-white shadow-xs hover:bg-indigo-700"
+                    @click="openAddModal"
+                >
                     <Plus class="size-3.5" />
                     Tambah Pengguna
                 </Button>
@@ -191,7 +205,9 @@ const handleDeleteUser = () => {
         </div>
 
         <!-- Main Card & Clean Table (Shadcn Style) -->
-        <Card class="p-0 overflow-hidden border border-slate-200/80 bg-white shadow-xs rounded-xl">
+        <Card
+            class="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-0 shadow-xs"
+        >
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -201,17 +217,19 @@ const handleDeleteUser = () => {
                         <TableHead class="w-36">Role</TableHead>
                         <TableHead class="w-36">Verifikasi Email</TableHead>
                         <TableHead class="w-36">Pasien Terhubung</TableHead>
-                        <TableHead class="text-right pr-4 w-32">Aksi</TableHead>
+                        <TableHead class="w-32 pr-4 text-right">Aksi</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow
-                        v-for="(u, index) in users.data"
-                        :key="u.user_id"
-                    >
+                    <TableRow v-for="(u, index) in users.data" :key="u.user_id">
                         <!-- No -->
-                        <TableCell class="text-center text-slate-400 font-mono text-[11px]">
-                            {{ (users.current_page - 1) * users.per_page + (index + 1) }}
+                        <TableCell
+                            class="text-center font-mono text-[11px] text-slate-400"
+                        >
+                            {{
+                                (users.current_page - 1) * users.per_page +
+                                (index + 1)
+                            }}
                         </TableCell>
 
                         <!-- Kode User -->
@@ -221,10 +239,10 @@ const handleDeleteUser = () => {
 
                         <!-- Pengguna (Nama & Email) -->
                         <TableCell>
-                            <div class="font-medium text-xs text-slate-900">
+                            <div class="text-xs font-medium text-slate-900">
                                 {{ u.username }}
                             </div>
-                            <div class="text-[11px] text-slate-400 font-mono">
+                            <div class="font-mono text-[11px] text-slate-400">
                                 {{ u.email }}
                             </div>
                         </TableCell>
@@ -235,14 +253,18 @@ const handleDeleteUser = () => {
                                 v-if="u.role === 'administrator'"
                                 class="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-700"
                             >
-                                <span class="size-1.5 rounded-full bg-indigo-600"></span>
+                                <span
+                                    class="size-1.5 rounded-full bg-indigo-600"
+                                ></span>
                                 Administrator
                             </span>
                             <span
                                 v-else
                                 class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"
                             >
-                                <span class="size-1.5 rounded-full bg-slate-400"></span>
+                                <span
+                                    class="size-1.5 rounded-full bg-slate-400"
+                                ></span>
                                 User Pasien
                             </span>
                         </TableCell>
@@ -269,12 +291,12 @@ const handleDeleteUser = () => {
                         </TableCell>
 
                         <!-- Aksi -->
-                        <TableCell class="text-right pr-4">
+                        <TableCell class="pr-4 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-amber-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-amber-600"
                                     @click="openResetModal(u)"
                                     title="Reset Password"
                                 >
@@ -283,7 +305,7 @@ const handleDeleteUser = () => {
                                 <Button
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-500 hover:text-indigo-600 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-500 hover:text-indigo-600"
                                     @click="openEditModal(u)"
                                     title="Edit"
                                 >
@@ -293,7 +315,7 @@ const handleDeleteUser = () => {
                                     v-if="u.user_id !== currentAuthId"
                                     size="icon-sm"
                                     variant="outline"
-                                    class="size-7 text-slate-400 hover:text-rose-600 hover:border-rose-200 border-slate-200"
+                                    class="size-7 border-slate-200 text-slate-400 hover:border-rose-200 hover:text-rose-600"
                                     @click="confirmDeleteUser(u)"
                                     title="Hapus"
                                 >
@@ -304,7 +326,7 @@ const handleDeleteUser = () => {
                     </TableRow>
 
                     <TableEmpty v-if="users.data.length === 0" :colspan="7">
-                        <div class="py-10 text-center text-slate-400 text-xs">
+                        <div class="py-10 text-center text-xs text-slate-400">
                             Tidak ada pengguna ditemukan.
                         </div>
                     </TableEmpty>
@@ -312,9 +334,15 @@ const handleDeleteUser = () => {
             </Table>
 
             <!-- Pagination Bar -->
-            <div class="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+            <div
+                class="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-2.5 text-xs text-slate-500"
+            >
                 <span>
-                    Hal <strong class="text-slate-700">{{ users.current_page }}</strong> dari {{ users.last_page }} (Total: {{ users.total }})
+                    Hal
+                    <strong class="text-slate-700">{{
+                        users.current_page
+                    }}</strong>
+                    dari {{ users.last_page }} (Total: {{ users.total }})
                 </span>
                 <div class="flex items-center gap-1">
                     <Button
@@ -324,11 +352,14 @@ const handleDeleteUser = () => {
                         :disabled="!users.prev_page_url"
                         as-child
                     >
-                        <Link v-if="users.prev_page_url" :href="users.prev_page_url">
+                        <Link
+                            v-if="users.prev_page_url"
+                            :href="users.prev_page_url"
+                        >
                             <ChevronLeft class="size-3" />
                             Prev
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             <ChevronLeft class="size-3" />
                             Prev
                         </span>
@@ -340,11 +371,14 @@ const handleDeleteUser = () => {
                         :disabled="!users.next_page_url"
                         as-child
                     >
-                        <Link v-if="users.next_page_url" :href="users.next_page_url">
+                        <Link
+                            v-if="users.next_page_url"
+                            :href="users.next_page_url"
+                        >
                             Next
                             <ChevronRight class="size-3" />
                         </Link>
-                        <span v-else class="opacity-40 flex items-center">
+                        <span v-else class="flex items-center opacity-40">
                             Next
                             <ChevronRight class="size-3" />
                         </span>
@@ -354,109 +388,205 @@ const handleDeleteUser = () => {
         </Card>
 
         <!-- Modal Form Tambah / Edit (MotionModal Style Konsisten Pasien) -->
-        <MotionModal :show="isModalOpen" max-width="max-w-md" @close="closeModal">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <MotionModal
+            :show="isModalOpen"
+            max-width="max-w-md"
+            @close="closeModal"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
                 <h2 class="text-sm font-bold text-slate-900">
-                    {{ isEditMode ? 'Edit Data Pengguna' : 'Tambah Pengguna Baru' }}
+                    {{
+                        isEditMode
+                            ? 'Edit Data Pengguna'
+                            : 'Tambah Pengguna Baru'
+                    }}
                 </h2>
-                <button type="button" @click="closeModal" class="text-slate-400 hover:text-slate-600 rounded p-1">
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitForm" class="p-4 space-y-3 text-xs">
+            <form @submit.prevent="submitForm" class="space-y-3 p-4 text-xs">
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Username <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Username <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="text"
                         v-model="form.username"
                         placeholder="Contoh: staf_klinik"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="form.errors.username" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.username }}</p>
+                    <p
+                        v-if="form.errors.username"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.username }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Alamat Email <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Alamat Email
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="email"
                         v-model="form.email"
                         placeholder="Contoh: staf@klinik.test"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="form.errors.email" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.email }}</p>
+                    <p
+                        v-if="form.errors.email"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.email }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Role Akses <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Role Akses <span class="text-rose-500">*</span></label
+                    >
                     <select
                         v-model="form.role"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none cursor-pointer"
+                        class="h-8 w-full cursor-pointer rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                     >
-                        <option value="user">User Pasien (Akses Antrean Pasien)</option>
-                        <option value="administrator">Administrator (Akses Penuh Kelola Klinik)</option>
+                        <option value="user">
+                            User Pasien (Akses Antrean Pasien)
+                        </option>
+                        <option value="administrator">
+                            Administrator (Akses Penuh Kelola Klinik)
+                        </option>
                     </select>
-                    <p v-if="form.errors.role" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.role }}</p>
+                    <p
+                        v-if="form.errors.role"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.role }}
+                    </p>
                 </div>
 
                 <div v-if="!isEditMode" class="space-y-1">
-                    <label class="font-semibold text-slate-700">Kata Sandi <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Kata Sandi <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="password"
                         v-model="form.password"
                         placeholder="Minimal 8 karakter"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="form.errors.password" class="text-[11px] text-rose-500 mt-0.5">{{ form.errors.password }}</p>
+                    <p
+                        v-if="form.errors.password"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ form.errors.password }}
+                    </p>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" class="h-8 text-xs border-slate-200" @click="closeModal">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="h-8 border-slate-200 text-xs"
+                        @click="closeModal"
+                    >
                         Batal
                     </Button>
-                    <Button type="submit" size="sm" class="h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium" :disabled="form.processing">
-                        {{ isEditMode ? 'Simpan Perubahan' : 'Tambah Pengguna' }}
+                    <Button
+                        type="submit"
+                        size="sm"
+                        class="h-8 bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700"
+                        :disabled="form.processing"
+                    >
+                        {{
+                            isEditMode ? 'Simpan Perubahan' : 'Tambah Pengguna'
+                        }}
                     </Button>
                 </div>
             </form>
         </MotionModal>
 
         <!-- Modal Reset Password -->
-        <MotionModal :show="isResetModalOpen" max-width="max-w-sm" @close="isResetModalOpen = false">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-                <h2 class="text-sm font-bold text-slate-900">
-                    Reset Password
-                </h2>
-                <button type="button" @click="isResetModalOpen = false" class="text-slate-400 hover:text-slate-600 rounded p-1">
+        <MotionModal
+            :show="isResetModalOpen"
+            max-width="max-w-sm"
+            @close="isResetModalOpen = false"
+        >
+            <div
+                class="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-4 py-3"
+            >
+                <h2 class="text-sm font-bold text-slate-900">Reset Password</h2>
+                <button
+                    type="button"
+                    @click="isResetModalOpen = false"
+                    class="rounded p-1 text-slate-400 hover:text-slate-600"
+                >
                     <X class="size-4" />
                 </button>
             </div>
 
-            <form @submit.prevent="submitResetPassword" class="p-4 space-y-3 text-xs">
+            <form
+                @submit.prevent="submitResetPassword"
+                class="space-y-3 p-4 text-xs"
+            >
                 <p class="text-slate-500">
-                    Ketik kata sandi baru untuk akun <strong>{{ selectedUser?.username }}</strong>.
+                    Ketik kata sandi baru untuk akun
+                    <strong>{{ selectedUser?.username }}</strong
+                    >.
                 </p>
 
                 <div class="space-y-1">
-                    <label class="font-semibold text-slate-700">Password Baru <span class="text-rose-500">*</span></label>
+                    <label class="font-semibold text-slate-700"
+                        >Password Baru
+                        <span class="text-rose-500">*</span></label
+                    >
                     <input
                         type="password"
                         v-model="resetForm.new_password"
                         placeholder="Minimal 8 karakter"
-                        class="w-full h-8 px-2.5 text-xs rounded-lg border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                        class="h-8 w-full rounded-lg border border-slate-200 px-2.5 text-xs focus:border-indigo-500 focus:outline-none"
                         required
                     />
-                    <p v-if="resetForm.errors.new_password" class="text-[11px] text-rose-500 mt-0.5">{{ resetForm.errors.new_password }}</p>
+                    <p
+                        v-if="resetForm.errors.new_password"
+                        class="mt-0.5 text-[11px] text-rose-500"
+                    >
+                        {{ resetForm.errors.new_password }}
+                    </p>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                    <Button type="button" variant="outline" size="sm" class="h-8 text-xs border-slate-200" @click="isResetModalOpen = false">
+                <div
+                    class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3"
+                >
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="h-8 border-slate-200 text-xs"
+                        @click="isResetModalOpen = false"
+                    >
                         Batal
                     </Button>
-                    <Button type="submit" size="sm" class="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium" :disabled="resetForm.processing">
+                    <Button
+                        type="submit"
+                        size="sm"
+                        class="h-8 bg-amber-600 text-xs font-medium text-white hover:bg-amber-700"
+                        :disabled="resetForm.processing"
+                    >
                         Simpan Password
                     </Button>
                 </div>
