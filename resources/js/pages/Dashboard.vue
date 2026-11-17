@@ -51,6 +51,7 @@ interface MedicationItem {
     medication_id: number;
     medication_name: string;
     stock: number;
+    min_stock?: number;
 }
 
 const props = defineProps<{
